@@ -1,11 +1,10 @@
 package com.example.orderapi.service.impl;
 
-import com.example.orderapi.entity.PointPolicy;
+import com.example.orderapi.entity.PointPolicy.PointPolicy;
 import com.example.orderapi.repository.PointPolicyRepository;
 import com.example.orderapi.service.PointPolicyService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +30,8 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     }
 
     @Override
-    public PointPolicy update(PointPolicy pointPolicy) {
-        return pointPolicyRepository.save(pointPolicy);
+    public void update(PointPolicy pointPolicy) {
+        pointPolicyRepository.save(pointPolicy);
     }
 
     @Override

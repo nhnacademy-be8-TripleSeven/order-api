@@ -1,11 +1,11 @@
 ### 모든 포인트 정책 반환
-GET localhost:8080/pointPolicy/
+GET localhost:8080/pointpolicies
 
 ### 포인트 정책 1번 반환
-GET localhost:8080/pointPolicy/1
+GET localhost:8080/pointpolicies/1
 
 ### 포인트 정책 생성
-POST localhost:8080/pointPolicy
+POST localhost:8080/pointpolicies
 Content-Type: application/json
 
 {
@@ -15,4 +15,14 @@ Content-Type: application/json
 }
 
 ### 포인트 정책 삭제
-DELETE localhost:8080/pointPolicy/1
+DELETE localhost:8080/pointpolicies/1
+
+### 포인트 정책 업데이트
+PUT localhost:8080/pointpolicies/6
+Content-Type: application/json
+
+{
+  "name": "Sample Policy",
+  "amount": 1000,
+  "rate": 0.05
+}

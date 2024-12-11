@@ -1,4 +1,4 @@
-package com.example.orderapi.entity;
+package com.example.orderapi.entity.PointPolicy;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
