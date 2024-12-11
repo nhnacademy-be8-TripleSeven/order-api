@@ -41,11 +41,6 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     }
 
     @Override
-    public PointPolicy findByName(String name) {
-        return pointPolicyRepository.findByName(name);
-    }
-
-    @Override
     public List<PointPolicy> findAll() {
         return pointPolicyRepository.findAll();
     }

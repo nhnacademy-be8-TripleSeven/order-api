@@ -9,6 +9,5 @@ public interface PointPolicyService {
     PointPolicy save(PointPolicy pointPolicy);
     PointPolicy update(PointPolicy pointPolicy);
     void delete(Long id);
-    PointPolicy findByName(String name);
     List<PointPolicy> findAll();
 }
