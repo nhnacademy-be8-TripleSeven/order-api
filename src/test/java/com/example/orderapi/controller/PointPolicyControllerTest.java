@@ -68,7 +68,7 @@ class PointPolicyControllerTest {
     void getAllPointPolicies() throws Exception {
         when(pointPolicyService.findAll()).thenReturn(pointPolicies);
 
-        mockMvc.perform(get("/pointpolicies"))
+        mockMvc.perform(get("/point-policies"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Welcome Bonus"))
                 .andExpect(jsonPath("$[0].amount").value(100))
@@ -82,7 +82,7 @@ class PointPolicyControllerTest {
     void getPointPolicy() throws Exception {
         when(pointPolicyService.findById(2L)).thenReturn(pointPolicy2);
 
-        mockMvc.perform(get("/pointpolicies/2"))
+        mockMvc.perform(get("/point-policies/{pointPolicyId}",2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test policy2"))
                 .andExpect(jsonPath("$.amount").value(350))
@@ -96,7 +96,7 @@ class PointPolicyControllerTest {
         pointPolicyCreateRequest.setAmount(100);
         pointPolicyCreateRequest.setRate(BigDecimal.valueOf(0.1));
 
-        mockMvc.perform(post("/pointpolicies")
+        mockMvc.perform(post("/point-policies")
         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pointPolicyCreateRequest)))
                 .andExpect(status().isCreated());
@@ -106,7 +106,7 @@ class PointPolicyControllerTest {
 
     @Test
     void deletePointPolicy() throws Exception {
-        mockMvc.perform(delete("/pointpolicies/1"))
+        mockMvc.perform(delete("/point-policies/{pointPolicyId}",1))
                 .andExpect(status().isNoContent());
 
     }
@@ -120,7 +120,7 @@ class PointPolicyControllerTest {
 
         when(pointPolicyService.findById(1L)).thenReturn(pointPolicy);
 
-        mockMvc.perform(put("/pointpolicies/1")
+        mockMvc.perform(put("/point-policies/{pointPolicyId}",1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(pointPolicyUpdateRequest)))
                 .andExpect(status().isNoContent());

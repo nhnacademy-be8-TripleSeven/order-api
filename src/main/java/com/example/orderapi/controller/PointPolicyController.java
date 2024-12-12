@@ -1,6 +1,7 @@
 package com.example.orderapi.controller;
 
 import com.example.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
+import com.example.orderapi.dto.pointpolicy.PointPolicyResponse;
 import com.example.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
 import com.example.orderapi.entity.PointPolicy.PointPolicy;
 import com.example.orderapi.exception.notfound.impl.PointPolicyNotFoundException;
@@ -17,57 +18,39 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/pointpolicies")
+@RequestMapping("/point-policies")
 public class PointPolicyController {
 
     private final PointPolicyService pointPolicyService;
 
     @GetMapping
-    public List<PointPolicy> getAllPointPolicies(){
-        List<PointPolicy> pointPolicies = pointPolicyService.findAll();
-        if(pointPolicies.isEmpty()){
-            throw new PointPolicyNotFoundException("PointPolicies not found");
-        }
-        return pointPolicies;
+    public List<PointPolicyResponse> getAllPointPolicies(){
+        return pointPolicyService.findAll();
     }
 
     @GetMapping("/{pointPolicyId}")
-    public PointPolicy getPointPolicy(@PathVariable String pointPolicyId) {
-        PointPolicy pointPolicy = pointPolicyService.findById(Long.parseLong(pointPolicyId));
-        if(Objects.isNull(pointPolicy)){
-            throw new PointPolicyNotFoundException("pointPolicyId:" + pointPolicyId + " not found");
-        }
-        return pointPolicy;
+    public PointPolicyResponse getPointPolicy(@PathVariable String pointPolicyId) {
+        return pointPolicyService.findById(Long.parseLong(pointPolicyId));
     }
 
 
     @PostMapping
-    public ResponseEntity<PointPolicy> createPointPolicy(@RequestBody PointPolicyCreateRequest request) {
-        PointPolicy pointPolicy = new PointPolicy();
-        pointPolicy.setName(request.getName());
-        pointPolicy.setAmount(request.getAmount());
-        pointPolicy.setRate(request.getRate());
-        PointPolicy savedPointPolicy = pointPolicyService.save(pointPolicy);
+    public ResponseEntity<PointPolicyResponse> createPointPolicy(@RequestBody PointPolicyCreateRequest request) {
+        PointPolicyResponse savedPointPolicy = pointPolicyService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPointPolicy);
     }
 
 
     @DeleteMapping("/{pointPolicyId}")
-    public ResponseEntity<PointPolicy> deletePointPolicy(@PathVariable String pointPolicyId) {
+    public ResponseEntity<PointPolicyResponse> deletePointPolicy(@PathVariable String pointPolicyId) {
         pointPolicyService.delete(Long.parseLong(pointPolicyId));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PutMapping("{pointPolicyId}")
-    public ResponseEntity<PointPolicy> updatePointPolicy(@PathVariable String pointPolicyId, @RequestBody PointPolicyUpdateRequest request) {
-        PointPolicy pointPolicy = pointPolicyService.findById(Long.parseLong(pointPolicyId));
-        if(Objects.isNull(pointPolicy)){
-            throw new PointPolicyNotFoundException("pointPolicyId:" + pointPolicyId + " not found");
-        }
-        pointPolicy.setName(request.getName());
-        pointPolicy.setAmount(request.getAmount());
-        pointPolicy.setRate(request.getRate());
-        pointPolicyService.update(pointPolicy);
+    public ResponseEntity<PointPolicyResponse> updatePointPolicy(@PathVariable Long pointPolicyId, @RequestBody PointPolicyUpdateRequest request) {
+
+        pointPolicyService.update(pointPolicyId,request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

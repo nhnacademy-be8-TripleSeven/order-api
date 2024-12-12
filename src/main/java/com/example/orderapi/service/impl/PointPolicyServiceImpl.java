@@ -1,13 +1,19 @@
 package com.example.orderapi.service.impl;
 
+import com.example.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
+import com.example.orderapi.dto.pointpolicy.PointPolicyResponse;
+import com.example.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
 import com.example.orderapi.entity.PointPolicy.PointPolicy;
+import com.example.orderapi.exception.notfound.impl.PointPolicyNotFoundException;
 import com.example.orderapi.repository.PointPolicyRepository;
 import com.example.orderapi.service.PointPolicyService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Transactional
@@ -20,17 +26,35 @@ public class PointPolicyServiceImpl implements PointPolicyService {
 
 
     @Override
-    public PointPolicy findById(Long id) {
-        return pointPolicyRepository.findById(id).orElse(null);
+    public PointPolicyResponse findById(Long id) {
+        PointPolicy pointPolicy = pointPolicyRepository.findById(id).orElse(null);
+        if(Objects.isNull(pointPolicy)) {
+            throw new PointPolicyNotFoundException("PointPolicyId="+id+" not found");
+        }
+        return PointPolicyResponse.fromEntity(pointPolicy);
     }
 
     @Override
-    public PointPolicy save(PointPolicy pointPolicy) {
-        return pointPolicyRepository.save(pointPolicy);
+    public PointPolicyResponse save(PointPolicyCreateRequest request) {
+
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.setName(request.getName());
+        pointPolicy.setRate(request.getRate());
+        pointPolicy.setAmount(request.getAmount());
+
+        PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
+        return PointPolicyResponse.fromEntity(savedPolicy);
     }
 
     @Override
-    public void update(PointPolicy pointPolicy) {
+    public void update(Long id, PointPolicyUpdateRequest request) {
+        PointPolicy pointPolicy = pointPolicyRepository.findById(id).orElse(null);
+        if(Objects.isNull(pointPolicy)) {
+            throw new PointPolicyNotFoundException("PointPolicyId="+id+" not found");
+        }
+        pointPolicy.setName(request.getName());
+        pointPolicy.setRate(request.getRate());
+        pointPolicy.setAmount(request.getAmount());
         pointPolicyRepository.save(pointPolicy);
     }
 
@@ -40,7 +64,12 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     }
 
     @Override
-    public List<PointPolicy> findAll() {
-        return pointPolicyRepository.findAll();
+    public List<PointPolicyResponse> findAll() {
+        List<PointPolicy> pointPolicies = pointPolicyRepository.findAll();
+        List<PointPolicyResponse> pointPolicyResponseList = new ArrayList<>();
+        for(PointPolicy pointPolicy : pointPolicies) {
+            pointPolicyResponseList.add(PointPolicyResponse.fromEntity(pointPolicy));
+        }
+        return pointPolicyResponseList;
     }
 }

@@ -1,5 +1,5 @@
 package com.example.orderapi.entity.PointHistory;
 
-public enum HistoryType {
+public enum HistoryTypes {
     EARN,SPEND
 }

@@ -1,28 +1,17 @@
-package com.example.orderapi.entity.PointPolicy;
+package com.example.orderapi.entity.PayTypes;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.*;
-
-import java.math.BigDecimal;
+import lombok.NoArgsConstructor;
 
 @Entity
-@AllArgsConstructor
-@Getter @Setter
 @NoArgsConstructor
-@Data
-public class PointPolicy {
-
+public class PayTypes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-
-    private int amount;
-
-    private BigDecimal rate;
-
 }

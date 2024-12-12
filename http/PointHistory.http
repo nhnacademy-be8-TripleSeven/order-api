@@ -1,20 +1,36 @@
+@memberId = 1
+@policyId = 1
+
 ### 모든 포인트 기록 조회
-GET localhost:8080/pointHistory
+GET localhost:8080/point-histories
 
 ### 모든 포인트 기록 조회 페이징 사용
-GET localhost:8080/pointHistory?page=1&size=3
+GET localhost:8080/point-histories?page=1&size=3
 
 
 
 ### memberId = 1의 포인트 기록 조회
-GET localhost:8080/pointHistory/1
+GET localhost:8080/point-histories/{{memberId}}
 
 ### memberId = 1의 포인트 기록 조회 페이징 이용
-GET localhost:8080/pointHistory/1?page=0&size=2
+GET localhost:8080/point-histories/{{memberId}}?page=0&size=3
 
 
-###
-DELETE localhost:8080/pointHistory?pointHistoryId=1
+### point-historyId = 4의 포인트 기록 삭제
+DELETE localhost:8080/point-histories?pointHistoryId=4
 
-###
-DELETE localhost:8080/pointPolicy/2
+
+### point history 삽입 요청
+POST localhost:8080/point-histories
+Content-Type: application/json
+
+{
+  "memberId": 1,
+  "types": "SPEND",
+  "amount": 500,
+  "changed_at": "2024-12-12T08:50:00",
+  "comment": "payment use"
+}
+
+### point history 삽입 요청
+POST localhost:8080/point-histories/members/{{memberId}}/policies/{{policyId}}
