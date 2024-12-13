@@ -1,4 +1,4 @@
-package com.example.orderapi.service;
+package com.example.orderapi.service.pointhistory;
 
 import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointhistory.PointHistoryResponse;
@@ -14,5 +14,5 @@ public interface PointHistoryService {
     PointHistoryResponse findByPointHistoryId(Long pointHistoryId);
     PointHistoryResponse save(PointHistoryCreateRequest request);
     PointHistoryResponse save(Long policyId, Long memberId);
-    int getPoint(Long pointId);
+    Integer getPoint(Long pointId);
 }

@@ -4,8 +4,8 @@ import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointhistory.PointHistoryResponse;
 import com.example.orderapi.entity.PointHistory.PointHistory;
 import com.example.orderapi.exception.notfound.impl.PointHistoryNotFoundException;
-import com.example.orderapi.service.PointHistoryService;
-import com.example.orderapi.service.PointPolicyService;
+import com.example.orderapi.service.pointhistory.PointHistoryService;
+import com.example.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,7 +73,7 @@ public class PointHistoryController {
     }
 
     @GetMapping("/members/{memberId}")
-    public int getPoint(@PathVariable Long memberId) {
+    public Integer getPoint(@PathVariable Long memberId) {
         return pointHistoryService.getPoint(memberId);
     }
 

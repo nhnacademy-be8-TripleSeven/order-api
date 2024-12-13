@@ -1,7 +1,7 @@
-### 모든 포인트 정책 반환
+### 모든 포인트 정책 조회
 GET localhost:8080/point-policies
 
-### 포인트 정책 1번 반환
+### 포인트 정책 1번 조회
 GET localhost:8080/point-policies/1
 
 ### 포인트 정책 생성

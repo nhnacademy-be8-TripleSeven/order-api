@@ -1,4 +1,4 @@
-package com.example.orderapi.repository;
+package com.example.orderapi.repository.pointhistory;
 
 import com.example.orderapi.entity.PointHistory.PointHistory;
 import org.springframework.data.domain.Page;

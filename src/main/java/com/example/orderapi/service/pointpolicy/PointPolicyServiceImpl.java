@@ -1,12 +1,11 @@
-package com.example.orderapi.service.impl;
+package com.example.orderapi.service.pointpolicy;
 
 import com.example.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
 import com.example.orderapi.dto.pointpolicy.PointPolicyResponse;
 import com.example.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
 import com.example.orderapi.entity.PointPolicy.PointPolicy;
 import com.example.orderapi.exception.notfound.impl.PointPolicyNotFoundException;
-import com.example.orderapi.repository.PointPolicyRepository;
-import com.example.orderapi.service.PointPolicyService;
+import com.example.orderapi.repository.pointpolicy.PointPolicyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

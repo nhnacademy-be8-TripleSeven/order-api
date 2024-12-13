@@ -10,6 +10,4 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect # MySQL 8.x용 Hibernate 다이얼렉트
-  h2:
-    console:
-      enabled: false # H2 콘솔 비활성화 (개발에서는 사용하지 않음)
+

@@ -15,24 +15,24 @@
         <appender name="LOGNCRASH" class="com.toast.java.logncrash.logback.LogNCrashHttpAppender">
             <appKey>${APP_KEY}</appKey>
             <url>${LOG_URL}</url>
-            <logSource>BookAPI-Test</logSource>
+            <logSource>3TEAM_ORDER_API</logSource>
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                 <pattern>{"level": "%level", "message": "%message", "timestamp": "%d{yyyy-MM-dd HH:mm:ss}"}</pattern>
             </encoder>
             <!-- Filter logs with INFO level and above -->
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>ERROR</level>
+                <level>INFO</level>
             </filter>
         </appender>
 
         <!-- Root Logger -->
-        <root level="INFO">
+        <root level="ERROR">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="LOGNCRASH" />
         </root>
     </springProfile>
 
-    <springProfile name="jhs">
+    <springProfile name="dev">
         <!-- Console Appender -->
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
@@ -44,25 +44,20 @@
         <appender name="LOGNCRASH" class="com.toast.java.logncrash.logback.LogNCrashHttpAppender">
             <appKey>${APP_KEY}</appKey>
             <url>${LOG_URL}</url>
-            <logSource>BookAPI-Test</logSource>
+            <logSource>3TEAM_ORDER_API</logSource>
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                 <pattern>{"level": "%level", "message": "%message", "timestamp": "%d{yyyy-MM-dd HH:mm:ss}"}</pattern>
             </encoder>
             <!-- Filter logs with INFO level and above -->
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>WARN</level>
+                <level>INFO</level>
             </filter>
         </appender>
 
         <!-- Root Logger -->
-        <root level="INFO">
+        <root level="WARN">
             <appender-ref ref="CONSOLE" />
-            <appender-ref ref="LOGNCRASH" />
         </root>
     </springProfile>
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-        <level>ERROR</level>
-    </filter>
 
 </configuration>
-

@@ -1,4 +1,4 @@
-package com.example.orderapi.service;
+package com.example.orderapi.service.paytypes;
 
 import com.example.orderapi.entity.PayTypes.PayTypes;
 

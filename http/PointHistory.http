@@ -37,3 +37,6 @@ POST localhost:8080/point-histories/members/{{memberId}}/policies/{{policyId}}
 
 ### memberId = 1의 point 조회
 GET localhost:8080/point-histories/members/{{memberId}}
+
+###
+GET localhost:8080/point-histories/members/10

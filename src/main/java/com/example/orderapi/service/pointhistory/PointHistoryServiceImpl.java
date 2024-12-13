@@ -1,4 +1,4 @@
-package com.example.orderapi.service.impl;
+package com.example.orderapi.service.pointhistory;
 
 import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointhistory.PointHistoryResponse;
@@ -7,9 +7,8 @@ import com.example.orderapi.entity.PointHistory.PointHistory;
 import com.example.orderapi.entity.PointPolicy.PointPolicy;
 import com.example.orderapi.exception.notfound.impl.PointHistoryNotFoundException;
 import com.example.orderapi.exception.notfound.impl.PointPolicyNotFoundException;
-import com.example.orderapi.repository.PointHistoryRepository;
-import com.example.orderapi.repository.PointPolicyRepository;
-import com.example.orderapi.service.PointHistoryService;
+import com.example.orderapi.repository.pointhistory.PointHistoryRepository;
+import com.example.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -96,7 +95,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public int getPoint(Long pointId) {
+    public Integer getPoint(Long pointId) {
         return pointHistoryRepository.sumAmount(pointId);
     }
 

@@ -1,10 +1,8 @@
-package com.example.orderapi.service;
+package com.example.orderapi.service.pointpolicy;
 
-import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
 import com.example.orderapi.dto.pointpolicy.PointPolicyResponse;
 import com.example.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
-import com.example.orderapi.entity.PointPolicy.PointPolicy;
 
 import java.util.List;
 

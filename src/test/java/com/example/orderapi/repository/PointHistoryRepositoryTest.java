@@ -1,11 +1,9 @@
 package com.example.orderapi.repository;
 
+import com.example.orderapi.repository.pointhistory.PointHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.jpa.repository.Query;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class PointHistoryRepositoryTest {
@@ -16,7 +14,7 @@ class PointHistoryRepositoryTest {
     @Test
     void findAllByMemberId() {
         //given
-        PointHiso
+
     }
 
     @Test
