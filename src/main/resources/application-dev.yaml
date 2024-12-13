@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    instance-id: front-api
+    instance-id: order-api
     hostname: localhost
 
 
