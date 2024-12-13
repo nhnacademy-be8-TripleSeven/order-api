@@ -11,9 +11,12 @@ spring:
     username: triple_seven
     password: eo1cItEUe@J2Tym
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
-      ddl-auto: update # 엔티티 변경 사항에 따라 테이블 자동 업데이트
+      ddl-auto: update
+    show-sql: true
     properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect # MySQL 8.x용 Hibernate 다이얼렉트
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false
