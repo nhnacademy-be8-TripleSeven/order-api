@@ -4,15 +4,9 @@ WORKDIR /app
 COPY pom.xml ./
 COPY libs ./libs
 RUN chmod 644 ./libs/toast-logncrash-logback-sdk-3.0.5.jar
+RUN ls /app/libs
 
 RUN mvn dependency:go-offline
-
-RUN mvn install:install-file \
-    -Dfile=/app/libs/toast-logncrash-logback-sdk-3.0.5.jar \
-    -DgroupId=com.toast.java.logncrash \
-    -DartifactId=logncrash-logback-sdk \
-    -Dversion=3.0.5 \
-    -Dpackaging=jar \
 
 COPY src ./src
 RUN mvn clean package -DskipTests
