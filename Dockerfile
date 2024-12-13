@@ -6,7 +6,7 @@ COPY libs /app/libs
 COPY pom.xml ./
 
 # JAR 파일을 Maven 로컬 리포지토리에 설치
-RUN mvn -X install:install-file \
+RUN mvn install:install-file \
     -Dfile=/app/libs/toast-logncrash-logback-sdk-3.0.5.jar \
     -DgroupId=com.toast.java.logncrash \
     -DartifactId=logncrash-logback-sdk \
