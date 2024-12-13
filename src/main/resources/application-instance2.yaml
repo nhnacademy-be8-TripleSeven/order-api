@@ -1,0 +1,7 @@
+server:
+  port: 8089
+
+eureka:
+  instance:
+    instance-id: order-api-1
+    hostname: localhost

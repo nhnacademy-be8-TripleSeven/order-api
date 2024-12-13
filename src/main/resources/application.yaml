@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: Order-API
+  profiles:
+    active: dev
+
+eureka:
+  instance:
+    instance-id: order-api
+    hostname: localhost
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://admin:1234@localhost:8761/eureka/
+
+logging:
+  config: classpath:logback-spring.xml
