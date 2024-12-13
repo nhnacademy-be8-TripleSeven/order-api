@@ -3,6 +3,7 @@ package com.example.orderapi.service.deliveryinfo;
 import com.example.orderapi.dto.deliveryinfo.*;
 import com.example.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.example.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class DeliveryInfoServiceImpl implements DeliveryInfoService {
     private final DeliveryInfoRepository deliveryInfoRepository;
 
@@ -68,8 +70,7 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
         }
         DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
         deliveryInfo.setArrivedAt(deliveryInfoArrivedAtUpdateRequest.getArrivedAt());
-        DeliveryInfo updateDeliverInfo = deliveryInfoRepository.save(deliveryInfo);
-        return DeliveryInfoResponse.fromEntity(updateDeliverInfo);
+        return DeliveryInfoResponse.fromEntity(deliveryInfo);
     }
 
     @Override
