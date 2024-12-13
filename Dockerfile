@@ -1,11 +1,10 @@
 FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
 
+COPY libs ./libs
 COPY pom.xml ./
-COPY app/libs ./libs
-RUN mvn clean install -Ddocker.basedir=${project.basedir}
 
-RUN mvn dependency:go-offline
+RUN mvn clean install
 
 COPY src ./src
 RUN mvn clean package -DskipTests
