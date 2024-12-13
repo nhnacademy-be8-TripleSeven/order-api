@@ -1,7 +1,7 @@
 FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
 
-COPY libs /app/libs
+COPY libs ./libs
 
 COPY pom.xml ./
 RUN mvn dependency:go-offline
