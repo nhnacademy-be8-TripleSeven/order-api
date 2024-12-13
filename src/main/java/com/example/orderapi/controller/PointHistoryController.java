@@ -72,4 +72,9 @@ public class PointHistoryController {
 
     }
 
+    @GetMapping("/members/{memberId}")
+    public int getPoint(@PathVariable Long memberId) {
+        return pointHistoryService.getPoint(memberId);
+    }
+
 }

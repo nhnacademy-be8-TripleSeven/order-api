@@ -1,6 +1,7 @@
 package com.example.orderapi.controller;
 
 import com.example.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
+import com.example.orderapi.dto.pointpolicy.PointPolicyResponse;
 import com.example.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
 import com.example.orderapi.entity.PointPolicy.PointPolicy;
 import com.example.orderapi.service.PointPolicyService;
@@ -36,22 +37,22 @@ class PointPolicyControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    PointPolicy pointPolicy;
-    PointPolicy pointPolicy2;
+    PointPolicyResponse pointPolicy;
+    PointPolicyResponse pointPolicy2;
 
     ObjectMapper objectMapper;
 
-    List<PointPolicy> pointPolicies;
+    List<PointPolicyResponse> pointPolicies;
     @BeforeEach
     void setUp() {
-        pointPolicy = new PointPolicy();
-        pointPolicy = new PointPolicy();
+        pointPolicy = new PointPolicyResponse();
+        pointPolicy = new PointPolicyResponse();
         pointPolicy.setId(1L);
         pointPolicy.setName("Welcome Bonus");
         pointPolicy.setAmount(100);
         pointPolicy.setRate(BigDecimal.valueOf(0.1));
 
-        pointPolicy2 = new PointPolicy();
+        pointPolicy2 = new PointPolicyResponse();
         pointPolicy2.setId(2L);
         pointPolicy2.setAmount(350);
         pointPolicy2.setRate(BigDecimal.valueOf(2.5));

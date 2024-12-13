@@ -1,10 +1,7 @@
 package com.example.orderapi.entity.PointHistory;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter @Setter
 @Data
+@AllArgsConstructor
 public class PointHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

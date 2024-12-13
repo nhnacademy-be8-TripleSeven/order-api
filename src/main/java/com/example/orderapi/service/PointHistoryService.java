@@ -14,4 +14,5 @@ public interface PointHistoryService {
     PointHistoryResponse findByPointHistoryId(Long pointHistoryId);
     PointHistoryResponse save(PointHistoryCreateRequest request);
     PointHistoryResponse save(Long policyId, Long memberId);
+    int getPoint(Long pointId);
 }

@@ -34,3 +34,6 @@ Content-Type: application/json
 
 ### point history 삽입 요청
 POST localhost:8080/point-histories/members/{{memberId}}/policies/{{policyId}}
+
+### memberId = 1의 point 조회
+GET localhost:8080/point-histories/members/{{memberId}}

@@ -39,6 +39,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
     @Override
     public Page<PointHistory> findAll(Pageable pageable) {
+
         return pointHistoryRepository.findAll(pageable);
     }
 
@@ -90,6 +91,14 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         history.setAmount(pointPolicy.getAmount());
         history.setChanged_at(LocalDateTime.now());
 
+        pointHistoryRepository.save(history);
         return PointHistoryResponse.fromEntity(history);
     }
+
+    @Override
+    public int getPoint(Long pointId) {
+        return pointHistoryRepository.sumAmount(pointId);
+    }
+
+
 }
