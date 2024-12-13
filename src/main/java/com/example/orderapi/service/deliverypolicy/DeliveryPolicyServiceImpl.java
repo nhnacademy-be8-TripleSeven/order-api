@@ -30,7 +30,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     @Override
     public DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest) {
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate();
+//        deliveryPolicy.ofCreate();
         DeliveryPolicy createDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
         return DeliveryPolicyResponse.fromEntity(createDeliveryPolicy);
     }
