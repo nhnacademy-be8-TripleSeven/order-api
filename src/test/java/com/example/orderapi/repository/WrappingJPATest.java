@@ -1,6 +1,6 @@
 package com.example.orderapi.repository;
 
-import com.example.orderapi.entity.Wrapping;
+import com.example.orderapi.entity.wrapping.Wrapping;
 import com.example.orderapi.repository.wrapping.WrappingRepository;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 

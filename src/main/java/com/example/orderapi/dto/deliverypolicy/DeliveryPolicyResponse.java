@@ -1,6 +1,6 @@
 package com.example.orderapi.dto.deliverypolicy;
 
-import com.example.orderapi.entity.DeliveryPolicy;
+import com.example.orderapi.entity.deliverypolicy.DeliveryPolicy;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

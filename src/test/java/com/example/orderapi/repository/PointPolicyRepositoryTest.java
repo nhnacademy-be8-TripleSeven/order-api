@@ -1,6 +1,6 @@
 package com.example.orderapi.repository;
 
-import com.example.orderapi.entity.PointPolicy.PointPolicy;
+import com.example.orderapi.entity.pointpolicy.PointPolicy;
 import com.example.orderapi.repository.pointpolicy.PointPolicyRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

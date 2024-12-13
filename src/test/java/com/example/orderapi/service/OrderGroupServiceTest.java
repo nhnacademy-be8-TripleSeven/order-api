@@ -1,7 +1,7 @@
 package com.example.orderapi.service;
 
 import com.example.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.example.orderapi.entity.OrderGroup;
+import com.example.orderapi.entity.ordergroup.OrderGroup;
 import com.example.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.example.orderapi.service.ordergroup.OrderGroupServiceImpl;
 import org.junit.jupiter.api.Assertions;

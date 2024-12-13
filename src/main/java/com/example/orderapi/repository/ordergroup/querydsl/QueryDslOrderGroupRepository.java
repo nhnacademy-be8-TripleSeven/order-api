@@ -1,6 +1,6 @@
 package com.example.orderapi.repository.ordergroup.querydsl;
 
-import com.example.orderapi.entity.OrderGroup;
+import com.example.orderapi.entity.ordergroup.OrderGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

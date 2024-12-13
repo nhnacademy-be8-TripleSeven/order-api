@@ -1,9 +1,7 @@
 package com.example.orderapi.dto.pointhistory;
 
-import com.example.orderapi.entity.PointHistory.HistoryTypes;
+import com.example.orderapi.entity.pointhistory.HistoryTypes;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 

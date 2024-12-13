@@ -2,7 +2,7 @@ package com.example.orderapi.controller;
 
 import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointhistory.PointHistoryResponse;
-import com.example.orderapi.entity.PointHistory.PointHistory;
+import com.example.orderapi.entity.pointhistory.PointHistory;
 import com.example.orderapi.exception.notfound.impl.PointHistoryNotFoundException;
 import com.example.orderapi.service.pointhistory.PointHistoryService;
 import com.example.orderapi.service.pointpolicy.PointPolicyService;

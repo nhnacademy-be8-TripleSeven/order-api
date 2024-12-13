@@ -1,6 +1,6 @@
 package com.example.orderapi.dto.pointpolicy;
 
-import com.example.orderapi.entity.PointPolicy.PointPolicy;
+import com.example.orderapi.entity.pointpolicy.PointPolicy;
 import lombok.Data;
 
 import java.math.BigDecimal;

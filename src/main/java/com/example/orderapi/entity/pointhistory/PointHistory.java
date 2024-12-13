@@ -1,4 +1,4 @@
-package com.example.orderapi.entity.PointHistory;
+package com.example.orderapi.entity.pointhistory;
 
 import jakarta.persistence.*;
 import lombok.*;

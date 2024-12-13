@@ -1,6 +1,6 @@
 package com.example.orderapi.repository.pointhistory;
 
-import com.example.orderapi.entity.PointHistory.PointHistory;
+import com.example.orderapi.entity.pointhistory.PointHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

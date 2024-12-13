@@ -3,7 +3,7 @@ package com.example.orderapi.service.ordergroup;
 import com.example.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.example.orderapi.dto.ordergroup.OrderGroupResponse;
 import com.example.orderapi.dto.ordergroup.OrderGroupUpdateRequest;
-import com.example.orderapi.entity.OrderGroup;
+import com.example.orderapi.entity.ordergroup.OrderGroup;
 import com.example.orderapi.repository.ordergroup.OrderGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

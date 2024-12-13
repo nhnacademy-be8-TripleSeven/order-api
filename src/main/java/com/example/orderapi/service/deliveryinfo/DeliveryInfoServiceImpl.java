@@ -1,7 +1,7 @@
 package com.example.orderapi.service.deliveryinfo;
 
 import com.example.orderapi.dto.deliveryinfo.*;
-import com.example.orderapi.entity.DeliveryInfo;
+import com.example.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.example.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

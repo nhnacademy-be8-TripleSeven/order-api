@@ -3,7 +3,7 @@ package com.example.orderapi.service.wrapping;
 import com.example.orderapi.dto.wrapping.WrappingCreateRequest;
 import com.example.orderapi.dto.wrapping.WrappingResponse;
 import com.example.orderapi.dto.wrapping.WrappingUpdateRequest;
-import com.example.orderapi.entity.Wrapping;
+import com.example.orderapi.entity.wrapping.Wrapping;
 import com.example.orderapi.repository.wrapping.WrappingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

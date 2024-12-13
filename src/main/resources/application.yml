@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: Order-API
-  profiles:
-    active: prod
-
-logging:
-  config: classpath:logback-spring.xml

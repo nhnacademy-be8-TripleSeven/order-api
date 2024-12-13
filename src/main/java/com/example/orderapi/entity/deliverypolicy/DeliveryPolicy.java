@@ -1,17 +1,19 @@
-package com.example.orderapi.entity.PayTypes;
+package com.example.orderapi.entity.deliverypolicy;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
 @Entity
-@NoArgsConstructor
-public class PayTypes {
+@Data
+public class DeliveryPolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
+
+    private int price;
 }

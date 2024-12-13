@@ -3,7 +3,7 @@ package com.example.orderapi.service.deliverypolicy;
 import com.example.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequest;
 import com.example.orderapi.dto.deliverypolicy.DeliveryPolicyResponse;
 import com.example.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequest;
-import com.example.orderapi.entity.DeliveryPolicy;
+import com.example.orderapi.entity.deliverypolicy.DeliveryPolicy;
 import com.example.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
