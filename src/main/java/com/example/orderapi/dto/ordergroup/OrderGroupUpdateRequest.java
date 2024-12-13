@@ -1,19 +1,10 @@
 package com.example.orderapi.dto.ordergroup;
 
-import lombok.Getter;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Value
+@Data
+@AllArgsConstructor
 public class OrderGroupUpdateRequest {
-    Long wrappingId;
-
-    String recipientName;
-
-    String recipientPhone;
-
-    public OrderGroupUpdateRequest(Long wrappingId, String recipientName, String recipientPhone) {
-        this.wrappingId = wrappingId;
-        this.recipientName = recipientName;
-        this.recipientPhone = recipientPhone;
-    }
+    private Long deliveryInfoId;
 }

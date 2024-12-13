@@ -2,9 +2,7 @@ package com.example.orderapi.dto.ordergroup;
 
 import com.example.orderapi.entity.OrderGroup;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
@@ -19,6 +17,8 @@ public class OrderGroupResponse {
 
     private Long deliveryInfoId;
 
+    private String orderedName;
+
     private ZonedDateTime orderedAt;
 
     private String recipientName;
@@ -27,17 +27,18 @@ public class OrderGroupResponse {
 
     private int deliveryPrice;
 
-    public static OrderGroupResponse fromEntity(OrderGroup orderGroup){
+    public static OrderGroupResponse fromEntity(OrderGroup OrderGroup){
         OrderGroupResponse dto = new OrderGroupResponse();
 
-        dto.setId(orderGroup.getId());
-        dto.setUserId(orderGroup.getUserId());
-        dto.setWrappingId(orderGroup.getWrappingId());
-        dto.setDeliveryInfoId(orderGroup.getDeliveryInfoId());
-        dto.setOrderedAt(orderGroup.getOrderedAt());
-        dto.setRecipientName(orderGroup.getRecipientName());
-        dto.setRecipientPhone(orderGroup.getRecipientPhone());
-        dto.setDeliveryPrice(orderGroup.getDeliveryPrice());
+        dto.setId(OrderGroup.getId());
+        dto.setUserId(OrderGroup.getUserId());
+        dto.setWrappingId(OrderGroup.getWrappingId());
+        dto.setDeliveryInfoId(OrderGroup.getDeliveryInfoId());
+        dto.setOrderedName(OrderGroup.getOrderedName());
+        dto.setOrderedAt(OrderGroup.getOrderedAt());
+        dto.setRecipientName(OrderGroup.getRecipientName());
+        dto.setRecipientPhone(OrderGroup.getRecipientPhone());
+        dto.setDeliveryPrice(OrderGroup.getDeliveryPrice());
 
         return dto;
     }
