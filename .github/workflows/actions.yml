@@ -63,7 +63,7 @@ jobs:
               docker stop order-server-instance-1 || true
               docker rm -f order-server-instance-1 || true
             fi
-              docker run --name order-server-instance-1 --network nhn-book-store-network -p 8088:8088 -e SPRING_PROFILES_ACTIVE=instance1 -d lushlife99/nhn-order:${{ github.sha }}
+              # docker run --name order-server-instance-1 --network nhn-book-store-network -p 8088:8088 -e SPRING_PROFILES_ACTIVE=instance1 -d lushlife99/nhn-order:${{ github.sha }}
 
 
 
@@ -79,4 +79,4 @@ jobs:
               docker stop order-server-instance-2 || true
               docker rm -f order-server-instance-2 || true
             fi
-              docker run --name order-server-instance-2 --network nhn-book-store-network -p 8089:8089 -e SPRING_PROFILES_ACTIVE=instance2 -d lushlife99/nhn-order:${{ github.sha }}
+              # docker run --name order-server-instance-2 --network nhn-book-store-network -p 8089:8089 -e SPRING_PROFILES_ACTIVE=instance2 -d lushlife99/nhn-order:${{ github.sha }}
