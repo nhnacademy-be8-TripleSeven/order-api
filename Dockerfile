@@ -3,8 +3,7 @@ WORKDIR /app
 
 COPY pom.xml ./
 COPY libs ./libs
-RUN chmod 644 ./libs/toast-logncrash-logback-sdk-3.0.5.jar
-RUN ls /app/libs
+RUN ls /app
 
 RUN mvn dependency:go-offline
 
