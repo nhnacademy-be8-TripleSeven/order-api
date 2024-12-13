@@ -12,8 +12,7 @@ public class LogTestController {
 
     @GetMapping("/test-error")
     public String testErrorLogging() {
-        logger.warn("This is an ERROR log message for testing");
+        logger.error("This is an ERROR log message for testing");
         return "Error log sent!";
     }
 }
-
