@@ -3,5 +3,5 @@ server:
 
 eureka:
   instance:
-    instance-id: order-api-1
+    instance-id: order-api-2
     hostname: localhost

@@ -3,13 +3,13 @@ server:
 
 eureka:
   instance:
-    instance-id: front-api
+    instance-id: order-api
     hostname: localhost
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/test
-    username: root
-    password: 1234
+    url: jdbc:mysql://localhost:3306/team3_order?serverTimezone=UTC&characterEncoding=UTF-8
+    username: triple_seven
+    password: eo1cItEUe@J2Tym
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
