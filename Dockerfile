@@ -4,8 +4,6 @@ WORKDIR /app
 COPY libs ./libs
 COPY pom.xml ./
 
-RUN mvn clean install
-
 COPY src ./src
 RUN mvn clean package -DskipTests
 
