@@ -25,7 +25,7 @@
         </appender>
     <springProfile name="dev">
         <!-- Root Logger -->
-        <root level="WARN">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
