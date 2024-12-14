@@ -33,9 +33,8 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
     @Override
     public Page<OrderGroupResponse> getOrderGroupsByUserId(Long userId, Pageable pageable) {
-//        Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
-//        return orderGroups.map(OrderGroupResponse::fromEntity);
-        return null;
+        Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
+        return orderGroups.map(OrderGroupResponse::fromEntity);
     }
 
     @Override

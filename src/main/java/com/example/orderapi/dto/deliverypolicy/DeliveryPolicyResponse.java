@@ -20,6 +20,7 @@ public class DeliveryPolicyResponse {
     @Builder
     private DeliveryPolicyResponse(Long id, String name, int price) {
         if (Objects.isNull(id)) {
+            log.error("DeliveryPolicy id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }
         this.id = id;

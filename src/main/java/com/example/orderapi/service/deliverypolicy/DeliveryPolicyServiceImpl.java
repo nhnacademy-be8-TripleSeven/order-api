@@ -36,7 +36,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     }
 
     @Override
-    public DeliveryPolicyResponse update(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest) {
+    public DeliveryPolicyResponse updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest) {
         Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
 
         if (optionalDeliveryPolicy.isEmpty()) {
@@ -50,7 +50,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteDeliveryPolicy(Long id) {
         if(!deliveryPolicyRepository.existsById(id)){
             throw new RuntimeException();
         }
