@@ -3,7 +3,7 @@ package com.example.orderapi.service;
 import com.example.orderapi.dto.wrapping.WrappingCreateRequest;
 import com.example.orderapi.dto.wrapping.WrappingResponse;
 import com.example.orderapi.dto.wrapping.WrappingUpdateRequest;
-import com.example.orderapi.entity.Wrapping;
+import com.example.orderapi.entity.wrapping.Wrapping;
 import com.example.orderapi.repository.wrapping.WrappingRepository;
 import com.example.orderapi.service.wrapping.WrappingServiceImpl;
 import org.junit.jupiter.api.DisplayName;

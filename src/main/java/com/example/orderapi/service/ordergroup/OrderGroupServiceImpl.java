@@ -3,7 +3,7 @@ package com.example.orderapi.service.ordergroup;
 import com.example.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.example.orderapi.dto.ordergroup.OrderGroupResponse;
 import com.example.orderapi.dto.ordergroup.OrderGroupUpdateRequest;
-import com.example.orderapi.entity.OrderGroup;
+import com.example.orderapi.entity.ordergroup.OrderGroup;
 import com.example.orderapi.repository.ordergroup.OrderGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,8 +33,9 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
     @Override
     public Page<OrderGroupResponse> getOrderGroupsByUserId(Long userId, Pageable pageable) {
-        Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
-        return orderGroups.map(OrderGroupResponse::fromEntity);
+//        Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
+//        return orderGroups.map(OrderGroupResponse::fromEntity);
+        return null;
     }
 
     @Override

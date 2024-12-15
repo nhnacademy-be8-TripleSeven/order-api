@@ -1,4 +1,4 @@
-package com.example.orderapi.entity;
+package com.example.orderapi.entity.ordergroup;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +11,6 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderGroup {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

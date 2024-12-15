@@ -10,7 +10,6 @@
         </encoder>
     </appender>
 
-    <springProfile name="dev">
         <!-- LogNCrash Appender -->
         <appender name="LOGNCRASH" class="com.toast.java.logncrash.logback.LogNCrashHttpAppender">
             <appKey>${APP_KEY}</appKey>
@@ -24,28 +23,16 @@
                 <level>INFO</level>
             </filter>
         </appender>
-
+    <springProfile name="dev">
         <!-- Root Logger -->
-        <root level="WARN">
+        <root level="ERROR">
             <appender-ref ref="CONSOLE"/>
+<!--            테스트 용-->
+            <appender-ref ref="LOGNCRASH"/>
         </root>
     </springProfile>
 
     <springProfile name="prod">
-        <!-- LogNCrash Appender -->
-        <appender name="LOGNCRASH" class="com.toast.java.logncrash.logback.LogNCrashHttpAppender">
-            <appKey>${APP_KEY}</appKey>
-            <url>${LOG_URL}</url>
-            <logSource>3TEAM_ORDER_API</logSource>
-            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>{"level": "%level", "message": "%message", "timestamp": "%d{yyyy-MM-dd HH:mm:ss}"}</pattern>
-            </encoder>
-            <!-- Filter logs with INFO level and above -->
-            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>INFO</level>
-            </filter>
-        </appender>
-
         <!-- Root Logger -->
         <root level="ERROR">
             <appender-ref ref="CONSOLE"/>

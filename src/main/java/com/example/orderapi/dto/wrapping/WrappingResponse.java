@@ -1,6 +1,6 @@
 package com.example.orderapi.dto.wrapping;
 
-import com.example.orderapi.entity.Wrapping;
+import com.example.orderapi.entity.wrapping.Wrapping;
 import lombok.Data;
 
 @Data

@@ -1,6 +1,6 @@
 package com.example.orderapi.service.paytypes;
 
-import com.example.orderapi.entity.PayTypes.PayTypes;
+import com.example.orderapi.entity.paytypes.PayTypes;
 
 import java.util.List;
 

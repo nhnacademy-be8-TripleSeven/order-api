@@ -2,7 +2,7 @@ package com.example.orderapi.controller;
 
 import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointhistory.PointHistoryResponse;
-import com.example.orderapi.entity.PointHistory.PointHistory;
+import com.example.orderapi.entity.pointhistory.PointHistory;
 import com.example.orderapi.exception.notfound.impl.PointHistoryNotFoundException;
 import com.example.orderapi.service.pointhistory.PointHistoryService;
 import com.example.orderapi.service.pointpolicy.PointPolicyService;
@@ -24,10 +24,11 @@ public class PointHistoryController {
     private final PointPolicyService pointPolicyService;
 
     @GetMapping
-    public Page<PointHistory> findAll(Pageable pageable) {
-        Page<PointHistory>histories = pointHistoryService.findAll(pageable);
-        if(histories.isEmpty())
+    public Page<PointHistory> findPointHistories(Pageable pageable) {
+        Page<PointHistory> histories = pointHistoryService.findAll(pageable);
+        if (histories.isEmpty()){
             throw new PointHistoryNotFoundException("point history not found");
+        }
 
         return histories;
     }
@@ -35,8 +36,8 @@ public class PointHistoryController {
     @GetMapping("/{memberId}")
     public Page<PointHistoryResponse> findByMemberId(@PathVariable Long memberId, Pageable pageable) {
         Page<PointHistoryResponse> history = pointHistoryService.findByMemberId(memberId, pageable);
-        if(history.isEmpty()){
-            throw new PointHistoryNotFoundException("memberId: " + memberId + "point history not found");
+        if (history.isEmpty()) {
+            throw new PointHistoryNotFoundException("memberId: %s %s point history not found".formatted(memberId,memberId));
         }
         return history;
     }
@@ -50,7 +51,7 @@ public class PointHistoryController {
 
     @DeleteMapping
     public ResponseEntity<PointHistoryResponse> deletePointHistoryByPointHistoryId(@RequestParam Long pointHistoryId) {
-        if(Objects.isNull(pointHistoryService.findByPointHistoryId(pointHistoryId))){
+        if (Objects.isNull(pointHistoryService.findByPointHistoryId(pointHistoryId))) {
             throw new PointHistoryNotFoundException("pointHistoryId: " + pointHistoryId + "point history not found");
         }
         pointHistoryService.deleteByPointHistoryId(pointHistoryId);
@@ -66,7 +67,7 @@ public class PointHistoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("members/{memberId}/policies/{policyId}") //포인트 적립
+    @PostMapping("/members/{memberId}/policies/{policyId}") //포인트 적립
     public ResponseEntity<PointHistoryResponse> createFromPolicy(@PathVariable Long policyId, @PathVariable Long memberId) {
         PointHistoryResponse response = pointHistoryService.save(policyId, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

@@ -1,6 +1,6 @@
 package com.example.orderapi.dto.ordergroup;
 
-import com.example.orderapi.entity.OrderGroup;
+import com.example.orderapi.entity.ordergroup.OrderGroup;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

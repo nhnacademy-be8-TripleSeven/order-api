@@ -2,7 +2,7 @@ package com.example.orderapi.service.pointhistory;
 
 import com.example.orderapi.dto.pointhistory.PointHistoryCreateRequest;
 import com.example.orderapi.dto.pointhistory.PointHistoryResponse;
-import com.example.orderapi.entity.PointHistory.PointHistory;
+import com.example.orderapi.entity.pointhistory.PointHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

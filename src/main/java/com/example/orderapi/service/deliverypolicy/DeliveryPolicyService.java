@@ -6,9 +6,9 @@ import com.example.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequest;
 
 public interface DeliveryPolicyService {
 
-    DeliveryPolicyResponse getById(Long id);
+    DeliveryPolicyResponse getDeliveryPolicy(Long id);
 
-    DeliveryPolicyResponse create(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest);
+    DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest);
 
     DeliveryPolicyResponse update(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest);
 

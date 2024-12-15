@@ -1,7 +1,7 @@
 package com.example.orderapi.dto.pointhistory;
 
-import com.example.orderapi.entity.PointHistory.HistoryTypes;
-import com.example.orderapi.entity.PointHistory.PointHistory;
+import com.example.orderapi.entity.pointhistory.HistoryTypes;
+import com.example.orderapi.entity.pointhistory.PointHistory;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Builder;
