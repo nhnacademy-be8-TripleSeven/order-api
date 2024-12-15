@@ -7,12 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PointHistoryService {
-    Page<PointHistoryResponse> findByMemberId(Long memberId, Pageable pageable);
-    Page<PointHistory> findAll(Pageable pageable);
-    void deleteByPointHistoryId(Long pointHistoryId);
-    void deleteByMemberId(Long memberId);
-    PointHistoryResponse findByPointHistoryId(Long pointHistoryId);
-    PointHistoryResponse save(PointHistoryCreateRequest request);
-    PointHistoryResponse save(Long policyId, Long memberId);
-    Integer getPoint(Long pointId);
+    Page<PointHistoryResponse> getMemberPointHistory(Long memberId, Pageable pageable);
+    Page<PointHistory> getAllPointHistories(Pageable pageable);
+    void removePointHistoryById(Long pointHistoryId);
+    void removeAllPointHistoriesForMember(Long memberId);
+    PointHistoryResponse getPointHistory(Long pointHistoryId);
+    PointHistoryResponse createPointHistory(PointHistoryCreateRequest request);
+    PointHistoryResponse assignPointBasedOnPolicy(Long policyId, Long memberId);
+    Integer calculateTotalPoints(Long pointId);
 }

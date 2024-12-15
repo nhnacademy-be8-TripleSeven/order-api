@@ -1,4 +1,4 @@
-package com.example.orderapi.repository;
+package com.example.orderapi.repository.pointpolicy;
 
 import com.example.orderapi.entity.pointpolicy.PointPolicy;
 import com.example.orderapi.repository.pointpolicy.PointPolicyRepository;

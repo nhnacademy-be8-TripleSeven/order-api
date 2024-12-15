@@ -24,37 +24,30 @@ public class PointHistoryController {
     private final PointPolicyService pointPolicyService;
 
     @GetMapping
-    public Page<PointHistory> findPointHistories(Pageable pageable) {
-        Page<PointHistory> histories = pointHistoryService.findAll(pageable);
-        if (histories.isEmpty()){
-            throw new PointHistoryNotFoundException("point history not found");
-        }
+    public ResponseEntity<Page<PointHistory>> findPointHistories(Pageable pageable) {
+        Page<PointHistory> histories = pointHistoryService.getAllPointHistories(pageable);
 
-        return histories;
+        return ResponseEntity.ok(histories); // HTTP 200
     }
 
     @GetMapping("/{memberId}")
-    public Page<PointHistoryResponse> findByMemberId(@PathVariable Long memberId, Pageable pageable) {
-        Page<PointHistoryResponse> history = pointHistoryService.findByMemberId(memberId, pageable);
-        if (history.isEmpty()) {
-            throw new PointHistoryNotFoundException("memberId: %s %s point history not found".formatted(memberId,memberId));
-        }
-        return history;
+    public ResponseEntity<Page<PointHistoryResponse>> findByMemberId(@PathVariable Long memberId, Pageable pageable) {
+        Page<PointHistoryResponse> history = pointHistoryService.getMemberPointHistory(memberId, pageable);
+
+        return ResponseEntity.ok(history); // HTTP 200
     }
 
     @DeleteMapping("/{memberId}")
     public ResponseEntity<PointHistoryResponse> deletePointHistoryByMemberId(@PathVariable Long memberId) {
-        pointHistoryService.deleteByMemberId(memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        pointHistoryService.removeAllPointHistoriesForMember(memberId);
+        return ResponseEntity.noContent().build();
     }
 
 
     @DeleteMapping
     public ResponseEntity<PointHistoryResponse> deletePointHistoryByPointHistoryId(@RequestParam Long pointHistoryId) {
-        if (Objects.isNull(pointHistoryService.findByPointHistoryId(pointHistoryId))) {
-            throw new PointHistoryNotFoundException("pointHistoryId: " + pointHistoryId + "point history not found");
-        }
-        pointHistoryService.deleteByPointHistoryId(pointHistoryId);
+
+        pointHistoryService.removePointHistoryById(pointHistoryId);
         return ResponseEntity.noContent().build();
     }
 
@@ -62,21 +55,21 @@ public class PointHistoryController {
     @PostMapping //포인트 사용
     public ResponseEntity<PointHistoryResponse> createFromRequest(@RequestBody PointHistoryCreateRequest request) {
 
-        PointHistoryResponse response = pointHistoryService.save(request);
+        PointHistoryResponse response = pointHistoryService.createPointHistory(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/members/{memberId}/policies/{policyId}") //포인트 적립
     public ResponseEntity<PointHistoryResponse> createFromPolicy(@PathVariable Long policyId, @PathVariable Long memberId) {
-        PointHistoryResponse response = pointHistoryService.save(policyId, memberId);
+        PointHistoryResponse response = pointHistoryService.assignPointBasedOnPolicy(policyId, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }
 
     @GetMapping("/members/{memberId}")
-    public Integer getPoint(@PathVariable Long memberId) {
-        return pointHistoryService.getPoint(memberId);
+    public ResponseEntity<Integer> getPoint(@PathVariable Long memberId) {
+        return ResponseEntity.ok(pointHistoryService.calculateTotalPoints(memberId));
     }
 
 }

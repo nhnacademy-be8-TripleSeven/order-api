@@ -1,11 +1,13 @@
 package com.example.orderapi.dto.pointhistory;
 
 import com.example.orderapi.entity.pointhistory.HistoryTypes;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Data
+@AllArgsConstructor
+@Getter
 public class PointHistoryCreateRequest {
     Long memberId;
 

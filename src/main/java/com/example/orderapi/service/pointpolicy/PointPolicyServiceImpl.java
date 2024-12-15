@@ -35,7 +35,6 @@ public class PointPolicyServiceImpl implements PointPolicyService {
 
     @Override
     public PointPolicyResponse save(PointPolicyCreateRequest request) {
-
         PointPolicy pointPolicy = new PointPolicy();
         pointPolicy.setName(request.getName());
         pointPolicy.setRate(request.getRate());
@@ -65,6 +64,9 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     @Override
     public List<PointPolicyResponse> findAll() {
         List<PointPolicy> pointPolicies = pointPolicyRepository.findAll();
+        if(pointPolicies.isEmpty()) {
+            throw new PointPolicyNotFoundException("pointPolicy not found");
+        }
         List<PointPolicyResponse> pointPolicyResponseList = new ArrayList<>();
         for(PointPolicy pointPolicy : pointPolicies) {
             pointPolicyResponseList.add(PointPolicyResponse.fromEntity(pointPolicy));

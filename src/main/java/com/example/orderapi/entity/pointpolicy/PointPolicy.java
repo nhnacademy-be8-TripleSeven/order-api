@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter @Setter
 @NoArgsConstructor
-@Data
 public class PointPolicy {
 
     @Id

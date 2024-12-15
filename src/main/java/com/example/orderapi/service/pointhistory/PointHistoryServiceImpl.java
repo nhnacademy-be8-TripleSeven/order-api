@@ -26,9 +26,9 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
 
     @Override
-    public Page<PointHistoryResponse> findByMemberId(Long memberId, Pageable pageable) {
+    public Page<PointHistoryResponse> getMemberPointHistory(Long memberId, Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAllByMemberId(memberId, pageable);
-        if(Objects.isNull(histories)){
+        if(histories.isEmpty()){
             throw new PointHistoryNotFoundException("memberId="+memberId +" 's pointHistory is null");
         }
 
@@ -37,23 +37,23 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public Page<PointHistory> findAll(Pageable pageable) {
+    public Page<PointHistory> getAllPointHistories(Pageable pageable) {
 
         return pointHistoryRepository.findAll(pageable);
     }
 
     @Override
-    public void deleteByPointHistoryId(Long pointHistoryId) {
+    public void removePointHistoryById(Long pointHistoryId) {
         pointHistoryRepository.deleteById(pointHistoryId);
     }
 
     @Override
-    public void deleteByMemberId(Long memberId) {
+    public void removeAllPointHistoriesForMember(Long memberId) {
         pointHistoryRepository.deleteAllByMemberId(memberId);
     }
 
     @Override
-    public PointHistoryResponse findByPointHistoryId(Long pointHistoryId) {
+    public PointHistoryResponse getPointHistory(Long pointHistoryId) {
         PointHistory history = pointHistoryRepository.findById(pointHistoryId).orElse(null);
         if(Objects.isNull(history)){
             throw new PointHistoryNotFoundException("pointHistoryId="+pointHistoryId +" is not found");
@@ -65,7 +65,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
 
     @Override
-    public PointHistoryResponse save(PointHistoryCreateRequest request) {
+    public PointHistoryResponse createPointHistory(PointHistoryCreateRequest request) {
        PointHistory history = new PointHistory();
        history.setMemberId(request.getMemberId());
        history.setComment(request.getComment());
@@ -78,7 +78,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public PointHistoryResponse save(Long policyId, Long memberId) {
+    public PointHistoryResponse assignPointBasedOnPolicy(Long policyId, Long memberId) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(policyId).orElse(null);
         if(Objects.isNull(pointPolicy)){
             throw new PointPolicyNotFoundException("policyId="+policyId +" is not found");
@@ -95,7 +95,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public Integer getPoint(Long pointId) {
+    public Integer calculateTotalPoints(Long pointId) {
         return pointHistoryRepository.sumAmount(pointId);
     }
 

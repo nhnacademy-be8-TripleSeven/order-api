@@ -5,26 +5,43 @@ import com.example.orderapi.entity.pointhistory.PointHistory;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 public class PointHistoryResponse {
-    private Long id;
+    private final Long id;
 
     @Enumerated(EnumType.STRING)
-    private HistoryTypes types;
+    private final HistoryTypes types;
 
-    private int amount;
+    private final int amount;
 
-    private LocalDateTime changed_at;
+    private final LocalDateTime changed_at;
 
-    private String comment;
+    private final String comment;
 
     @Builder
-    private PointHistoryResponse(Long id, HistoryTypes types, int amount, LocalDateTime changed_at, String comment) {
+    public PointHistoryResponse(Long id, HistoryTypes types, int amount, LocalDateTime changed_at, String comment) {
+        // Validate input parameters using Objects.isNull()
+        if (Objects.isNull(id)) {
+            throw new IllegalArgumentException("ID cannot be null");
+        }
+        if (Objects.isNull(types)) {
+            throw new IllegalArgumentException("History Type cannot be null");
+        }
+        if (amount < 0) {
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+        if (Objects.isNull(changed_at)) {
+            throw new IllegalArgumentException("Changed At cannot be null");
+        }
+        if (Objects.isNull(comment) || comment.trim().isEmpty()) {
+            throw new IllegalArgumentException("Comment cannot be null or empty");
+        }
+
         this.id = id;
         this.types = types;
         this.amount = amount;
@@ -33,7 +50,8 @@ public class PointHistoryResponse {
     }
 
     public static PointHistoryResponse fromEntity(PointHistory pointHistory) {
-        return new PointHistoryResponse(pointHistory.getId(),
+        return new PointHistoryResponse(
+                pointHistory.getId(),
                 pointHistory.getTypes(),
                 pointHistory.getAmount(),
                 pointHistory.getChanged_at(),
