@@ -47,13 +47,14 @@ public class PointHistoryController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+
     @DeleteMapping
     public ResponseEntity<PointHistoryResponse> deletePointHistoryByPointHistoryId(@RequestParam Long pointHistoryId) {
         if(Objects.isNull(pointHistoryService.findByPointHistoryId(pointHistoryId))){
             throw new PointHistoryNotFoundException("pointHistoryId: " + pointHistoryId + "point history not found");
         }
         pointHistoryService.deleteByPointHistoryId(pointHistoryId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
 
