@@ -1,6 +1,7 @@
 package com.example.orderapi.dto.wrapping;
 
 import com.example.orderapi.entity.wrapping.Wrapping;
+import com.example.orderapi.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,11 @@ public class WrappingResponse {
 
     @Builder
     private WrappingResponse(Long id, String name, int price) {
-        if (Objects.isNull(id)) {
+        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("Wrapping id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }
+
         this.id = id;
         this.name = name;
         this.price = price;

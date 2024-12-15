@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Service
 @RequiredArgsConstructor
 @Transactional
+@Service
 public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
     private final DeliveryPolicyRepository deliveryPolicyRepository;
@@ -30,7 +30,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     @Override
     public DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest) {
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-//        deliveryPolicy.ofCreate();
+        deliveryPolicy.ofCreate(deliveryPolicyCreateRequest.getName(), deliveryPolicyCreateRequest.getPrice());
         DeliveryPolicy createDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
         return DeliveryPolicyResponse.fromEntity(createDeliveryPolicy);
     }
@@ -44,7 +44,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
         }
 
         DeliveryPolicy deliveryPolicy = optionalDeliveryPolicy.get();
-        deliveryPolicy.update(deliveryPolicyUpdateRequest.getName(), deliveryPolicyUpdateRequest.getPrice());
+        deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequest.getName(), deliveryPolicyUpdateRequest.getPrice());
 
         return DeliveryPolicyResponse.fromEntity(deliveryPolicy);
     }

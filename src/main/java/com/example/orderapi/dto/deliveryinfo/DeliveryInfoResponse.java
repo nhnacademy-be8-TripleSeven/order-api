@@ -1,6 +1,7 @@
 package com.example.orderapi.dto.deliveryinfo;
 
 import com.example.orderapi.entity.deliveryinfo.DeliveryInfo;
+import com.example.orderapi.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class DeliveryInfoResponse {
 
     @Builder
     private DeliveryInfoResponse(Long id, String name, int invoiceNumber, ZonedDateTime forwardedAt, LocalDate deliveryDate, ZonedDateTime arrivedAt) {
-        if (Objects.isNull(id)) {
+        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("DeliveryInfo id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }

@@ -7,18 +7,20 @@ import com.example.orderapi.entity.wrapping.Wrapping;
 import com.example.orderapi.repository.wrapping.WrappingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class WrappingServiceImpl implements WrappingService {
 
     private final WrappingRepository wrappingRepository;
 
     @Override
-    public WrappingResponse getById(Long id) {
+    public WrappingResponse getWrappingById(Long id) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
 
         if (optionalWrapping.isEmpty()) {
@@ -29,7 +31,7 @@ public class WrappingServiceImpl implements WrappingService {
     }
 
     @Override
-    public List<WrappingResponse> getAllToList() {
+    public List<WrappingResponse> getWrappingsToList() {
         List<Wrapping> list = wrappingRepository.findAll();
 
         if (list.isEmpty()) {
@@ -40,31 +42,31 @@ public class WrappingServiceImpl implements WrappingService {
     }
 
     @Override
-    public WrappingResponse create(WrappingCreateRequest wrappingCreateRequest) {
+    public WrappingResponse createWrapping(WrappingCreateRequest wrappingCreateRequest) {
         Wrapping wrapping = new Wrapping();
-        wrapping.setName(wrappingCreateRequest.getName());
-        wrapping.setPrice(wrappingCreateRequest.getPrice());
+        wrapping.ofCreate(wrappingCreateRequest.getName(), wrappingCreateRequest.getPrice());
         Wrapping createWrapping = wrappingRepository.save(wrapping);
 
         return WrappingResponse.fromEntity(createWrapping);
     }
 
     @Override
-    public WrappingResponse update(Long id, WrappingUpdateRequest wrappingUpdateRequest) {
+    public WrappingResponse updateWrapping(Long id, WrappingUpdateRequest wrappingUpdateRequest) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
         if (optionalWrapping.isEmpty()) {
             throw new RuntimeException();
         }
         Wrapping wrapping = optionalWrapping.get();
-        wrapping.setName(wrappingUpdateRequest.getName());
-        wrapping.setPrice(wrappingUpdateRequest.getPrice());
-        Wrapping updateWrapping = wrappingRepository.save(wrapping);
+        wrapping.ofUpdate(wrappingUpdateRequest.getName(), wrappingUpdateRequest.getPrice());
 
-        return WrappingResponse.fromEntity(updateWrapping);
+        return WrappingResponse.fromEntity(wrapping);
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteWrapping(Long id) {
+        if (!wrappingRepository.existsById(id)) {
+            throw new RuntimeException();
+        }
         wrappingRepository.deleteById(id);
     }
 }

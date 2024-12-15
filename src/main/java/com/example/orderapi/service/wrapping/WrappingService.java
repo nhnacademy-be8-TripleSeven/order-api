@@ -7,13 +7,13 @@ import com.example.orderapi.dto.wrapping.WrappingUpdateRequest;
 import java.util.List;
 
 public interface WrappingService {
-    WrappingResponse getById(Long id);
+    WrappingResponse getWrappingById(Long id);
 
-    List<WrappingResponse> getAllToList();
+    List<WrappingResponse> getWrappingsToList();
 
-    WrappingResponse create(WrappingCreateRequest wrappingCreateRequest);
+    WrappingResponse createWrapping(WrappingCreateRequest wrappingCreateRequest);
 
-    WrappingResponse update(Long id, WrappingUpdateRequest wrappingUpdateRequest);
+    WrappingResponse updateWrapping(Long id, WrappingUpdateRequest wrappingUpdateRequest);
 
-    void delete(Long id);
+    void deleteWrapping(Long id);
 }

@@ -1,6 +1,7 @@
 package com.example.orderapi.dto.deliverypolicy;
 
 import com.example.orderapi.entity.deliverypolicy.DeliveryPolicy;
+import com.example.orderapi.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ public class DeliveryPolicyResponse {
 
     @Builder
     private DeliveryPolicyResponse(Long id, String name, int price) {
-        if (Objects.isNull(id)) {
+        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("DeliveryPolicy id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }

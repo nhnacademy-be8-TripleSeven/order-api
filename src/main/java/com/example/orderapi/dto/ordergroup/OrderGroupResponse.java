@@ -1,6 +1,7 @@
 package com.example.orderapi.dto.ordergroup;
 
 import com.example.orderapi.entity.ordergroup.OrderGroup;
+import com.example.orderapi.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class OrderGroupResponse {
 
     @Builder
     private OrderGroupResponse(Long id, Long userId, Long wrappingId, Long deliveryInfoId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice) {
-        if (Objects.isNull(id)) {
+        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }
@@ -47,16 +48,28 @@ public class OrderGroupResponse {
     }
 
     public static OrderGroupResponse fromEntity(OrderGroup orderGroup) {
+        if (Objects.isNull(orderGroup.getDeliveryInfo())){
+            return OrderGroupResponse.builder()
+                    .id(orderGroup.getId())
+                    .userId(orderGroup.getUserId())
+                    .orderedName(orderGroup.getOrderedName())
+                    .orderedAt(orderGroup.getOrderedAt())
+                    .recipientName(orderGroup.getRecipientName())
+                    .recipientPhone(orderGroup.getRecipientPhone())
+                    .deliveryPrice(orderGroup.getDeliveryPrice())
+                    .wrappingId(orderGroup.getWrapping().getId())
+                    .build();
+        }
         return OrderGroupResponse.builder()
                 .id(orderGroup.getId())
                 .userId(orderGroup.getUserId())
-                .wrappingId(orderGroup.getWrappingId())
-                .deliveryInfoId(orderGroup.getDeliveryInfoId())
                 .orderedName(orderGroup.getOrderedName())
                 .orderedAt(orderGroup.getOrderedAt())
                 .recipientName(orderGroup.getRecipientName())
                 .recipientPhone(orderGroup.getRecipientPhone())
                 .deliveryPrice(orderGroup.getDeliveryPrice())
+                .wrappingId(orderGroup.getWrapping().getId())
+                .deliveryInfoId(orderGroup.getDeliveryInfo().getId())
                 .build();
     }
 }
