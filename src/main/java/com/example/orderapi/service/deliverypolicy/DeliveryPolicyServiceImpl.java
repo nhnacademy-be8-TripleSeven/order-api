@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Service
 @RequiredArgsConstructor
 @Transactional
+@Service
 public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
     private final DeliveryPolicyRepository deliveryPolicyRepository;
@@ -30,13 +30,13 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     @Override
     public DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest) {
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-//        deliveryPolicy.ofCreate();
+        deliveryPolicy.ofCreate(deliveryPolicyCreateRequest.getName(), deliveryPolicyCreateRequest.getPrice());
         DeliveryPolicy createDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
         return DeliveryPolicyResponse.fromEntity(createDeliveryPolicy);
     }
 
     @Override
-    public DeliveryPolicyResponse update(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest) {
+    public DeliveryPolicyResponse updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest) {
         Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
 
         if (optionalDeliveryPolicy.isEmpty()) {
@@ -44,13 +44,13 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
         }
 
         DeliveryPolicy deliveryPolicy = optionalDeliveryPolicy.get();
-        deliveryPolicy.update(deliveryPolicyUpdateRequest.getName(), deliveryPolicyUpdateRequest.getPrice());
+        deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequest.getName(), deliveryPolicyUpdateRequest.getPrice());
 
         return DeliveryPolicyResponse.fromEntity(deliveryPolicy);
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteDeliveryPolicy(Long id) {
         if(!deliveryPolicyRepository.existsById(id)){
             throw new RuntimeException();
         }

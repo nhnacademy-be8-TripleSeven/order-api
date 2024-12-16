@@ -4,10 +4,9 @@ import com.example.orderapi.dto.deliveryinfo.*;
 
 public interface DeliveryInfoService {
 
-    DeliveryInfoResponse getById(Long id);
-    DeliveryInfoResponse create(DeliveryInfoCreateRequest deliveryInfoCreateRequest);
-    DeliveryInfoResponse updateAll(Long id, DeliveryInfoUpdateRequest deliveryInfoUpdateRequest);
-    DeliveryInfoResponse updateLogistics(Long id, DeliveryInfoLogisticsUpdateRequest deliveryInfoLogisticsUpdateRequest);
-    DeliveryInfoResponse updateArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequest deliveryInfoArrivedAtUpdateRequest);
-    void delete(Long id);
+    DeliveryInfoResponse getDeliveryInfoById(Long id);
+    DeliveryInfoResponse createDeliveryInfo(DeliveryInfoCreateRequest deliveryInfoCreateRequest);
+    DeliveryInfoResponse updateDeliveryInfoLogistics(Long id, DeliveryInfoLogisticsUpdateRequest deliveryInfoLogisticsUpdateRequest);
+    DeliveryInfoResponse updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequest deliveryInfoArrivedAtUpdateRequest);
+    void deleteDeliveryInfo(Long id);
 }

@@ -1,59 +1,188 @@
 package com.example.orderapi.service;
 
+import com.example.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
+import com.example.orderapi.dto.ordergroup.OrderGroupCreateRequest;
+import com.example.orderapi.dto.ordergroup.OrderGroupResponse;
+import com.example.orderapi.dto.ordergroup.OrderGroupUpdateDeliveryInfoRequest;
+import com.example.orderapi.dto.wrapping.WrappingResponse;
+import com.example.orderapi.entity.deliveryinfo.DeliveryInfo;
+import com.example.orderapi.entity.ordergroup.OrderGroup;
+import com.example.orderapi.entity.wrapping.Wrapping;
+import com.example.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.example.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
+import com.example.orderapi.service.ordergroup.OrderGroupServiceImpl;
+import com.example.orderapi.service.wrapping.WrappingServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderGroupServiceTest {
-//
-//    // target
-//    @InjectMocks
-//    OrderGroupServiceImpl orderGroupService;
-//
-//
-//    // dependency
-//    @Mock
-//    OrderGroupRepository orderGroupRepository;
-//
-//    Long id;
-//
-//
-//    OrderGroup OrderGroup;
-//
-//    @BeforeEach
-//    void setUp() {
-//
-//        String dateString = "2018-08-23 10:30:00";
-//
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//
-//        LocalDateTime localDateTime = LocalDateTime.parse(dateString, formatter);
-//
-//        ZoneId zoneId = ZoneId.of("Asia/Seoul");
-//        ZonedDateTime orderedAt = localDateTime.atZone(zoneId);
-//
-//        id = 1L;
-//        Long userId = 2L;
-//        Long wrappingId = 1L;
-//        Long deliveryInfoId = null;
-//        String ordererName = "orderer1";
-//        String recipientName = "recipient1";
-//        String recipientPhone = "01012345678";
-//        int deliveryPrice = 5000;
-//
-//        OrderGroup = new OrderGroup(id, userId, wrappingId, deliveryInfoId, ordererName, orderedAt, recipientName, recipientPhone, deliveryPrice);
-//    }
-//
-//
-//    @Test
-//    void getById(){
-//        //given
-////        given(orderGroupRepository.findById(id)).willReturn(Optional.of(new OrderGroupResponse()));
-//
-//        //when
-//        OrderGroupResponse actual = orderGroupService.getById(id);
-//
-//        //then
-//        Assertions.assertEquals(actual, OrderGroup);
-//    }
+    @Mock
+    private OrderGroupRepository orderGroupRepository;
+
+    @Mock
+    private WrappingServiceImpl wrappingService;
+
+    @Mock
+    private DeliveryInfoServiceImpl deliveryInfoService;
+
+    @InjectMocks
+    private OrderGroupServiceImpl orderGroupService;
+
+    private OrderGroup orderGroup;
+
+    private Wrapping wrapping;
+
+    private DeliveryInfo deliveryInfo;
+
+    @BeforeEach
+    void setUp() {
+        wrapping = new Wrapping();
+        wrapping.ofCreate("Test Wrapping", 100);
+
+        orderGroup = new OrderGroup();
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+
+        deliveryInfo = new DeliveryInfo();
+        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678);
+    }
+
+    @Test
+    void testGetOrderGroupById_Success() {
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
+
+        OrderGroupResponse response = orderGroupService.getOrderGroupById(1L);
+
+        assertNotNull(response);
+        assertEquals("Test Ordered", response.getOrderedName());
+        assertEquals("Test Recipient", response.getRecipientName());
+        assertEquals("01012345678", response.getRecipientPhone());
+        assertEquals(1000, response.getDeliveryPrice());
+    }
+
+    @Test
+    void testGetOrderGroupById_Fail() {
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> orderGroupService.getOrderGroupById(1L));
+        verify(orderGroupRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testCreateOrderGroup_Success() {
+        when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponse.fromEntity(wrapping));
+
+        OrderGroupResponse response = orderGroupService.createOrderGroup(
+                new OrderGroupCreateRequest(
+                        orderGroup.getUserId(),
+                        1L,
+                        orderGroup.getOrderedName(),
+                        orderGroup.getRecipientName(),
+                        orderGroup.getRecipientPhone(),
+                        orderGroup.getDeliveryPrice()));
+
+        assertNotNull(response);
+        assertEquals("Test Ordered", response.getOrderedName());
+        assertEquals("Test Recipient", response.getRecipientName());
+        assertEquals("01012345678", response.getRecipientPhone());
+        assertEquals(1000, response.getDeliveryPrice());
+
+        verify(orderGroupRepository, times(1)).save(any());
+    }
+
+    @Test
+    void testCreateOrderGroup_Fail() {
+        when(wrappingService.getWrappingById(anyLong())).thenReturn(null);
+        assertThrows(RuntimeException.class, () -> orderGroupService.createOrderGroup(
+                new OrderGroupCreateRequest(
+                        orderGroup.getUserId(),
+                        1L,
+                        orderGroup.getOrderedName(),
+                        orderGroup.getRecipientName(),
+                        orderGroup.getRecipientPhone(),
+                        orderGroup.getDeliveryPrice())));
+
+        verify(orderGroupRepository, times(0)).save(any());
+    }
+
+    @Test
+    void testUpdateOrderGroup_Success() {
+        when(deliveryInfoService.getDeliveryInfoById(anyLong())).thenReturn(DeliveryInfoResponse.fromEntity(deliveryInfo));
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
+
+        OrderGroupResponse response = orderGroupService.updateOrderGroup(
+                1L,
+                new OrderGroupUpdateDeliveryInfoRequest(1L));
+
+        assertNotNull(response);
+        assertEquals("Test Ordered", response.getOrderedName());
+        assertEquals("Test Recipient", response.getRecipientName());
+        assertEquals("01012345678", response.getRecipientPhone());
+        assertEquals(1000, response.getDeliveryPrice());
+
+        verify(orderGroupRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void testUpdateOrderGroup_Fail() {
+        when(deliveryInfoService.getDeliveryInfoById(anyLong())).thenReturn(null);
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
+
+        assertThrows(RuntimeException.class, () -> orderGroupService.updateOrderGroup(
+                1L,
+                new OrderGroupUpdateDeliveryInfoRequest(1L)));
+
+        verify(orderGroupRepository, times(1)).findById(anyLong());
+        verify(deliveryInfoService, times(1)).getDeliveryInfoById(1L);
+    }
+
+    @Test
+    void testDeleteOrderGroup_Success() {
+        when(orderGroupRepository.existsById(anyLong())).thenReturn(true);
+        orderGroupService.deleteOrderGroup(1L);
+
+        verify(orderGroupRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    void testDeleteOrderGroup_Fail() {
+        when(orderGroupRepository.existsById(anyLong())).thenReturn(false);
+        assertThrows(RuntimeException.class, () -> orderGroupService.deleteOrderGroup(1L));
+        verify(orderGroupRepository, times(0)).deleteById(anyLong());
+    }
+
+    @Test
+    void testGetOrderGroupPages() {
+        Pageable pageable = PageRequest.of(0, 10);
+        OrderGroup orderGroup2 = new OrderGroup();
+        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+        when(orderGroupRepository.findAllByUserId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(orderGroup, orderGroup2), pageable, 2));
+
+        Page<OrderGroupResponse> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(orderGroup.getId(), result.getContent().getFirst().getId());
+        assertEquals(orderGroup2.getId(), result.getContent().getLast().getId());
+        assertEquals(0, result.getNumber());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(10, result.getSize());
+        assertEquals(2, result.getTotalElements());
+
+        verify(orderGroupRepository, times(1)).findAllByUserId(anyLong(), any());
+    }
 }

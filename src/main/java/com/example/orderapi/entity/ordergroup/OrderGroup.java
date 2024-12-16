@@ -1,15 +1,15 @@
 package com.example.orderapi.entity.ordergroup;
 
+import com.example.orderapi.entity.deliveryinfo.DeliveryInfo;
+import com.example.orderapi.entity.wrapping.Wrapping;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Getter;
 
 import java.time.ZonedDateTime;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class OrderGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +19,9 @@ public class OrderGroup {
     private Long userId;
 
     @NotNull
-    private Long wrappingId;
-
-    private Long deliveryInfoId;
-
-    @NotNull
     private String orderedName;
 
-
+    @NotNull
     private ZonedDateTime orderedAt;
 
     @NotNull
@@ -35,6 +30,30 @@ public class OrderGroup {
     @NotNull
     private String recipientPhone;
 
+    @NotNull
     private int deliveryPrice;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "wrapping_id", nullable = false)
+    private Wrapping wrapping;
+
+    @OneToOne
+    @JoinColumn(name = "delivery_info_id")
+    private DeliveryInfo deliveryInfo;
+
+    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, int deliveryPrice, Wrapping wrapping) {
+        this.userId = userId;
+        this.orderedName = orderedName;
+        this.recipientName = recipientName;
+        this.recipientPhone = recipientPhone;
+        this.deliveryPrice = deliveryPrice;
+        this.orderedAt = ZonedDateTime.now();
+        this.wrapping = wrapping;
+    }
+
+    public void ofUpdateDeliveryInfo(DeliveryInfo deliveryInfo) {
+        this.deliveryInfo = deliveryInfo;
+    }
 
 }

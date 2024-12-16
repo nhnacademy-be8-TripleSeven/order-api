@@ -1,21 +1,39 @@
 package com.example.orderapi.dto.wrapping;
 
 import com.example.orderapi.entity.wrapping.Wrapping;
-import lombok.Data;
+import com.example.orderapi.environmentutils.EnvironmentUtil;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
-@Data
+import java.util.Objects;
+
+@Getter
+@Slf4j
 public class WrappingResponse {
-    private Long id;
+    private final Long id;
 
-    private String name;
+    private final String name;
 
-    private int price;
+    private final int price;
+
+    @Builder
+    private WrappingResponse(Long id, String name, int price) {
+        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
+            log.error("Wrapping id cannot be null");
+            throw new IllegalArgumentException("id cannot be null");
+        }
+
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
 
     public static WrappingResponse fromEntity(Wrapping wrapping) {
-        WrappingResponse dto = new WrappingResponse();
-        dto.setId(wrapping.getId());
-        dto.setName(wrapping.getName());
-        dto.setPrice(wrapping.getPrice());
-        return dto;
+        return WrappingResponse.builder()
+                .id(wrapping.getId())
+                .name(wrapping.getName())
+                .price(wrapping.getPrice())
+                .build();
     }
 }

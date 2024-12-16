@@ -10,8 +10,8 @@ public interface DeliveryPolicyService {
 
     DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest);
 
-    DeliveryPolicyResponse update(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest);
+    DeliveryPolicyResponse updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest);
 
-    void delete(Long id);
+    void deleteDeliveryPolicy(Long id);
 
 }

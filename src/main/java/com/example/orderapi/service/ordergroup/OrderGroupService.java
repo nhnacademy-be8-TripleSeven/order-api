@@ -2,19 +2,19 @@ package com.example.orderapi.service.ordergroup;
 
 import com.example.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.example.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.example.orderapi.dto.ordergroup.OrderGroupUpdateRequest;
+import com.example.orderapi.dto.ordergroup.OrderGroupUpdateDeliveryInfoRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderGroupService {
 
-    OrderGroupResponse getById(Long id);
+    OrderGroupResponse getOrderGroupById(Long id);
 
-    Page<OrderGroupResponse> getOrderGroupsByUserId(Long userId, Pageable pageable);
+    Page<OrderGroupResponse> getOrderGroupPagesByUserId(Long userId, Pageable pageable);
 
-    OrderGroupResponse update(Long id, OrderGroupUpdateRequest orderGroupUpdateRequest);
+    OrderGroupResponse updateOrderGroup(Long id, OrderGroupUpdateDeliveryInfoRequest orderGroupUpdateRequest);
 
-    OrderGroupResponse create(OrderGroupCreateRequest orderGroupCreateRequest);
+    OrderGroupResponse createOrderGroup(OrderGroupCreateRequest orderGroupCreateRequest);
 
-    void delete(Long id);
+    void deleteOrderGroup(Long id);
 }
