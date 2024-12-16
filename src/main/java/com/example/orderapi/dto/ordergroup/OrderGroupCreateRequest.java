@@ -1,32 +1,33 @@
 package com.example.orderapi.dto.ordergroup;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Value;
-
-import java.time.ZonedDateTime;
+import org.hibernate.validator.constraints.Length;
 
 @Value
 public class OrderGroupCreateRequest {
+    @NotNull
     Long userId;
 
+    @NotNull
     Long wrappingId;
 
+    @NotNull
+    @NotBlank
     String orderedName;
 
-    ZonedDateTime orderedAt;
-
+    @NotNull
+    @NotBlank
     String recipientName;
 
+    @NotNull
+    @NotBlank
+    @Length(max = 15)
     String recipientPhone;
 
+    @NotNull
+    @Min(100)
     int deliveryPrice;
-
-    public OrderGroupCreateRequest(Long userId, Long wrappingId, String orderedName, String recipientName, String recipientPhone, int deliveryPrice) {
-        this.userId = userId;
-        this.wrappingId = wrappingId;
-        this.orderedName = orderedName;
-        orderedAt = ZonedDateTime.now();
-        this.recipientName = recipientName;
-        this.recipientPhone = recipientPhone;
-        this.deliveryPrice = deliveryPrice;
-    }
 }
