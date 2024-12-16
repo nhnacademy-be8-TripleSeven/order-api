@@ -85,6 +85,7 @@ public class OrderGroupServiceTest {
     @Test
     void testCreateOrderGroup_Success() {
         when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponse.fromEntity(wrapping));
+        when(orderGroupRepository.save(any())).thenReturn(orderGroup);
 
         OrderGroupResponse response = orderGroupService.createOrderGroup(
                 new OrderGroupCreateRequest(
