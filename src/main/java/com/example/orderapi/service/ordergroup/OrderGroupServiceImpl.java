@@ -81,9 +81,9 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 orderGroupCreateRequest.getDeliveryPrice(),
                 wrapping);
 
-        orderGroupRepository.save(orderGroup);
+        OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
 
-        return OrderGroupResponse.fromEntity(orderGroup);
+        return OrderGroupResponse.fromEntity(savedOrderGroup);
     }
 
     @Override
