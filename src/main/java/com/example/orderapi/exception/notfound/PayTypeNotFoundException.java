@@ -1,4 +1,4 @@
-package com.example.orderapi.exception.notfound.impl;
+package com.example.orderapi.exception.notfound;
 
 public class PayTypeNotFoundException extends RuntimeException {
     public PayTypeNotFoundException(String message) {

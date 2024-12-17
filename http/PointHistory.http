@@ -13,23 +13,43 @@ GET localhost:8088/point-histories/1?page=0&size=3
 ### pointHistoryId = 4의 포인트 기록 삭제
 DELETE localhost:8088/point-histories?pointHistoryId=4
 
-### 포인트 히스토리 삽입 요청
+### 포인트 적립 (결제 관련 적립은 주문에서 처리)
 POST localhost:8088/point-histories
 Content-Type: application/json
 
 {
   "memberId": 1,
-  "types": "SPEND",
-  "amount": 500,
-  "changed_at": "2024-12-12T08:50:00",
-  "comment": "payment use"
+  "types": "EARN",
+  "pointPolicyId": 1
 }
 
-### 포인트 히스토리 삽입 요청 (정책 기반)
-POST localhost:8088/point-histories/members/1/policies/1
 
 ### memberId = 1의 포인트 조회
 GET localhost:8088/point-histories/members/1
 
 ### memberId = 10의 포인트 조회
 GET localhost:8088/point-histories/members/10
+
+
+#### 포인트 적립 결제
+#POST localhost:8088/point-histories
+#Content-Type: application/json
+#
+#{
+#  "memberId": 1,
+#  "pointPolicyId": 3,
+#  "amount": 10000,
+#  "types": "EARN"
+#}
+
+#### 포인트 결제시 사용
+#POST localhost:8088/point-histories
+#Content-Type: application/json
+#
+#{
+#  "memberId": 1,
+#  "types": "SPEND",
+#  "amount": -500,
+#  "comment": "payment use",
+#  "pointPolicyId" : null
+#}

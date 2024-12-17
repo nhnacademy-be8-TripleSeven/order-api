@@ -2,7 +2,7 @@ package com.example.orderapi.service.paytypes;
 
 import com.example.orderapi.dto.paytypes.PayTypesResponse;
 import com.example.orderapi.entity.paytypes.PayTypes;
-import com.example.orderapi.exception.notfound.impl.PayTypeNotFoundException;
+import com.example.orderapi.exception.notfound.PayTypeNotFoundException;
 import com.example.orderapi.repository.paytypes.PayTypesRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

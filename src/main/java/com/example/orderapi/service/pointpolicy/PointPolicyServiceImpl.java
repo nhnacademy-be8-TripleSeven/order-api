@@ -4,7 +4,7 @@ import com.example.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
 import com.example.orderapi.dto.pointpolicy.PointPolicyResponse;
 import com.example.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
 import com.example.orderapi.entity.pointpolicy.PointPolicy;
-import com.example.orderapi.exception.notfound.impl.PointPolicyNotFoundException;
+import com.example.orderapi.exception.notfound.PointPolicyNotFoundException;
 import com.example.orderapi.repository.pointpolicy.PointPolicyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +35,12 @@ public class PointPolicyServiceImpl implements PointPolicyService {
 
     @Override
     public PointPolicyResponse save(PointPolicyCreateRequest request) {
-        PointPolicy pointPolicy = new PointPolicy();
-        pointPolicy.setName(request.getName());
-        pointPolicy.setRate(request.getRate());
-        pointPolicy.setAmount(request.getAmount());
-
+        PointPolicy pointPolicy = new PointPolicy(
+                null,
+                request.getName(),
+                request.getAmount(),
+                request.getRate()
+        );
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
         return PointPolicyResponse.fromEntity(savedPolicy);
     }

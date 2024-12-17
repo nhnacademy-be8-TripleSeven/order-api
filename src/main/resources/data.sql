@@ -1,8 +1,6 @@
-INSERT INTO point_policy (name, amount, rate) VALUES ('Welcome Bonus', 100, 0);
-INSERT INTO point_policy (name, amount, rate) VALUES ('Referral Bonus', 200, 0.);
-INSERT INTO point_policy (name, amount, rate) VALUES ('Loyalty Reward', 500, 0);
-INSERT INTO point_policy (name, amount, rate) VALUES ('Seasonal Bonus', 0, 0.15);
-INSERT INTO point_policy (name, amount, rate) VALUES ('Anniversary Bonus', 0, 0.3);
+INSERT INTO point_policy (name, amount, rate) VALUES ('Welcome Bonus', 5000, 0);
+INSERT INTO point_policy (name, amount, rate) VALUES ('Review Bonus', 500, 0);
+INSERT INTO point_policy (name, amount ,rate) VALUES ( 'Payment Point',0,1.5 );
 
 
 
@@ -37,3 +35,17 @@ INSERT INTO point_history (types, amount, changed_at, comment, member_id)
 VALUES ('SPEND', -70, '2024-12-09 08:50:00', 'Points redeemed for service', 4);
 
 
+-- Insert PayType with name "Credit Card"
+INSERT INTO pay_types (name) VALUES ('Credit Card');
+
+-- Insert PayType with name "PayPal"
+INSERT INTO pay_types (name) VALUES ('PayPal');
+
+-- Insert PayType with name "Bank Transfer"
+INSERT INTO pay_types (name) VALUES ('Bank Transfer');
+
+-- Insert PayType with name "Cash"
+INSERT INTO pay_types (name) VALUES ('Cash');
+
+-- Insert PayType with name "Mobile Payment"
+INSERT INTO pay_types (name) VALUES ('Mobile Payment');

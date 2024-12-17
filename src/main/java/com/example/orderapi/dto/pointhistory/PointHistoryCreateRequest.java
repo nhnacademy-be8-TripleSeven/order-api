@@ -4,8 +4,8 @@ import com.example.orderapi.entity.pointhistory.HistoryTypes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 
+//주문 외의 포인트 적립 이력 생성
 @AllArgsConstructor
 @Getter
 public class PointHistoryCreateRequest {
@@ -13,9 +13,5 @@ public class PointHistoryCreateRequest {
 
     private HistoryTypes types;
 
-    private int amount;
-
-    private LocalDateTime changed_at;
-
-    private String comment;
+    private Long pointPolicyId;
 }

@@ -32,9 +32,7 @@ public class PointHistoryResponse {
         if (Objects.isNull(types)) {
             throw new IllegalArgumentException("History Type cannot be null");
         }
-        if (amount < 0) {
-            throw new IllegalArgumentException("Amount cannot be negative");
-        }
+
         if (Objects.isNull(changed_at)) {
             throw new IllegalArgumentException("Changed At cannot be null");
         }

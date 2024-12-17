@@ -18,6 +18,7 @@ public class PointHistory {
     @Enumerated(EnumType.STRING)
     private HistoryTypes types;
 
+    //결제시 도서구매금액, 결제시 포인트 사용 금액
     private int amount;
 
     private LocalDateTime changed_at;
@@ -25,4 +26,5 @@ public class PointHistory {
     private String comment;
 
     private Long memberId;
+
 }
