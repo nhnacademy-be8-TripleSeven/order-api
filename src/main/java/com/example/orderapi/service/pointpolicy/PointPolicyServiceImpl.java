@@ -46,7 +46,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     }
 
     @Override
-    public void update(Long id, PointPolicyUpdateRequest request) {
+    public PointPolicyResponse update(Long id, PointPolicyUpdateRequest request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(id).orElse(null);
         if(Objects.isNull(pointPolicy)) {
             throw new PointPolicyNotFoundException("PointPolicyId="+id+" not found");
@@ -54,7 +54,8 @@ public class PointPolicyServiceImpl implements PointPolicyService {
         pointPolicy.setName(request.getName());
         pointPolicy.setRate(request.getRate());
         pointPolicy.setAmount(request.getAmount());
-        pointPolicyRepository.save(pointPolicy);
+        PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
+        return PointPolicyResponse.fromEntity(savedPolicy);
     }
 
     @Override
