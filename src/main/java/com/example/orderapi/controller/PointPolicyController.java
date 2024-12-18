@@ -22,16 +22,14 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/point-policies")
 public class PointPolicyController {
 
     private final PointPolicyService pointPolicyService;
 
-    @GetMapping
+    @GetMapping("/admin/point-policies")
     @Operation(summary = "모든 포인트 정책 조회", description = "모든 포인트 정책을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = PointPolicyResponse.class))),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "조회 실패")
     })
     public ResponseEntity<List<PointPolicyResponse>> getAllPointPolicies(){
@@ -39,11 +37,10 @@ public class PointPolicyController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/{pointPolicyId}")
+    @GetMapping("/admin/point-policies/{pointPolicyId}")
     @Operation(summary = "포인트 정책 단건 조회", description = "해당하는 포인트 정책을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = PointPolicyResponse.class))),
+            @ApiResponse(responseCode = "200",description = "조회 성공"),
             @ApiResponse(responseCode = "404",description = "해당하는 포인트 정책 없음.")
     })
     public ResponseEntity<PointPolicyResponse> getPointPolicy(@PathVariable String pointPolicyId) {
@@ -52,11 +49,10 @@ public class PointPolicyController {
     }
 
 
-    @PostMapping
+    @PostMapping("admin/point-policies")
     @Operation(summary = "포인트 정책 생성", description = "포인트 정책을 생성합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",description = "생성 성공",
-            content = @Content(schema = @Schema(implementation = PointPolicyResponse.class))),
+            @ApiResponse(responseCode = "201",description = "생성 성공"),
             @ApiResponse(responseCode = "400",description = "잘못된 요청")
     })
     public ResponseEntity<PointPolicyResponse> createPointPolicy(@RequestBody PointPolicyCreateRequest request) {
@@ -65,7 +61,7 @@ public class PointPolicyController {
     }
 
 
-    @DeleteMapping("/{pointPolicyId}")
+    @DeleteMapping("/admin/point-policies/{pointPolicyId}")
     @Operation(summary = "포인트 정책 삭제", description = "해당 포인트 정책을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
@@ -76,11 +72,10 @@ public class PointPolicyController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PutMapping("{pointPolicyId}")
+    @PutMapping("admin/point-policies/{pointPolicyId}")
     @Operation(summary = "포인트 정책 수정", description = "해당 포인트 정책을 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "수정 성공",
-            content = @Content(schema = @Schema(implementation = PointPolicyResponse.class))),
+            @ApiResponse(responseCode = "204", description = "수정 성공"),
             @ApiResponse(responseCode = "404", description = "해당하는 포인트 정책 없음")
     })
     public ResponseEntity<PointPolicyResponse> updatePointPolicy(@PathVariable Long pointPolicyId, @RequestBody PointPolicyUpdateRequest request) {

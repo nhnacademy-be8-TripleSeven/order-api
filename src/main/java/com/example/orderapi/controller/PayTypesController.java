@@ -19,17 +19,15 @@ import java.util.List;
 @Tag(name = "PayTypes-Controller", description = "결제 방식 컨트롤러")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/pay-types")
 public class PayTypesController {
 
     private final PayTypesService payTypesService;
 
     // 모든 결제 유형 조회
-    @GetMapping
+    @GetMapping("/pay-types")
     @Operation(summary = "모든 결제유형 조회", description = "결제 유형을 전부 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = PayTypesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     public ResponseEntity<List<PayTypesResponse>> getAllPayTypes() {
@@ -38,11 +36,10 @@ public class PayTypesController {
     }
 
     // 특정 결제 유형 조회 (ID로 조회)
-    @GetMapping("/{id}")
+    @GetMapping("/pay-types/{id}")
     @Operation(summary = "결제유형 단건 조회", description = "Id를 이용해 특정 결제 유형을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = PayTypesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을 수 없음")
     })
     public ResponseEntity<PayTypesResponse> getPayTypeById(@PathVariable Long id) {
@@ -51,11 +48,10 @@ public class PayTypesController {
     }
 
     // 결제 유형 생성
-    @PostMapping
+    @PostMapping("/admin/pay-types")
     @Operation(summary = "결제 유형 생성", description = "새로운 결제 유형을 생성합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "결제 유형 생성 성공",
-            content = @Content(schema = @Schema(implementation = PayTypesResponse.class))),
+            @ApiResponse(responseCode = "201", description = "결제 유형 생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     public ResponseEntity<PayTypesResponse> createPayType(@RequestBody PayTypes payTypes) {
@@ -64,11 +60,10 @@ public class PayTypesController {
     }
 
     // 결제 유형 수정
-    @PutMapping("/{id}")
+    @PutMapping("/admin/pay-types/{id}")
     @Operation(summary = "결제 유형 수정", description = "결제 유형을 수정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "결제 유형 수정 성공",
-            content = @Content(schema = @Schema(implementation = PayTypesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "결제 유형 수정 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을 수 없음")
     })
@@ -79,7 +74,7 @@ public class PayTypesController {
     }
 
     // 결제 유형 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/pay-types/{id}")
     @Operation(summary = "결제 유형 삭제", description = "결제 유형을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "결제 유형 삭제 성공"),

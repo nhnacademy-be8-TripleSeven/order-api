@@ -19,18 +19,16 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "DeliveryInfo-Controller", description = "배송 정보 관리 컨트롤러")
 @RestController
-@RequestMapping("/api/delivery-info")
 @RequiredArgsConstructor
 public class DeliveryInfoController {
 
     private final DeliveryInfoService deliveryInfoService;
 
     // 1. 특정 배송 정보 조회
-    @GetMapping("/{id}")
+    @GetMapping("/delivery-info/{id}")
     @Operation(summary = "배송 정보 조회", description = "특정 ID의 배송 정보를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = DeliveryInfoResponse.class))),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
     })
     public ResponseEntity<DeliveryInfoResponse> getDeliveryInfo(@PathVariable Long id) {
@@ -39,11 +37,10 @@ public class DeliveryInfoController {
     }
 
     // 2. 배송 정보 생성
-    @PostMapping
+    @PostMapping("/delivery-info")
     @Operation(summary = "배송 정보 생성", description = "새로운 배송 정보를 생성합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성 성공",
-                    content = @Content(schema = @Schema(implementation = DeliveryInfoResponse.class))),
+            @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     public ResponseEntity<DeliveryInfoResponse> createDeliveryInfo(@RequestBody DeliveryInfoCreateRequest request) {
@@ -52,11 +49,10 @@ public class DeliveryInfoController {
     }
 
     // 3. 배송 정보 물류 업데이트
-    @PutMapping("/{id}/logistics")
+    @PutMapping("/delivery-info/{id}/logistics")
     @Operation(summary = "배송 물류 정보 업데이트", description = "배송의 물류 정보를 업데이트합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 성공",
-                    content = @Content(schema = @Schema(implementation = DeliveryInfoResponse.class))),
+            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
     })
     public ResponseEntity<DeliveryInfoResponse> updateDeliveryLogistics(
@@ -66,11 +62,10 @@ public class DeliveryInfoController {
     }
 
     // 4. 배송 도착 시간 업데이트
-    @PutMapping("/{id}/arrived-at")
+    @PutMapping("/delivery-info/{id}/arrived-at")
     @Operation(summary = "배송 도착 시간 업데이트", description = "배송의 도착 시간을 업데이트합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 성공",
-                    content = @Content(schema = @Schema(implementation = DeliveryInfoResponse.class))),
+            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
     })
     public ResponseEntity<DeliveryInfoResponse> updateDeliveryArrivedAt(
@@ -80,7 +75,7 @@ public class DeliveryInfoController {
     }
 
     // 5. 배송 정보 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/delivery-info/{id}")
     @Operation(summary = "배송 정보 삭제", description = "특정 배송 정보를 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),

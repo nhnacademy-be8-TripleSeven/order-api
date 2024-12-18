@@ -19,18 +19,16 @@ import java.util.List;
 
 @Tag(name = "OrderDetail-Controller", description = "주문 상세 관리 컨트롤러")
 @RestController
-@RequestMapping("/api/order-details")
 @RequiredArgsConstructor
 public class OrderDetailController {
 
     private final OrderDetailService orderDetailService;
 
     // 1. 주문 상세 단건 조회
-    @GetMapping("/{id}")
+    @GetMapping("/order-details/{id}")
     @Operation(summary = "주문 상세 단건 조회", description = "특정 주문 상세를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = OrderDetailResponse.class))),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
     public ResponseEntity<OrderDetailResponse> getOrderDetailById(@PathVariable Long id) {
@@ -39,11 +37,10 @@ public class OrderDetailController {
     }
 
     // 2. 주문 상세 생성
-    @PostMapping
+    @PostMapping("/order-details")
     @Operation(summary = "주문 상세 생성", description = "새로운 주문 상세를 생성합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성 성공",
-                    content = @Content(schema = @Schema(implementation = OrderDetailResponse.class))),
+            @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     public ResponseEntity<OrderDetailResponse> createOrderDetail(@RequestBody OrderDetailCreateRequest request) {
@@ -52,11 +49,10 @@ public class OrderDetailController {
     }
 
     // 3. 주문 상세 상태 업데이트
-    @PutMapping("/{id}/status")
+    @PutMapping("/order-details/{id}/status")
     @Operation(summary = "주문 상세 상태 업데이트", description = "특정 주문 상세의 상태를 업데이트합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 성공",
-                    content = @Content(schema = @Schema(implementation = OrderDetailResponse.class))),
+            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
     public ResponseEntity<OrderDetailResponse> updateOrderDetailStatus(
@@ -66,7 +62,7 @@ public class OrderDetailController {
     }
 
     // 4. 주문 상세 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/order-details/{id}")
     @Operation(summary = "주문 상세 삭제", description = "특정 주문 상세를 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
@@ -78,11 +74,10 @@ public class OrderDetailController {
     }
 
     // 5. 주문 그룹별 주문 상세 목록 조회
-    @GetMapping("/order-groups/{orderGroupId}")
+    @GetMapping("/order-details/order-groups/{orderGroupId}")
     @Operation(summary = "주문 그룹별 주문 상세 목록 조회", description = "특정 주문 그룹에 속한 주문 상세 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
     public ResponseEntity<List<OrderDetailResponse>> getOrderDetailsByOrderGroupId(@PathVariable Long orderGroupId) {
