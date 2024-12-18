@@ -3,7 +3,14 @@ server:
 
 eureka:
   client:
-    enabled: false
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://admin:1234@localhost:8761/eureka
+  instance:
+    instance-id: order-api
+    hostname: localhost
+    prefer-ip-address: true
 
 spring:
   datasource:
@@ -20,6 +27,8 @@ spring:
       hibernate.format_sql: true
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
+  rabbitmq:
+    virtual-host: vh1_dev
 
 #spring:
 #  datasource:

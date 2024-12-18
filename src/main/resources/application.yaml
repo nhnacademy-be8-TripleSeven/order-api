@@ -3,6 +3,12 @@ spring:
     name: order-api
   profiles:
     active: dev
+  rabbitmq:
+    username: admin
+    password: nhnacademy123!
+    host: 133.186.241.167
+    port: 5672
+
 
 logging:
   config: classpath:logback-spring.xml

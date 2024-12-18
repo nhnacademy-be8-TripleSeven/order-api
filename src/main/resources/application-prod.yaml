@@ -44,6 +44,8 @@ spring:
       hibernate.format_sql: true
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
+  rabbitmq:
+    virtual-host: vh1_prod
 
   lifecycle:
     timeout-per-shutdown-phase: 30s

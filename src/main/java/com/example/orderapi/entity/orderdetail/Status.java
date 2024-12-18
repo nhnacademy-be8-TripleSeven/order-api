@@ -2,7 +2,9 @@ package com.example.orderapi.entity.orderdetail;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 
+@Getter
 public enum Status {
     PAYMENT_PENDING("결제대기"),
     PAYMENT_COMPLETED("결제완료"),
@@ -16,10 +18,6 @@ public enum Status {
 
     Status(String korean) {
         this.korean = korean;
-    }
-
-    public String getKorean() {
-        return korean;
     }
 
     @JsonCreator
