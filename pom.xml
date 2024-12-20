@@ -8,7 +8,7 @@
         <version>3.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
+    <groupId>com.tripleseven</groupId>
     <artifactId>order-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>order-api</name>
@@ -171,7 +171,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <mainClass>com.example.orderapi.OrderApiApplication</mainClass>
+                    <mainClass>com.tripleseven.orderapi.OrderApiApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>

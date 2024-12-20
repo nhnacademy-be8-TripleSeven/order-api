@@ -2,14 +2,19 @@ spring:
   application:
     name: order-api
   profiles:
-    active: dev
+    active: prod
   rabbitmq:
     username: admin
     password: nhnacademy123!
     host: 133.186.241.167
     port: 5672
 
+url: https://api-keymanager.nhncloudservice.com
+appKey: qTQNj7LyHhdAazH3
+keyId: 22611337ca804b778ddf7b036c824807
 
+keyStoreFilePath: triple-seven.p12
+password: nhn24
 
 logging:
   config: classpath:logback-spring.xml
