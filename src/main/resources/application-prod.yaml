@@ -13,7 +13,6 @@ management:
       enabled: true
     resume:
       enabled: true
-
   info:
     env:
       enabled: true

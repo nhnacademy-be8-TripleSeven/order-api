@@ -30,8 +30,10 @@ public class OrderGroupResponse {
 
     private final int deliveryPrice;
 
+    private final String address;
+
     @Builder
-    private OrderGroupResponse(Long id, Long userId, Long wrappingId, Long deliveryInfoId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice) {
+    private OrderGroupResponse(Long id, Long userId, Long wrappingId, Long deliveryInfoId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
         if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
@@ -45,6 +47,7 @@ public class OrderGroupResponse {
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
         this.deliveryPrice = deliveryPrice;
+        this.address = address;
     }
 
     public static OrderGroupResponse fromEntity(OrderGroup orderGroup) {
@@ -56,6 +59,7 @@ public class OrderGroupResponse {
                     .orderedAt(orderGroup.getOrderedAt())
                     .recipientName(orderGroup.getRecipientName())
                     .recipientPhone(orderGroup.getRecipientPhone())
+                    .address(orderGroup.getAddress())
                     .deliveryPrice(orderGroup.getDeliveryPrice())
                     .wrappingId(orderGroup.getWrapping().getId())
                     .build();
@@ -68,6 +72,7 @@ public class OrderGroupResponse {
                 .recipientName(orderGroup.getRecipientName())
                 .recipientPhone(orderGroup.getRecipientPhone())
                 .deliveryPrice(orderGroup.getDeliveryPrice())
+                .address(orderGroup.getAddress())
                 .wrappingId(orderGroup.getWrapping().getId())
                 .deliveryInfoId(orderGroup.getDeliveryInfo().getId())
                 .build();

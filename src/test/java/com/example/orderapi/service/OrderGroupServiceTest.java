@@ -12,6 +12,7 @@ import com.example.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.example.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import com.example.orderapi.service.ordergroup.OrderGroupServiceImpl;
 import com.example.orderapi.service.wrapping.WrappingServiceImpl;
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +56,7 @@ public class OrderGroupServiceTest {
         wrapping.ofCreate("Test Wrapping", 100);
 
         orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
 
         deliveryInfo = new DeliveryInfo();
         deliveryInfo.ofCreate("Test DeliveryInfo", 12345678);
@@ -64,14 +65,17 @@ public class OrderGroupServiceTest {
     @Test
     void testGetOrderGroupById_Success() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
-
         OrderGroupResponse response = orderGroupService.getOrderGroupById(1L);
+        assertThrows(LazyInitializationException.class, () -> {
+            orderGroupService.getOrderGroupPagesByUserId(1L, PageRequest.ofSize(1)).getSize();
+        });
 
         assertNotNull(response);
         assertEquals("Test Ordered", response.getOrderedName());
         assertEquals("Test Recipient", response.getRecipientName());
         assertEquals("01012345678", response.getRecipientPhone());
         assertEquals(1000, response.getDeliveryPrice());
+        assertEquals("Test Address", response.getAddress());
     }
 
     @Test
@@ -94,7 +98,8 @@ public class OrderGroupServiceTest {
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),
-                        orderGroup.getDeliveryPrice()));
+                        orderGroup.getDeliveryPrice(),
+                        orderGroup.getAddress()));
 
         assertNotNull(response);
         assertEquals("Test Ordered", response.getOrderedName());
@@ -115,7 +120,8 @@ public class OrderGroupServiceTest {
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),
-                        orderGroup.getDeliveryPrice())));
+                        orderGroup.getDeliveryPrice(),
+                        orderGroup.getAddress())));
 
         verify(orderGroupRepository, times(0)).save(any());
     }
@@ -170,7 +176,7 @@ public class OrderGroupServiceTest {
     void testGetOrderGroupPages() {
         Pageable pageable = PageRequest.of(0, 10);
         OrderGroup orderGroup2 = new OrderGroup();
-        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
         when(orderGroupRepository.findAllByUserId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(orderGroup, orderGroup2), pageable, 2));
 
         Page<OrderGroupResponse> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);

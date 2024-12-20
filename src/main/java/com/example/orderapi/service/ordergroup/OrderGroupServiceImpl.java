@@ -79,6 +79,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 orderGroupCreateRequest.getRecipientName(),
                 orderGroupCreateRequest.getRecipientPhone(),
                 orderGroupCreateRequest.getDeliveryPrice(),
+                orderGroupCreateRequest.getAddress(),
                 wrapping);
 
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);

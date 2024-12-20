@@ -52,6 +52,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderGroupResponse.getRecipientName(),
                 orderGroupResponse.getRecipientPhone(),
                 orderGroupResponse.getDeliveryPrice(),
+                orderGroupResponse.getAddress(),
                 wrapping);
 
         orderDetail.ofCreate(

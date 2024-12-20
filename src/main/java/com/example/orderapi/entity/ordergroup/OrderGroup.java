@@ -34,6 +34,9 @@ public class OrderGroup {
     private int deliveryPrice;
 
     @NotNull
+    private String address;
+
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "wrapping_id", nullable = false)
     private Wrapping wrapping;
@@ -42,12 +45,13 @@ public class OrderGroup {
     @JoinColumn(name = "delivery_info_id")
     private DeliveryInfo deliveryInfo;
 
-    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, int deliveryPrice, Wrapping wrapping) {
+    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, int deliveryPrice, String address, Wrapping wrapping) {
         this.userId = userId;
         this.orderedName = orderedName;
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
         this.deliveryPrice = deliveryPrice;
+        this.address = address;
         this.orderedAt = ZonedDateTime.now();
         this.wrapping = wrapping;
     }

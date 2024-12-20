@@ -52,7 +52,7 @@ public class OrderDetailServiceTest {
         wrapping.ofCreate("Test Wrapping", 100);
 
         orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000,"Test Address", wrapping);
 
         orderDetail = new OrderDetail();
         orderDetail.ofCreate(1L, 3, 10000, wrapping, orderGroup);

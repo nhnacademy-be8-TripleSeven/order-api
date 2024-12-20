@@ -36,7 +36,7 @@ public class OrderDetailRepositoryTest {
         wrappingRepository.save(wrapping);
 
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
         orderGroupRepository.save(orderGroup);
 
         orderDetail = new OrderDetail();

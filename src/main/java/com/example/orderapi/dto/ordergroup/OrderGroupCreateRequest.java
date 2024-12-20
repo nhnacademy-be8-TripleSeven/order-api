@@ -30,4 +30,7 @@ public class OrderGroupCreateRequest {
     @NotNull
     @Min(100)
     int deliveryPrice;
+
+    @NotNull
+    String address;
 }

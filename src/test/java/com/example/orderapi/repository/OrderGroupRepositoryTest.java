@@ -5,10 +5,14 @@ import com.example.orderapi.entity.ordergroup.OrderGroup;
 import com.example.orderapi.entity.wrapping.Wrapping;
 import com.example.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.example.orderapi.repository.wrapping.WrappingRepository;
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
@@ -32,7 +36,7 @@ public class OrderGroupRepositoryTest {
         wrappingRepository.save(wrapping);
 
         orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, wrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address" ,wrapping);
     }
 
     @Test
@@ -44,6 +48,7 @@ public class OrderGroupRepositoryTest {
         assertEquals("Test Recipient", savedOrderGroup.getRecipientName());
         assertEquals("01012345678", savedOrderGroup.getRecipientPhone());
         assertEquals(1000, savedOrderGroup.getDeliveryPrice());
+        assertEquals("Test Address", savedOrderGroup.getAddress());
         assertEquals("Test Wrapping", savedOrderGroup.getWrapping().getName());
         assertEquals(100, savedOrderGroup.getWrapping().getPrice());
         assertNull(savedOrderGroup.getDeliveryInfo());
@@ -60,6 +65,7 @@ public class OrderGroupRepositoryTest {
         assertEquals("Test Recipient", foundOrderGroup.get().getRecipientName());
         assertEquals("01012345678", foundOrderGroup.get().getRecipientPhone());
         assertEquals(1000, foundOrderGroup.get().getDeliveryPrice());
+        assertEquals("Test Address", savedOrderGroup.getAddress());
         assertEquals("Test Wrapping", foundOrderGroup.get().getWrapping().getName());
         assertEquals(100, foundOrderGroup.get().getWrapping().getPrice());
         assertNull(foundOrderGroup.get().getDeliveryInfo());
@@ -103,6 +109,7 @@ public class OrderGroupRepositoryTest {
         assertEquals(savedOrderGroup.getRecipientName(), updatedOrderGroup.getRecipientName());
         assertEquals(savedOrderGroup.getRecipientPhone(), updatedOrderGroup.getRecipientPhone());
         assertEquals(savedOrderGroup.getDeliveryPrice(), updatedOrderGroup.getDeliveryPrice());
+        assertEquals(savedOrderGroup.getAddress(), updatedOrderGroup.getAddress());
         assertEquals(savedOrderGroup.getWrapping().getName(), updatedOrderGroup.getWrapping().getName());
         assertEquals(savedOrderGroup.getWrapping().getPrice(), updatedOrderGroup.getWrapping().getPrice());
         assertEquals(savedOrderGroup.getDeliveryInfo().getId(), updatedOrderGroup.getDeliveryInfo().getId());
