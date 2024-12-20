@@ -10,35 +10,24 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PaymentListener {
-
+    // Todo 결제 성공 후 비동기적 상황 구현
     private static final Logger log = LoggerFactory.getLogger(PaymentListener.class);
 
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @RabbitListener(queues = "nhn24.order.queue")
-    public void processPayment(String message) {
-        // 결제 처리
+    public void processOrder(String message) {
         log.info(message);
-        // 성공 시 실행
-            // 주문 상태 업데이트
-
-            // 포인트 적립 처리
-
-        // 사용자 알림 (성공, 실패)
-            // 결제 성공 메시지 전송 dooray hook
-
-        // 별개 구현 (성공 시 만 실행)
-        // 장바구니 초기화
+        // Todo 주문 내역 저장
     }
 
     @RabbitListener(queues = "nhn24.cart.queue")
     public void clearCart() {
-        // 장바구니 초기화 로직
-//        memberApiClient.clearCart(userId, cartId);
+        // Todo 장바구니 초기화
     }
 
     @RabbitListener(queues = "nhn24.point.queue")
     public void processPoint() {
-
+        // Todo 포인트 적립 및 사용
     }
 }

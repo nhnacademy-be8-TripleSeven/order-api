@@ -23,6 +23,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy{
 
     @Override
     public void processMultipleOrder() {
+        // Todo RabbitMQ 와 연결 (Listener 실행)
         // 1. 도서 API에서 가격 및 재고 확인
 
         // 2. 가격 및 재고 검증
@@ -39,7 +40,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy{
 //        for(CartItem cartItem : cartItems){
 //            totalPrice += cartItem.getDiscountPrice() * cartItem.getAmount();
 //        }
-        
+
 
     }
 
