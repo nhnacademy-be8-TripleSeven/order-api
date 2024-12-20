@@ -4,8 +4,7 @@ import com.example.orderapi.dto.orderdetail.OrderDetailCreateRequest;
 import com.example.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 
 public interface OrderProcessingStrategy {
-    void processSingleOrder(OrderGroupCreateRequest orderGroupCreateRequest,
-                      OrderDetailCreateRequest orderDetailCreateRequest);
+    void processSingleOrder();
 
     void processMultipleOrder();
 }
