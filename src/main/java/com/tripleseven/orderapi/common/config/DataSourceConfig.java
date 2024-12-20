@@ -12,7 +12,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 @Configuration
-//@Profile("dev")
+@Profile("prod")
 public class DataSourceConfig {
 
     @Autowired
