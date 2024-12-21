@@ -6,6 +6,7 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequest;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
+import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
@@ -96,5 +97,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         }
 
         return orderDetails.stream().map(OrderDetailResponse::fromEntity).toList();
+    }
+
+    @Override
+    public List<OrderDetailResponse> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
+        return List.of();
     }
 }
