@@ -1,42 +1,37 @@
 spring:
   application:
     name: order-api
+
   profiles:
     active: dev
+  jpa:
+    open-in-view: false
 
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: org.apache.commons.dbcp2.BasicDataSource
+    dbcp2:
+      initial-size: 5
+      max-total: 50   # 50~200
+      max-idle: 30
+      min-idle: 10
+      test-on-borrow: true
+      validation-query: SELECT 1
+      remove-abandoned-on-borrow: true
 
-  lifecycle:
-    timeout-per-shutdown-phase: 30s
-
-
-eureka:
-
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://admin:1234@eureka-server:8761/eureka
-  instance:
-    prefer-ip-address: true
-
-management:
-  health:
-    status:
-      order: DOWN, UP
-  endpoint:
-    jolokia:
-      enable: true
-    pause:
-      enabled: true
-    resume:
-      enabled: true
-
-  info:
-    env:
-      enabled: true
-
-server:
-  shutdown: graceful
+  rabbitmq:
+    username: admin
+    password: nhnacademy123!
+    host: 133.186.241.167
+    port: 5672
 
 logging:
   config: classpath:logback-spring.xml
+
+
+payment:
+  toss:
+    test_client_api_key: test_ck_BX7zk2yd8yJlqyeZoOmL3x9POLqK
+    test_secret_api_key: test_sk_BX7zk2yd8yj65jD6b9Yv3x9POLqK
+
+

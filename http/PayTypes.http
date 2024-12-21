@@ -1,0 +1,33 @@
+### 모든 결제 유형 조회
+GET localhost:8088/pay-types
+
+### 특정 결제 유형 조회 GET 요청
+GET localhost:8088/pay-types/1
+
+### 새로운 결제 유형 생성 POST 요청
+POST localhost:8088/admin/pay-types
+Content-Type: application/json
+
+{
+  "name": "Credit Card"
+}
+
+### 결제 유형 수정 PUT 요청 (ID 1로 수정)
+PUT localhost:8088/admin/pay-types/1
+Content-Type: application/json
+
+{
+  "name": "Debit Card"
+}
+
+### 특정 결제 유형 삭제 DELETE 요청 (ID 1로 삭제)
+DELETE localhost:8088/admin/pay-types/1
+
+
+###
+POST localhost:8088/pay-types
+Content-Type: application/json
+
+{
+  "name": ""
+}
