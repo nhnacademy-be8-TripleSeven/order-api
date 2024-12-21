@@ -8,7 +8,7 @@
         <version>3.4.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
+    <groupId>com.tripleseven</groupId>
     <artifactId>order-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>order-api</name>
@@ -95,6 +95,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.toast.java.logncrash</groupId>
             <artifactId>logncrash-logback-sdk</artifactId>
             <version>3.0.5</version>
@@ -113,11 +118,11 @@
             <version>4.5.13</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.json</groupId>-->
-<!--            <artifactId>json</artifactId>-->
-<!--            <version>20230227</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
 
         <dependency>
             <groupId>org.codehaus.janino</groupId>
@@ -135,9 +140,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.7.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
 
@@ -162,7 +171,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <mainClass>com.example.orderapi.OrderApiApplication</mainClass>
+                    <mainClass>com.tripleseven.orderapi.OrderApiApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>
