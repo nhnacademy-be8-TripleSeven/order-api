@@ -17,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -93,6 +96,19 @@ public class OrderGroupServiceImpl implements OrderGroupService {
             throw new RuntimeException();
         }
         orderGroupRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<OrderGroupResponse> getOrderGroupPeriodByUserId(Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        ZonedDateTime startDateTime = startDate.atStartOfDay().atZone(ZoneId.systemDefault());
+        ZonedDateTime endDateTime = endDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault());
+
+        Page<OrderGroup> savedOrderGroup = orderGroupRepository.findAllByPeriod(userId, startDateTime, endDateTime, pageable);
+        if(savedOrderGroup.getContent().isEmpty()) {
+            throw new RuntimeException();
+        }
+
+        return savedOrderGroup.map(OrderGroupResponse::fromEntity);
     }
 
 }

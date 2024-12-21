@@ -4,6 +4,8 @@ spring:
 
   profiles:
     active: dev
+  jpa:
+    open-in-view: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -25,3 +27,11 @@ spring:
 
 logging:
   config: classpath:logback-spring.xml
+
+
+payment:
+  toss:
+    test_client_api_key: test_ck_BX7zk2yd8yJlqyeZoOmL3x9POLqK
+    test_secret_api_key: test_sk_BX7zk2yd8yj65jD6b9Yv3x9POLqK
+
+
