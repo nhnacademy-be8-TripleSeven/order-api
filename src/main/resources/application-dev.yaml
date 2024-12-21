@@ -7,6 +7,8 @@ eureka:
     register-with-eureka: true
     service-url:
       defaultZone: http://admin:1234@localhost:8761/eureka
+#    상황에 따라 eureka 설정
+    enabled: false
   instance:
     instance-id: order-api
     hostname: localhost
@@ -25,11 +27,12 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
-      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
+
   rabbitmq:
     virtual-host: vh1_dev
 
+# h2 설정
 #spring:
 #  datasource:
 #    url: jdbc:h2:mem:devDB
