@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.controller;
 
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequest;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoLogisticsUpdateRequest;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,19 +43,6 @@ public class DeliveryInfoController {
     public ResponseEntity<DeliveryInfoResponse> createDeliveryInfo(@RequestBody DeliveryInfoCreateRequest request) {
         DeliveryInfoResponse response = deliveryInfoService.createDeliveryInfo(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 배송 정보 (DeliveryInfoResponse)
-    }
-
-    // 3. 배송 정보 물류 업데이트
-    @PutMapping("/delivery-info/{id}/logistics")
-    @Operation(summary = "배송 물류 정보 업데이트", description = "배송의 물류 정보를 업데이트합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
-            @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
-    })
-    public ResponseEntity<DeliveryInfoResponse> updateDeliveryLogistics(
-            @PathVariable Long id, @RequestBody DeliveryInfoLogisticsUpdateRequest request) {
-        DeliveryInfoResponse response = deliveryInfoService.updateDeliveryInfoLogistics(id, request);
-        return ResponseEntity.ok(response); // 반환: 업데이트된 배송 정보 (DeliveryInfoResponse)
     }
 
     // 4. 배송 도착 시간 업데이트

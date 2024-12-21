@@ -10,6 +10,10 @@ import org.hibernate.validator.constraints.Length;
 public class DeliveryInfoCreateRequest {
     @NotNull
     @NotBlank
+    Long id;
+
+    @NotNull
+    @NotBlank
     String name;
 
     @Min(0)
