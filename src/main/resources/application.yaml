@@ -3,7 +3,7 @@ spring:
     name: order-api
 
   profiles:
-    active: dev
+    active: prod
   jpa:
     open-in-view: false
 
