@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.entity.ordergroup;
 
-import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -41,10 +40,6 @@ public class OrderGroup {
     @JoinColumn(name = "wrapping_id", nullable = false)
     private Wrapping wrapping;
 
-    @OneToOne
-    @JoinColumn(name = "delivery_info_id")
-    private DeliveryInfo deliveryInfo;
-
     public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, int deliveryPrice, String address, Wrapping wrapping) {
         this.userId = userId;
         this.orderedName = orderedName;
@@ -56,8 +51,7 @@ public class OrderGroup {
         this.wrapping = wrapping;
     }
 
-    public void ofUpdateDeliveryInfo(DeliveryInfo deliveryInfo) {
-        this.deliveryInfo = deliveryInfo;
+    public void ofUpdate(String address) {
+        this.address = address;
     }
-
 }

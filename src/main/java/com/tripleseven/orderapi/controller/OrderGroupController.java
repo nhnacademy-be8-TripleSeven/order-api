@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.controller;
 
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateDeliveryInfoRequest;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,20 +59,6 @@ public class OrderGroupController {
     public ResponseEntity<OrderGroupResponse> createOrderGroup(@RequestBody OrderGroupCreateRequest request) {
         OrderGroupResponse response = orderGroupService.createOrderGroup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 그룹 (OrderGroupResponse)
-    }
-
-    // 4. 주문 그룹 배송 정보 업데이트
-    @PutMapping("/order-groups/{id}/delivery-info")
-    @Operation(summary = "주문 그룹 배송 정보 업데이트", description = "특정 주문 그룹의 배송 정보를 업데이트합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
-            @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
-    })
-    public ResponseEntity<OrderGroupResponse> updateOrderGroupDeliveryInfo(
-            @PathVariable Long id,
-            @RequestBody OrderGroupUpdateDeliveryInfoRequest request) {
-        OrderGroupResponse response = orderGroupService.updateOrderGroup(id, request);
-        return ResponseEntity.ok(response); // 반환: 업데이트된 주문 그룹 (OrderGroupResponse)
     }
 
     // 5. 주문 그룹 삭제

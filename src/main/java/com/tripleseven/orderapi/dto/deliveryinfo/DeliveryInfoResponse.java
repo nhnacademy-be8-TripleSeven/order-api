@@ -19,14 +19,10 @@ public class DeliveryInfoResponse {
 
     private final int invoiceNumber;
 
-    private final ZonedDateTime forwardedAt;
-
-    private final LocalDate deliveryDate;
-
     private final ZonedDateTime arrivedAt;
 
     @Builder
-    private DeliveryInfoResponse(Long id, String name, int invoiceNumber, ZonedDateTime forwardedAt, LocalDate deliveryDate, ZonedDateTime arrivedAt) {
+    private DeliveryInfoResponse(Long id, String name, int invoiceNumber, ZonedDateTime arrivedAt) {
         if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("DeliveryInfo id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
@@ -34,8 +30,6 @@ public class DeliveryInfoResponse {
         this.id = id;
         this.name = name;
         this.invoiceNumber = invoiceNumber;
-        this.forwardedAt = forwardedAt;
-        this.deliveryDate = deliveryDate;
         this.arrivedAt = arrivedAt;
     }
 
@@ -44,8 +38,6 @@ public class DeliveryInfoResponse {
                 .id(deliveryInfo.getId())
                 .name(deliveryInfo.getName())
                 .invoiceNumber(deliveryInfo.getInvoiceNumber())
-                .forwardedAt(deliveryInfo.getForwardedAt())
-                .deliveryDate(deliveryInfo.getDeliveryDate())
                 .arrivedAt(deliveryInfo.getArrivedAt())
                 .build();
     }
