@@ -1,5 +1,6 @@
 package com.example.orderapi.entity.pay;
 
+import com.example.orderapi.dto.pay.Payment;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,6 +8,7 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -21,7 +23,7 @@ public class Pay {
 
     private Long payTypeId;
 
-    private Date date;
+    private LocalDate date;
 
     private Long price;
 
@@ -29,7 +31,8 @@ public class Pay {
 
     private String paymentKey;  //결제의 키 값, 결제 데이터 관리를 위해 반드시 저장해야함
 
-
-
-
+    public void ofCreate(Payment payment){
+        orderGroupId = payment.getOrderId();
+        date = LocalDate.now();
+    }
 }

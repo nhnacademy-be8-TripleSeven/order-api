@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true\
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: 14782454k!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: org.apache.commons.dbcp2.BasicDataSource
+    # 유휴 커넥션에 대해 유효성 검사
+    dbcp2:
+      initial-size: 5   # 초기 커넥션 풀 크기
+      max-total: 10     # 최대 커넥션 풀 크기
+      max-idle: 5       # 최대 유휴 커넥션 수
+      min-idle: 5       # 최소 유휴 커넥션 수
+      validation-query: SELECT 1  # 커넥션 유효성 검사 쿼리
+      test-on-borrow: true        # 커넥션을 빌릴 때 유효성 검사
+      test-while-idle: true

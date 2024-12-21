@@ -1,11 +1,9 @@
 package com.example.orderapi.controller;
 
+import com.example.orderapi.dto.paytypes.PayTypeCreateRequest;
 import com.example.orderapi.dto.paytypes.PayTypesResponse;
-import com.example.orderapi.entity.paytypes.PayTypes;
 import com.example.orderapi.service.paytypes.PayTypesService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,8 +52,8 @@ public class PayTypesController {
             @ApiResponse(responseCode = "201", description = "결제 유형 생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ResponseEntity<PayTypesResponse> createPayType(@RequestBody PayTypes payTypes) {
-        PayTypesResponse createdPayType = payTypesService.createPayType(payTypes);
+    public ResponseEntity<PayTypesResponse> createPayType(@RequestBody PayTypeCreateRequest request) {
+        PayTypesResponse createdPayType = payTypesService.createPayType(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPayType);
     }
 
@@ -67,9 +65,8 @@ public class PayTypesController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을 수 없음")
     })
-    public ResponseEntity<PayTypesResponse> updatePayType(@PathVariable Long id, @RequestBody PayTypes payTypes) {
-        payTypes.setId(id);  // 전달받은 ID로 엔티티 업데이트
-        PayTypesResponse updatedPayType = payTypesService.updatePayType(payTypes);
+    public ResponseEntity<PayTypesResponse> updatePayType(@PathVariable Long id, @RequestBody PayTypeCreateRequest request) {
+        PayTypesResponse updatedPayType = payTypesService.updatePayType(id, request);
         return ResponseEntity.ok(updatedPayType);
     }
 
@@ -78,10 +75,12 @@ public class PayTypesController {
     @Operation(summary = "결제 유형 삭제", description = "결제 유형을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "결제 유형 삭제 성공"),
-            @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을수 없음")
+            @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을 수 없음")
     })
     public ResponseEntity<Void> removePayType(@PathVariable Long id) {
         payTypesService.removePayType(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }

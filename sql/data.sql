@@ -42,10 +42,39 @@ INSERT INTO pay_types (name) VALUES ('Credit Card');
 INSERT INTO pay_types (name) VALUES ('PayPal');
 
 -- Insert PayType with name "Bank Transfer"
-INSERT INTO pay_types (name) VALUES ('Bank Transfer');
 
 -- Insert PayType with name "Cash"
 INSERT INTO pay_types (name) VALUES ('Cash');
 
 -- Insert PayType with name "Mobile Payment"
 INSERT INTO pay_types (name) VALUES ('Mobile Payment');
+
+-- Wrapping 테이블 데이터 삽입
+INSERT INTO wrapping (name, price) VALUES ('Gift Wrap', 200);
+INSERT INTO wrapping (name, price) VALUES ('Standard Wrap', 100);
+
+-- DeliveryPolicy 테이블 데이터 삽입
+INSERT INTO delivery_policy (name, price) VALUES ('Standard Delivery', 3000);
+INSERT INTO delivery_policy (name, price) VALUES ('Express Delivery', 5000);
+
+-- DeliveryInfo 테이블 데이터 삽입
+INSERT INTO delivery_info (name, invoice_number, forwarded_at, delivery_date, arrived_at)
+VALUES ('John Doe', 12345, '2024-12-10 15:00:00', '2024-12-12', '2024-12-14 10:00:00');
+INSERT INTO delivery_info (name, invoice_number, forwarded_at, delivery_date, arrived_at)
+VALUES ('Jane Smith', 12346, '2024-12-11 10:30:00', '2024-12-13', '2024-12-15 12:00:00');
+
+-- OrderGroup 테이블 데이터 삽입
+INSERT INTO order_group (user_id, ordered_name, ordered_at, recipient_name, recipient_phone, delivery_price, wrapping_id, delivery_info_id)
+VALUES (1, 'Order 1', '2024-12-08 14:30:00', 'John Doe', '010-1234-5678', 3000, 1, 1);
+INSERT INTO order_group (user_id, ordered_name, ordered_at, recipient_name, recipient_phone, delivery_price, wrapping_id, delivery_info_id)
+VALUES (2, 'Order 2', '2024-12-09 11:00:00', 'Jane Smith', '010-2345-6789', 5000, 2, 2);
+
+-- OrderDetail 테이블 데이터 삽입
+INSERT INTO order_detail (book_id, amount, status, price, wrapping_id, order_group_id)
+VALUES (1001, 2, 'PAYMENT_PENDING', 20000, 1, 1);
+INSERT INTO order_detail (book_id, amount, status, price, wrapping_id, order_group_id)
+VALUES (1002, 1, 'PAYMENT_PENDING', 15000, 2, 2);
+
+-- DeliveryInfo 업데이트 (필요시)
+UPDATE order_group SET delivery_info_id = 1 WHERE id = 1;
+UPDATE order_group SET delivery_info_id = 2 WHERE id = 2;

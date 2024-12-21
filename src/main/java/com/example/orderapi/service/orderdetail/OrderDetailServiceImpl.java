@@ -6,6 +6,7 @@ import com.example.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequest;
 import com.example.orderapi.dto.ordergroup.OrderGroupResponse;
 import com.example.orderapi.dto.wrapping.WrappingResponse;
 import com.example.orderapi.entity.orderdetail.OrderDetail;
+import com.example.orderapi.entity.orderdetail.Status;
 import com.example.orderapi.entity.ordergroup.OrderGroup;
 import com.example.orderapi.entity.wrapping.Wrapping;
 import com.example.orderapi.repository.orderdetail.OrderDetailRepository;
@@ -94,6 +95,16 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             throw new RuntimeException();
         }
 
+        return orderDetails.stream().map(OrderDetailResponse::fromEntity).toList();
+    }
+
+    @Override
+    public List<OrderDetailResponse> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
+        List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderGroupIdAndStatus(orderGroupId, status);
+
+        if(orderDetails.isEmpty()) {
+            throw new RuntimeException();
+        }
         return orderDetails.stream().map(OrderDetailResponse::fromEntity).toList();
     }
 }

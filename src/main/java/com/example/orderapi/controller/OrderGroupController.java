@@ -17,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Tag(name = "OrderGroup-Controller", description = "주문 그룹 관리 컨트롤러")
 @RestController
 @RequiredArgsConstructor
@@ -86,5 +89,24 @@ public class OrderGroupController {
     public ResponseEntity<Void> deleteOrderGroup(@PathVariable Long id) {
         orderGroupService.deleteOrderGroup(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 반환: HTTP 204 (내용 없음)
+    }
+
+
+    @GetMapping("/order-groups/period")
+    @Operation(summary = "주문 그룹 기간별 조회", description = "특정 사용자에 대해 지정된 기간 내 주문 그룹을 조회합니다. " +
+            "시작 날짜와 종료 날짜를 지정하지 않으면, 기본적으로 현재 날짜부터 내일 날짜까지의 범위로 조회됩니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
+            @ApiResponse(responseCode = "404", description = "주문 그룹을 찾을 수 없음")
+    })
+    public ResponseEntity<Page<OrderGroupResponse>> getOrderGroupPeriod(
+            @RequestHeader("X-USER") Long memberId,
+            @RequestParam(value = "startDate", required = false) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) LocalDate endDate,
+            Pageable pageable) {
+
+        Page<OrderGroupResponse> orderGroupResponses = orderGroupService.getOrderGroupPeriodByUserId(memberId, startDate, endDate, pageable);
+        return ResponseEntity.ok(orderGroupResponses);
     }
 }

@@ -1,15 +1,18 @@
 package com.example.orderapi.service.paytypes;
 
+import com.example.orderapi.dto.paytypes.PayTypeCreateRequest;
 import com.example.orderapi.dto.paytypes.PayTypesResponse;
 import com.example.orderapi.entity.paytypes.PayTypes;
 import com.example.orderapi.exception.notfound.PayTypeNotFoundException;
 import com.example.orderapi.repository.paytypes.PayTypesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class PayTypesServiceImpl implements PayTypesService {
@@ -28,11 +31,9 @@ public class PayTypesServiceImpl implements PayTypesService {
     }
 
     @Override
-    public PayTypesResponse createPayType(PayTypes payTypes) {
-        if (payTypes == null || payTypes.getName() == null || payTypes.getName().isEmpty()) {
-            throw new IllegalArgumentException("PayType name cannot be null or empty.");
-        }
-        PayTypes savedPayType = payTypesRepository.save(payTypes);
+    public PayTypesResponse createPayType(PayTypeCreateRequest request) {
+        PayTypes newPayType = PayTypes.ofCreate(request.getName());
+        PayTypes savedPayType = payTypesRepository.save(newPayType);
         return PayTypesResponse.fromEntity(savedPayType);
     }
 
@@ -54,19 +55,13 @@ public class PayTypesServiceImpl implements PayTypesService {
     }
 
     @Override
-    public PayTypesResponse updatePayType(PayTypes payTypes) {
-        if (payTypes == null || payTypes.getId() == null) {
-            throw new IllegalArgumentException("PayType ID must be provided for update.");
-        }
-
-        Optional<PayTypes> existingPayType = payTypesRepository.findById(payTypes.getId());
+    public PayTypesResponse updatePayType(Long id, PayTypeCreateRequest request) {
+        Optional<PayTypes> existingPayType = payTypesRepository.findById(id);
         if (existingPayType.isEmpty()) {
-            throw new PayTypeNotFoundException("PayType with id " + payTypes.getId() + " not found.");
+            throw new PayTypeNotFoundException("PayType with id " + id + " not found.");
         }
 
-        PayTypes updatedPayType = existingPayType.get();
-        updatedPayType.setName(payTypes.getName());
-
+        PayTypes updatedPayType = existingPayType.get().ofUpdate(request.getName());
         PayTypes savedPayType = payTypesRepository.save(updatedPayType);
         return PayTypesResponse.fromEntity(savedPayType);
     }

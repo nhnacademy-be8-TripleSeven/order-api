@@ -3,6 +3,7 @@ package com.example.orderapi.controller;
 import com.example.orderapi.dto.orderdetail.OrderDetailCreateRequest;
 import com.example.orderapi.dto.orderdetail.OrderDetailResponse;
 import com.example.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequest;
+import com.example.orderapi.entity.orderdetail.Status;
 import com.example.orderapi.service.orderdetail.OrderDetailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -84,4 +85,22 @@ public class OrderDetailController {
         List<OrderDetailResponse> responses = orderDetailService.getOrderDetailsToList(orderGroupId);
         return ResponseEntity.ok(responses); // 반환: 주문 상세 목록 (List<OrderDetailResponse>)
     }
+
+    @GetMapping("/order-details/{orderGroupId}/status/{status}")
+    @Operation(
+            summary = "주문 그룹과 상태별 주문 상세 목록 조회",
+            description = "특정 주문 그룹과 주문 상태에 해당하는 주문 상세 목록을 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "주문 그룹 또는 상태에 해당하는 주문 상세가 존재하지 않음")
+    })
+    public ResponseEntity<List<OrderDetailResponse>> listOrderDetailsByStatus(
+            @PathVariable Long orderGroupId,
+            @PathVariable Status status) {
+        List<OrderDetailResponse> responses = orderDetailService.getOrderDetailsForGroupWithStatus(orderGroupId, status);
+        return ResponseEntity.ok(responses);
+    }
+
+    
 }

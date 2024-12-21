@@ -52,7 +52,7 @@ public class PointHistoryResponse {
                 pointHistory.getId(),
                 pointHistory.getTypes(),
                 pointHistory.getAmount(),
-                pointHistory.getChanged_at(),
+                pointHistory.getChangedAt(),
                 pointHistory.getComment());
     }
 }

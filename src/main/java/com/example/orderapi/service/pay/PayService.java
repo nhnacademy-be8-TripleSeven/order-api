@@ -1,6 +1,8 @@
 package com.example.orderapi.service.pay;
 
 
-public interface PayService {
+import com.example.orderapi.dto.pay.Payment;
 
+public interface PayService {
+    void save(Payment payment);
 }

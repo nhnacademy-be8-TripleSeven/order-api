@@ -9,7 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class PointHistoryCreateRequest {
-    Long memberId;
 
     private HistoryTypes types;
 

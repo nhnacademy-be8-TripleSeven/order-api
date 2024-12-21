@@ -7,54 +7,65 @@ import com.example.orderapi.entity.pointpolicy.PointPolicy;
 import com.example.orderapi.exception.notfound.PointPolicyNotFoundException;
 import com.example.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.example.orderapi.repository.pointpolicy.PointPolicyRepository;
-import com.example.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
-public class PointServiceImpl implements PointService{
+public class PointServiceImpl implements PointService {
 
     private final PointHistoryRepository pointHistoryRepository;
     private final PointPolicyRepository pointPolicyRepository;
 
+    // 결제 관련 정책 ID를 상수로 정의
+    private static final Long PAYMENT_POLICY_ID = 3L;
 
-    //
+    // 결제 시 포인트 사용 내역 생성
     @Override
     public PointHistoryResponse createPointHistoryForPaymentSpend(Long memberId, int usePoint) {
-        PointPolicy policy = pointPolicyRepository.findById(3L).orElse(null);//결제 관련 정책이 3번에 저장됨
-        if(Objects.isNull(policy)){
-            throw new PointPolicyNotFoundException("point policy not found");
-        }
-        PointHistory pointHistory = new PointHistory(
+        PointPolicy policy = getPointPolicyById(PAYMENT_POLICY_ID); // 결제 관련 정책 조회
+        PointHistory pointHistory = createPointHistory(
                 HistoryTypes.SPEND,
-                usePoint * -1,
-                LocalDateTime.now(),
-                policy.getName(),
-                memberId
+                memberId,
+                usePoint * -1, // 사용 포인트는 음수로 저장
+                policy.getName()
         );
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
         return PointHistoryResponse.fromEntity(savedHistory);
     }
 
+    // 결제 시 포인트 적립 내역 생성
     @Override
     public PointHistoryResponse createPointHistoryForPaymentEarn(Long memberId, int payAmount, Long pointPolicyId) {
-        PointPolicy policy = pointPolicyRepository.findById(pointPolicyId).orElse(null);
-        if(Objects.isNull(policy)){
-            throw new PointPolicyNotFoundException("point policy not found");
-        }
-        PointHistory pointHistory = new PointHistory(
+        PointPolicy policy = getPointPolicyById(pointPolicyId); // 적립 정책 조회
+        PointHistory pointHistory = createPointHistory(
                 HistoryTypes.EARN,
-                policy.getAmount(),
-                LocalDateTime.now(),
-                policy.getName(),
-                memberId
+                memberId,
+                policy.getAmount(), // 정책에 따라 적립 포인트 결정
+                policy.getName()
         );
-
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
         return PointHistoryResponse.fromEntity(savedHistory);
+    }
+
+    // 정책 조회 공통 메서드
+    private PointPolicy getPointPolicyById(Long policyId) {
+        return pointPolicyRepository.findById(policyId)
+                .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + policyId + " not found"));
+    }
+
+    // PointHistory 생성 공통 메서드
+    private PointHistory createPointHistory(HistoryTypes type, Long memberId, int amount, String comment) {
+        return new PointHistory(
+                type,
+                amount,
+                LocalDateTime.now(),
+                comment,
+                memberId
+        );
     }
 }
