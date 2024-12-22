@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.service.ordergroup;
 
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponse;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequest;
@@ -21,7 +20,6 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Transactional
 @Service
 public class OrderGroupServiceImpl implements OrderGroupService {
 
@@ -29,6 +27,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     private final WrappingService wrappingService;
 
     @Override
+    @Transactional(readOnly = true)
     public OrderGroupResponse getOrderGroupById(Long id) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
 
@@ -40,12 +39,14 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderGroupResponse> getOrderGroupPagesByUserId(Long userId, Pageable pageable) {
         Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
         return orderGroups.map(OrderGroupResponse::fromEntity);
     }
 
     @Override
+    @Transactional
     public OrderGroupResponse createOrderGroup(OrderGroupCreateRequest orderGroupCreateRequest) {
         OrderGroup orderGroup = new OrderGroup();
 
@@ -68,10 +69,11 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
+    @Transactional
     public OrderGroupResponse updateAddressOrderGroup(Long id, OrderGroupUpdateAddressRequest orderGroupUpdateAddressRequest) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
 
-        if(optionalOrderGroup.isEmpty()){
+        if (optionalOrderGroup.isEmpty()) {
             throw new RuntimeException();
         }
 
@@ -83,6 +85,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
+    @Transactional
     public void deleteOrderGroup(Long id) {
         if (!orderGroupRepository.existsById(id)) {
             throw new RuntimeException();
@@ -91,6 +94,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderGroupResponse> getOrderGroupPeriodByUserId(Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
         ZonedDateTime startDateTime = startDate.atStartOfDay().atZone(ZoneId.systemDefault());
         ZonedDateTime endDateTime = endDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault());

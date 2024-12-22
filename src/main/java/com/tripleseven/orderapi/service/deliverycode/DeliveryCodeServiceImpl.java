@@ -20,13 +20,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DeliveryCodeServiceImpl implements DeliveryCodeService {
 
     private final DeliveryCodeRepository deliveryCodeRepository;
     private final ObjectMapper objectMapper;
 
     @Override
+    @Transactional
     public void saveDeliveryCode(String url) {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -59,6 +59,7 @@ public class DeliveryCodeServiceImpl implements DeliveryCodeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getDeliveryCodeToName(String name) {
         Optional<DeliveryCode> deliveryCode = deliveryCodeRepository.findDeliveryCodeByName(name);
         if (deliveryCode.isEmpty()){

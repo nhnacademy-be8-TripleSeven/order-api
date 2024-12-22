@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequest;
@@ -12,7 +11,6 @@ import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupServiceImpl;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
-import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

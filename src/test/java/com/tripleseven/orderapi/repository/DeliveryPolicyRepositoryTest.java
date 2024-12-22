@@ -32,8 +32,8 @@ public class DeliveryPolicyRepositoryTest {
     void testSaveDeliveryPolicy() {
 
         assertNotNull(savedDeliveryPolicy.getId());
-        assertEquals( "Test DeliveryPolicy", savedDeliveryPolicy.getName());
-        assertEquals( 1000, savedDeliveryPolicy.getPrice());
+        assertEquals("Test DeliveryPolicy", savedDeliveryPolicy.getName());
+        assertEquals(1000, savedDeliveryPolicy.getPrice());
     }
 
     @Test

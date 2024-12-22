@@ -7,20 +7,20 @@ import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@RequiredArgsConstructor
-@Transactional
 @Service
+@RequiredArgsConstructor
 public class DeliveryInfoServiceImpl implements DeliveryInfoService {
     private final DeliveryInfoRepository deliveryInfoRepository;
     private final OrderGroupRepository orderGroupRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public DeliveryInfoResponse getDeliveryInfoById(Long id) {
         Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
         if (optionalDeliveryInfo.isEmpty()) {
@@ -31,6 +31,7 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
     }
 
     @Override
+    @Transactional
     public DeliveryInfoResponse createDeliveryInfo(DeliveryInfoCreateRequest deliveryInfoCreateRequest) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(deliveryInfoCreateRequest.getId());
 
@@ -45,6 +46,7 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
     }
 
     @Override
+    @Transactional
     public DeliveryInfoResponse updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequest deliveryInfoArrivedAtUpdateRequest) {
         Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
         if (optionalDeliveryInfo.isEmpty()) {
@@ -56,6 +58,7 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
     }
 
     @Override
+    @Transactional
     public void deleteDeliveryInfo(Long id) {
         if (!deliveryInfoRepository.existsById(id)) {
             throw new RuntimeException();
