@@ -19,15 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
-@Transactional
 @Service
+@RequiredArgsConstructor
 public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
     private final WrappingService wrappingService;
     private final OrderGroupService orderGroupService;
 
     @Override
+    @Transactional(readOnly = true)
     public OrderDetailResponse getOrderDetailService(Long id) {
         Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
         if (optionalOrderDetail.isEmpty()) {
@@ -38,6 +38,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
+    @Transactional
     public OrderDetailResponse createOrderDetail(OrderDetailCreateRequest orderDetailCreateRequest) {
         OrderDetail orderDetail = new OrderDetail();
 
@@ -69,6 +70,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
+    @Transactional
     public OrderDetailResponse updateOrderDetailStatus(Long id, OrderDetailUpdateStatusRequest orderDetailUpdateStatusRequest) {
         Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
         if (optionalOrderDetail.isEmpty()) {
@@ -81,6 +83,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
+    @Transactional
     public void deleteOrderDetail(Long id) {
         if (!orderDetailRepository.existsById(id)) {
             throw new RuntimeException();
@@ -89,6 +92,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderDetailResponse> getOrderDetailsToList(Long orderGroupId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderGroupId(orderGroupId);
 
@@ -100,6 +104,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderDetailResponse> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
         return List.of();
     }

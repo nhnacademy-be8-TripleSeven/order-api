@@ -12,14 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
-@Transactional
 @Service
+@RequiredArgsConstructor
 public class WrappingServiceImpl implements WrappingService {
 
     private final WrappingRepository wrappingRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public WrappingResponse getWrappingById(Long id) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
 
@@ -31,6 +31,7 @@ public class WrappingServiceImpl implements WrappingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<WrappingResponse> getWrappingsToList() {
         List<Wrapping> list = wrappingRepository.findAll();
 
@@ -42,6 +43,7 @@ public class WrappingServiceImpl implements WrappingService {
     }
 
     @Override
+    @Transactional
     public WrappingResponse createWrapping(WrappingCreateRequest wrappingCreateRequest) {
         Wrapping wrapping = new Wrapping();
         wrapping.ofCreate(wrappingCreateRequest.getName(), wrappingCreateRequest.getPrice());
@@ -51,6 +53,7 @@ public class WrappingServiceImpl implements WrappingService {
     }
 
     @Override
+    @Transactional
     public WrappingResponse updateWrapping(Long id, WrappingUpdateRequest wrappingUpdateRequest) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
         if (optionalWrapping.isEmpty()) {
@@ -63,6 +66,7 @@ public class WrappingServiceImpl implements WrappingService {
     }
 
     @Override
+    @Transactional
     public void deleteWrapping(Long id) {
         if (!wrappingRepository.existsById(id)) {
             throw new RuntimeException();
