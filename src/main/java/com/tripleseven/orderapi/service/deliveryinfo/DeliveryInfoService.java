@@ -13,4 +13,5 @@ public interface DeliveryInfoService {
     DeliveryInfoResponse updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequest deliveryInfoArrivedAtUpdateRequest);
 
     void deleteDeliveryInfo(Long id);
+
 }

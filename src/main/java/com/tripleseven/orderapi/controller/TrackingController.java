@@ -1,0 +1,30 @@
+package com.tripleseven.orderapi.controller;
+
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
+import com.tripleseven.orderapi.dto.properties.ApiProperties;
+import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeService;
+import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
+
+@RequiredArgsConstructor
+@RestController
+public class TrackingController {
+    private final DeliveryInfoService deliveryInfoService;
+    private final DeliveryCodeService deliveryCodeService;
+    private final ApiProperties apiProperties;
+
+    @PostMapping("/tracking/{id}")
+    public RedirectView showDeliveryInfo(@PathVariable Long id) {
+        DeliveryInfoResponse response = deliveryInfoService.getDeliveryInfoById(id);
+        String code = deliveryCodeService.getDeliveryCodeToName(response.getName());
+        String apiUrl = "https://info.sweettracker.co.kr/tracking/4?" +
+                "t_code=" + code +
+                "&t_invoice=" + response.getInvoiceNumber() +
+                "&t_key=" + apiProperties.getTrackingKey();
+        return new RedirectView(apiUrl);
+    }
+}
