@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.rabbit;
+package com.tripleseven.orderapi.common.rabbit;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

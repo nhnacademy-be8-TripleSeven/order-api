@@ -3,12 +3,14 @@ package com.tripleseven.orderapi.controller;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequest;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequest;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
+import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeService;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,7 @@ public class DeliveryInfoController {
     })
     public ResponseEntity<DeliveryInfoResponse> getDeliveryInfo(@PathVariable Long id) {
         DeliveryInfoResponse response = deliveryInfoService.getDeliveryInfoById(id);
+
         return ResponseEntity.ok(response); // 반환: 배송 정보 (DeliveryInfoResponse)
     }
 
@@ -69,6 +72,4 @@ public class DeliveryInfoController {
         deliveryInfoService.deleteDeliveryInfo(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // 반환: HTTP 204 (내용 없음)
     }
-
-
 }

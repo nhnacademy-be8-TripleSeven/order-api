@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.rabbit;
+package com.tripleseven.orderapi.common.rabbit;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
