@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.common.skm;
+package com.tripleseven.orderapi.dto.skm;
 
 public class DatabaseCredentials {
 
@@ -8,7 +8,7 @@ public class DatabaseCredentials {
 
 
     public DatabaseCredentials(String info) {
-        String [] sources = info.split("\n");
+        String[] sources = info.split("\n");
         this.url = sources[0];
         this.username = sources[1];
         this.password = sources[2];

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +24,10 @@ import java.util.Map;
 @RestController
 public class PayApiController {
 
-    private static final String WIDGET_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
-    private static final String API_SECRET_KEY = "test_ck_BX7zk2yd8yJlqyeZoOmL3x9POLqK";
+    @Value("${payment.toss.test_widget_api_key}")
+    private String WIDGET_SECRET_KEY;
+    @Value("${payment.toss.test_secret_api_key}")
+    private String API_SECRET_KEY;
     private final Map<String, String> billingKeyMap = new HashMap<>();
     private final PayService payService;
 
@@ -33,11 +36,8 @@ public class PayApiController {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
-//        Payment payment = new Payment(
-//                response.get("paymentKey").toString(),
-//                Long.parseLong(response.get("orderId").toString()),  // String을 Long으로 변환
-//                Long.parseLong(response.get("totalAmount").toString())   // String을 Long으로 변환
-//        );
+        payService.save(response);
+
         int statusCode = response.containsKey("error") ? 400 : 200;
         return ResponseEntity.status(statusCode).body(response);
     }
@@ -79,6 +79,7 @@ public class PayApiController {
         JSONObject requestData = parseRequestData(jsonBody);
         String url = "https://api.tosspayments.com/v1/brandpay/payments/confirm";
         JSONObject response = sendRequest(requestData, API_SECRET_KEY, url);
+
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 
@@ -104,11 +105,29 @@ public class PayApiController {
         }
     }
 
+    //주문 취소
     @PostMapping("/payments/{paymentKey}/cancel")
     public ResponseEntity<JSONObject> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequest request) throws Exception {
         JSONObject requestData = convertToJSONObject(request);
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey +"/cancel";
         JSONObject response = sendRequest(requestData, API_SECRET_KEY, url);
+        payService.payCancel(response);
+        return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
+    }
+
+    //주문 조회 paymentKey
+    @GetMapping("payments/{paymentKey}")
+    public ResponseEntity<JSONObject> getPayment(@PathVariable("paymentKey") String paymentKey) throws Exception {
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
+        JSONObject response = sendRequest(new JSONObject(), API_SECRET_KEY, url);
+        return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
+    }
+
+    //주문 조회 orderId
+    @GetMapping("payments/orders/{orderId}")
+    public ResponseEntity<JSONObject> getOrder(@PathVariable("orderId") String orderId) throws Exception {
+        String url = "https://api.tosspayments.com/v1/orders/" + orderId;
+        JSONObject response = sendRequest(new JSONObject(), API_SECRET_KEY, url);
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 

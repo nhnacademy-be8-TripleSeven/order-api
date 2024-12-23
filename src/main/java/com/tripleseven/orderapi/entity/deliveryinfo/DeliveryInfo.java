@@ -1,9 +1,7 @@
 package com.tripleseven.orderapi.entity.deliveryinfo;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
@@ -14,7 +12,6 @@ import java.time.ZonedDateTime;
 @Getter
 public class DeliveryInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -23,20 +20,17 @@ public class DeliveryInfo {
     @NotNull
     private int invoiceNumber;
 
-    private ZonedDateTime forwardedAt;
-
-    private LocalDate deliveryDate;
-
     private ZonedDateTime arrivedAt;
 
-    public void ofCreate(String name, int invoiceNumber) {
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "order_group_id")
+    private OrderGroup orderGroup;
+
+    public void ofCreate(String name, int invoiceNumber, OrderGroup orderGroup) {
         this.name = name;
         this.invoiceNumber = invoiceNumber;
-    }
-
-    public void ofUpdateLogistics(ZonedDateTime forwardedAt, LocalDate deliveryDate) {
-        this.forwardedAt = forwardedAt;
-        this.deliveryDate = deliveryDate;
+        this.orderGroup = orderGroup;
     }
 
     public void ofUpdateArrived(ZonedDateTime arrivedAt) {

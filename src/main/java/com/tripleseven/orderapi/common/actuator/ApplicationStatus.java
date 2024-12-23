@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 public final class ApplicationStatus {
     private boolean status = true;
 
-    public void stopService(){
+    public void stopService() {
         this.status = false;
     }
 
-    public boolean getStatus(){
+    public boolean getStatus() {
         return status;
     }
 }

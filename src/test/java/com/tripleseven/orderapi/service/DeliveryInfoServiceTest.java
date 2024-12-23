@@ -2,10 +2,12 @@ package com.tripleseven.orderapi.service;
 
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequest;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoLogisticsUpdateRequest;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -26,23 +27,36 @@ public class DeliveryInfoServiceTest {
     @Mock
     private DeliveryInfoRepository deliveryInfoRepository;
 
+    @Mock
+    private OrderGroupRepository orderGroupRepository;
+
     @InjectMocks
     private DeliveryInfoServiceImpl deliveryInfoService;
 
     private DeliveryInfo deliveryInfo;
 
-    private ZonedDateTime forwardedAt;
-
-    private LocalDate deliveryDate;
+    private OrderGroup orderGroup;
 
     private ZonedDateTime arrivedAt;
 
+
     @BeforeEach
     void setUp() {
+        Wrapping wrapping = new Wrapping();
+        wrapping.ofCreate("Test Wrapping", 100);
+
+        orderGroup = new OrderGroup();
+        orderGroup.ofCreate(1L,
+                "Test Ordered",
+                "Test Recipient",
+                "01012345678",
+                1000,
+                "Test Address",
+                wrapping);
+
         deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678);
-        forwardedAt = ZonedDateTime.parse("2024-12-15T10:30:00+09:00[Asia/Seoul]");
-        deliveryDate = LocalDate.parse("2024-12-15");
+        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
+
         arrivedAt = ZonedDateTime.parse("2024-12-17T11:24:00+09:00[Asia/Seoul]");
     }
 
@@ -68,12 +82,15 @@ public class DeliveryInfoServiceTest {
 
     @Test
     void testCreateDeliveryInfo_Success() {
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
         when(deliveryInfoRepository.save(any())).thenReturn(deliveryInfo);
 
         DeliveryInfoResponse response = deliveryInfoService.createDeliveryInfo(
                 new DeliveryInfoCreateRequest(
+                        1L,
                         "Test DeliveryInfo",
-                        12345678));
+                        12345678
+                ));
 
         assertNotNull(response);
         assertEquals("Test DeliveryInfo", response.getName());
@@ -87,34 +104,8 @@ public class DeliveryInfoServiceTest {
         assertThrows(RuntimeException.class, () -> deliveryInfoService.createDeliveryInfo(
                 new DeliveryInfoCreateRequest(
                         null,
-                        0)));
-    }
-
-    @Test
-    void testUpdateLogisticsDeliveryInfo_Success() {
-        DeliveryInfoLogisticsUpdateRequest updateRequest = new DeliveryInfoLogisticsUpdateRequest(forwardedAt, deliveryDate);
-
-        when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.of(deliveryInfo));
-
-        DeliveryInfoResponse response = deliveryInfoService.updateDeliveryInfoLogistics(1L, updateRequest);
-
-        assertNotNull(response);
-        assertEquals("Test DeliveryInfo", response.getName());
-        assertEquals(12345678, response.getInvoiceNumber());
-        assertEquals(forwardedAt, response.getForwardedAt());
-        assertEquals(deliveryDate, response.getDeliveryDate());
-        assertNull(response.getArrivedAt());
-
-        verify(deliveryInfoRepository, times(1)).findById(1L);
-
-    }
-
-    @Test
-    void testUpdateLogisticsDeliveryInfo_Fail() {
-        DeliveryInfoLogisticsUpdateRequest updateRequest = new DeliveryInfoLogisticsUpdateRequest(forwardedAt, deliveryDate);
-        when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> deliveryInfoService.updateDeliveryInfoLogistics(1L, updateRequest));
-        verify(deliveryInfoRepository, times(1)).findById(1L);
+                        null,
+                        -1)));
     }
 
     @Test
@@ -127,8 +118,6 @@ public class DeliveryInfoServiceTest {
         assertNotNull(response);
         assertEquals("Test DeliveryInfo", response.getName());
         assertEquals(12345678, response.getInvoiceNumber());
-        assertNull(response.getForwardedAt());
-        assertNull(response.getDeliveryDate());
         assertEquals(arrivedAt, response.getArrivedAt());
 
         verify(deliveryInfoRepository, times(1)).findById(1L);

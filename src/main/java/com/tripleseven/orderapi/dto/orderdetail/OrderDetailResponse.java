@@ -2,7 +2,7 @@ package com.tripleseven.orderapi.dto.orderdetail;
 
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
-import com.tripleseven.orderapi.environmentutils.EnvironmentUtil;
+import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

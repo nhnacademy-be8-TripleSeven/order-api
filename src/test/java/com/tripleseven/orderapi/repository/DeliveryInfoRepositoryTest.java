@@ -1,13 +1,16 @@
 package com.tripleseven.orderapi.repository;
 
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -18,20 +21,26 @@ public class DeliveryInfoRepositoryTest {
     @Autowired
     private DeliveryInfoRepository deliveryInfoRepository;
 
+    @Autowired
+    private OrderGroupRepository orderGroupRepository;
+
+    @Autowired
+    private WrappingRepository wrappingRepository;
+
     private DeliveryInfo deliveryInfo;
-
-    private ZonedDateTime forwardedAt;
-
-    private LocalDate deliveryDate;
 
     private ZonedDateTime arrivedAt;
 
     @BeforeEach
     void setUp() {
+        Wrapping wrapping = new Wrapping();
+        wrapping.ofCreate("Test Wrapping", 100);
+        Wrapping savedWrapping = wrappingRepository.save(wrapping);
+        OrderGroup orderGroup = new OrderGroup();
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", savedWrapping);
+        OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
         deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678);
-        forwardedAt = ZonedDateTime.parse("2024-12-15T10:30:00+09:00[Asia/Seoul]");
-        deliveryDate = LocalDate.parse("2024-12-15");
+        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, savedOrderGroup);
         arrivedAt = ZonedDateTime.parse("2024-12-17T11:24:00+09:00[Asia/Seoul]");
     }
 
@@ -42,9 +51,7 @@ public class DeliveryInfoRepositoryTest {
         assertNotNull(savedDeliveryInfo.getId());
         assertEquals("Test DeliveryInfo", savedDeliveryInfo.getName());
         assertEquals(12345678, savedDeliveryInfo.getInvoiceNumber());
-        assertNull(savedDeliveryInfo.getDeliveryDate());
         assertNull(savedDeliveryInfo.getArrivedAt());
-        assertNull(savedDeliveryInfo.getForwardedAt());
     }
 
     @Test
@@ -58,9 +65,7 @@ public class DeliveryInfoRepositoryTest {
         DeliveryInfo getDeliveryInfo = foundDeliveryInfo.get();
         assertEquals("Test DeliveryInfo", getDeliveryInfo.getName());
         assertEquals(12345678, getDeliveryInfo.getInvoiceNumber());
-        assertNull(getDeliveryInfo.getDeliveryDate());
         assertNull(getDeliveryInfo.getArrivedAt());
-        assertNull(getDeliveryInfo.getForwardedAt());
     }
 
     @Test
@@ -77,18 +82,6 @@ public class DeliveryInfoRepositoryTest {
 
         Optional<DeliveryInfo> foundDeliveryInfo = deliveryInfoRepository.findById(savedDeliveryInfo.getId());
         assertFalse(foundDeliveryInfo.isPresent());
-    }
-
-    @Test
-    void testUpdateLogisticsDeliveryInfo() {
-        DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
-
-        savedDeliveryInfo.ofUpdateLogistics(forwardedAt, deliveryDate);
-
-        DeliveryInfo updatedDeliveryInfo = deliveryInfoRepository.save(savedDeliveryInfo);
-
-        assertEquals(forwardedAt, updatedDeliveryInfo.getForwardedAt());
-        assertEquals(deliveryDate, updatedDeliveryInfo.getDeliveryDate());
     }
 
     @Test

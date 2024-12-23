@@ -1,9 +1,8 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateDeliveryInfoRequest;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequest;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
@@ -12,7 +11,6 @@ import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupServiceImpl;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
-import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,16 +57,13 @@ public class OrderGroupServiceTest {
         orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
 
         deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678);
+        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
     }
 
     @Test
     void testGetOrderGroupById_Success() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
         OrderGroupResponse response = orderGroupService.getOrderGroupById(1L);
-        assertThrows(LazyInitializationException.class, () -> {
-            orderGroupService.getOrderGroupPagesByUserId(1L, PageRequest.ofSize(1)).getSize();
-        });
 
         assertNotNull(response);
         assertEquals("Test Ordered", response.getOrderedName());
@@ -127,13 +122,12 @@ public class OrderGroupServiceTest {
     }
 
     @Test
-    void testUpdateOrderGroup_Success() {
-        when(deliveryInfoService.getDeliveryInfoById(anyLong())).thenReturn(DeliveryInfoResponse.fromEntity(deliveryInfo));
+    void testUpdateAddressOrderGroup_Success() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
 
-        OrderGroupResponse response = orderGroupService.updateOrderGroup(
+        OrderGroupResponse response = orderGroupService.updateAddressOrderGroup(
                 1L,
-                new OrderGroupUpdateDeliveryInfoRequest(1L));
+                new OrderGroupUpdateAddressRequest("Test Address"));
 
         assertNotNull(response);
         assertEquals("Test Ordered", response.getOrderedName());
@@ -145,16 +139,14 @@ public class OrderGroupServiceTest {
     }
 
     @Test
-    void testUpdateOrderGroup_Fail() {
-        when(deliveryInfoService.getDeliveryInfoById(anyLong())).thenReturn(null);
-        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
+    void testUpdateAddressOrderGroup_Fail() {
+        when(orderGroupRepository.findById(anyLong())).thenReturn(null);
 
-        assertThrows(RuntimeException.class, () -> orderGroupService.updateOrderGroup(
+        assertThrows(RuntimeException.class, () -> orderGroupService.updateAddressOrderGroup(
                 1L,
-                new OrderGroupUpdateDeliveryInfoRequest(1L)));
+                new OrderGroupUpdateAddressRequest(null)));
 
         verify(orderGroupRepository, times(1)).findById(anyLong());
-        verify(deliveryInfoService, times(1)).getDeliveryInfoById(1L);
     }
 
     @Test

@@ -29,12 +29,12 @@ public class OrderDetail {
     private int price;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wrapping_id")
     private Wrapping wrapping;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_group_id")
     private OrderGroup orderGroup;
 

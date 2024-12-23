@@ -7,8 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.json.simple.JSONObject;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Getter
@@ -22,16 +25,30 @@ public class Pay {
 
     private Long payTypeId;
 
-    private LocalDate date;
+    private OffsetDateTime requestedAt;
 
     private Long price;
 
-    private boolean status; //결제 상태
+    private String status; //결제 상태
 
     private String paymentKey;  //결제의 키 값, 결제 데이터 관리를 위해 반드시 저장해야함
 
-    public void ofCreate(Payment payment){
-        orderGroupId = payment.getOrderId();
-        date = LocalDate.now();
+    private String orderId;
+
+
+    public void ofCreate(JSONObject response){
+        orderId = response.get("orderId").toString();
+        requestedAt = OffsetDateTime.parse(response.get("approvedAt").toString());
+        price = Long.valueOf(response.get("balanceAmount").toString());
+        status = response.get("status").toString();
+        paymentKey = response.get("paymentKey").toString();
+    }
+
+    public void ofUpdate(JSONObject response){
+        orderId = response.get("orderId").toString();
+        requestedAt = OffsetDateTime.parse(response.get("approvedAt").toString());
+        price = Long.valueOf(response.get("balanceAmount").toString());
+        status = response.get("status").toString();
+        paymentKey = response.get("paymentKey").toString();
     }
 }

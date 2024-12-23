@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.business.pay.strategy;
+package com.tripleseven.orderapi.business.pay;
 
 public interface OrderProcessingStrategy {
     void processSingleOrder();
