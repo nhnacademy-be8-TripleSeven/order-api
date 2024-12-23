@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.UUID;
 
 @Controller
-public class PayController {
+public class PayViewController {
 
     @GetMapping("/payment")
     public String paymentPage(Model model) {
