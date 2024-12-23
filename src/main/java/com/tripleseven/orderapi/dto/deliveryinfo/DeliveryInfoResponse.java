@@ -1,12 +1,11 @@
 package com.tripleseven.orderapi.dto.deliveryinfo;
 
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
-import com.tripleseven.orderapi.environmentutils.EnvironmentUtil;
+import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +24,10 @@ import java.util.Map;
 @RestController
 public class PayApiController {
 
-    private static final String WIDGET_SECRET_KEY = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
-    private static final String API_SECRET_KEY = "test_sk_BX7zk2yd8yj65jD6b9Yv3x9POLqK";
+    @Value("${payment.toss.test_widget_api_key}")
+    private String WIDGET_SECRET_KEY;
+    @Value("${payment.toss.test_secret_api_key}")
+    private String API_SECRET_KEY;
     private final Map<String, String> billingKeyMap = new HashMap<>();
     private final PayService payService;
 
