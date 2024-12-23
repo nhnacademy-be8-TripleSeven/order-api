@@ -38,3 +38,19 @@ app:
 api:
   tracking:
     key: wmkoSaNXvX41qbzwSp2KzQ
+
+
+management:
+  health:
+    status:
+      order: DOWN, UP
+  endpoint:
+    jolokia:
+      enable: true
+    pause:
+      enabled: true
+    resume:
+      enabled: true
+  info:
+    env:
+      enabled: true
