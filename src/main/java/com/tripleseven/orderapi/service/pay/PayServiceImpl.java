@@ -4,8 +4,11 @@ import com.tripleseven.orderapi.dto.pay.Payment;
 import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import lombok.RequiredArgsConstructor;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Transactional
 @Service
@@ -15,9 +18,19 @@ public class PayServiceImpl implements PayService {
 
 
     @Override
-    public void save(Payment payment) {
+    public void save(JSONObject jsonObject) {
         Pay pay = new Pay();
-        pay.ofCreate(payment);
+        pay.ofCreate(jsonObject);
+        payRepository.save(pay);
+    }
+
+    @Override
+    public void payCancel(JSONObject response) {
+        Pay pay = payRepository.findByPaymentKey(response.get("paymentKey").toString());
+        if(Objects.isNull(pay)){
+            throw new RuntimeException();
+        }
+        pay.ofUpdate(response);
         payRepository.save(pay);
     }
 }
