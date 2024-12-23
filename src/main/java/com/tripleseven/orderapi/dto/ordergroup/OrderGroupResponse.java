@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.dto.ordergroup;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import com.tripleseven.orderapi.environmentutils.EnvironmentUtil;
+import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

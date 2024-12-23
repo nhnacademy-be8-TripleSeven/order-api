@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.config;
+package com.tripleseven.orderapi.common.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

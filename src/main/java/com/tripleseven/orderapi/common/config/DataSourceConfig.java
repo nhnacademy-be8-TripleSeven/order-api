@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.common.config;
 
 import com.tripleseven.orderapi.dto.skm.DatabaseCredentials;
-import com.tripleseven.orderapi.business.skm.SecureKeyManagerService;
+import com.tripleseven.orderapi.service.skm.SecureKeyManagerService;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

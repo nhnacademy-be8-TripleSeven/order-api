@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.common.initializer;
+package com.tripleseven.orderapi.common.listener;
 
 import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         if (initializeData) {
-            String apiUrl = "https://info.sweettracker.co.kr/api/v1/companylist?t_key="+apiKey;
+            String apiUrl = "https://info.sweettracker.co.kr/api/v1/companylist?t_key=" + apiKey;
             deliveryCodeService.saveDeliveryCode(apiUrl);
             System.out.println("Data fetched and saved during server startup.");
         }
