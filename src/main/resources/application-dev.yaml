@@ -32,35 +32,4 @@ spring:
   rabbitmq:
     virtual-host: vh1_dev
 
-# h2 설정
-#spring:
-#  datasource:
-#    url: jdbc:h2:mem:devDB
-#    driver-class-name: org.h2.Driver
-#    username: sa
-#    password:
-#  output:
-#    ansi:
-#      enabled: always
-#  jpa:
-#    hibernate:
-#      ddl-auto: create-drop
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
-#        use_sql_comments: true
-#    defer-datasource-initialization: true
-#  h2:
-#    console:
-#      enabled: true
-#      path: /h2-console
-
-#  web:
-#    resources:
-#      add-mappings: false
-#  sql:
-#    init:
-#      mode: always
-
 
