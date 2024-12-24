@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,12 +50,16 @@ public class OrderDetailServiceTest {
     @BeforeEach
     void setUp() {
         wrapping = new Wrapping();
+        ReflectionTestUtils.setField(wrapping, "id", 1L);
         wrapping.ofCreate("Test Wrapping", 100);
 
+
         orderGroup = new OrderGroup();
+        ReflectionTestUtils.setField(orderGroup, "id", 1L);
         orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
 
         orderDetail = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail, "id", 1L);
         orderDetail.ofCreate(1L, 3, 10000, wrapping, orderGroup);
     }
 
@@ -159,6 +164,7 @@ public class OrderDetailServiceTest {
     @Test
     void testGetOrderDetailsToList_Success() {
         OrderDetail orderDetail2 = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail2, "id", 2L);
         orderDetail2.ofCreate(2L, 2, 5000, wrapping, orderGroup);
         when(orderDetailRepository.findAllByOrderGroupId(anyLong())).thenReturn(List.of(orderDetail, orderDetail2));
 

@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.dto.deliverypolicy;
 
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
-import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ public class DeliveryPolicyResponseDTO {
 
     @Builder
     private DeliveryPolicyResponseDTO(Long id, String name, int price) {
-        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
+        if (Objects.isNull(id)) {
             log.error("DeliveryPolicy id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }
