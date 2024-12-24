@@ -31,6 +31,7 @@ jobs:
           -Dsonar.projectKey=tripleseven-order-api \
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dlogback.configurationFile=src/main/resources/logback-spring.xml
 
       - name: Build Docker image
         run: |
