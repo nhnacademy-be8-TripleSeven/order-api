@@ -46,6 +46,7 @@ payment:
 
 app:
   initialize: true
+
 api:
   tracking:
     key: wmkoSaNXvX41qbzwSp2KzQ
