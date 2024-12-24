@@ -7,18 +7,6 @@ spring:
   jpa:
     open-in-view: false
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: org.apache.commons.dbcp2.BasicDataSource
-    dbcp2:
-      initial-size: 5
-      max-total: 50   # 50~200
-      max-idle: 30
-      min-idle: 10
-      test-on-borrow: true
-      validation-query: SELECT 1
-      remove-abandoned-on-borrow: true
-
   rabbitmq:
     username: admin
     password: nhnacademy123!
@@ -27,17 +15,6 @@ spring:
 
 logging:
   config: classpath:logback-spring.xml
-
-#eureka:
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://admin:1234@eureka-server:8761/eureka
-#  instance:
-#    instance-id: order-api
-#    hostname: localhost
-#    prefer-ip-address: true
 
 payment:
   toss:
