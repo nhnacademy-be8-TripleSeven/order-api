@@ -33,9 +33,6 @@
     </springProfile>
 
     <springProfile name="instance1">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-        </root>
         <root level="ERROR">
             <appender-ref ref="LOGNCRASH"/>
         </root>
