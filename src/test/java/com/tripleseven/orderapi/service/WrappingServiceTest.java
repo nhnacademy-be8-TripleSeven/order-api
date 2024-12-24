@@ -6,13 +6,19 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
+import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.annotation.Order;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,11 +38,13 @@ public class WrappingServiceTest {
     @BeforeEach
     void setUp() {
         wrapping = new Wrapping();
+        ReflectionTestUtils.setField(wrapping, "id", 1L);
         wrapping.ofCreate("Test Wrapping", 100);
-        wrappingRepository.save(wrapping);
     }
 
+
     @Test
+    @Order(0)
     void testGetWrappingById_Success() {
         when(wrappingRepository.findById(anyLong())).thenReturn(Optional.of(wrapping));
 
@@ -51,6 +59,7 @@ public class WrappingServiceTest {
     }
 
     @Test
+    @Order(4)
     void testGetWrappingById_Fail() {
         when(wrappingRepository.findById(any())).thenReturn(Optional.empty());
 
