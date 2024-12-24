@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.dto.orderdetail;
 
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
-import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,7 @@ public class OrderDetailResponseDTO {
 
     @Builder
     private OrderDetailResponseDTO(Long id, Long bookId, int amount, Status status, int price, Long wrappingId, Long orderGroupId) {
-        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
+        if (Objects.isNull(id)) {
             log.error("OrderDetail id cannot be null");
             throw new IllegalArgumentException("id or bookId cannot be null");
         }
