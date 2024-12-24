@@ -26,7 +26,8 @@ jobs:
       - name: List files for debugging
         run: ls -al libs
 
-      
+      - name: Check Current Directory
+        run: pwd
       - name: Install LogNCrash With Maven
         run: | 
             mvn install:install-file \            
