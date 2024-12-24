@@ -19,7 +19,8 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-          
+      - name: test
+        run : ls -al libs/
       - name: Install LogNCrash With Maven
         run: | 
             mvn install:install-file \            
