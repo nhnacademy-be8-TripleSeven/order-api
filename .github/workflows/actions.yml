@@ -20,6 +20,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
           
+      - name: Install LogNCrash With Maven
+        run: mvn install:install-file \            
+            -Dfile=./libs/toast-logncrash-logback-sdk-3.0.5.jar \
+            -DgroupId=com.toast.java.logncrash \
+            -DartifactId=logncrash-logback-sdk \
+            -Dversion=3.0.5 \
+            -Dpackaging=jar
+
+          
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
 
