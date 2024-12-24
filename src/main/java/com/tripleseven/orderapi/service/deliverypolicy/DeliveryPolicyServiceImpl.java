@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service.deliverypolicy;
 
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponse;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,24 +19,24 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     private final DeliveryPolicyRepository deliveryPolicyRepository;
 
     @Override
-    public DeliveryPolicyResponse getDeliveryPolicy(Long id) {
+    public DeliveryPolicyResponseDTO getDeliveryPolicy(Long id) {
         Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
         if (optionalDeliveryPolicy.isEmpty()) {
             throw new RuntimeException();
         }
-        return DeliveryPolicyResponse.fromEntity(optionalDeliveryPolicy.get());
+        return DeliveryPolicyResponseDTO.fromEntity(optionalDeliveryPolicy.get());
     }
 
     @Override
-    public DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest) {
+    public DeliveryPolicyResponseDTO createDeliveryPolicy(DeliveryPolicyCreateRequestDTO deliveryPolicyCreateRequestDTO) {
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate(deliveryPolicyCreateRequest.getName(), deliveryPolicyCreateRequest.getPrice());
+        deliveryPolicy.ofCreate(deliveryPolicyCreateRequestDTO.getName(), deliveryPolicyCreateRequestDTO.getPrice());
         DeliveryPolicy createDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
-        return DeliveryPolicyResponse.fromEntity(createDeliveryPolicy);
+        return DeliveryPolicyResponseDTO.fromEntity(createDeliveryPolicy);
     }
 
     @Override
-    public DeliveryPolicyResponse updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest) {
+    public DeliveryPolicyResponseDTO updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequestDTO deliveryPolicyUpdateRequestDTO) {
         Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
 
         if (optionalDeliveryPolicy.isEmpty()) {
@@ -44,9 +44,9 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
         }
 
         DeliveryPolicy deliveryPolicy = optionalDeliveryPolicy.get();
-        deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequest.getName(), deliveryPolicyUpdateRequest.getPrice());
+        deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequestDTO.getName(), deliveryPolicyUpdateRequestDTO.getPrice());
 
-        return DeliveryPolicyResponse.fromEntity(deliveryPolicy);
+        return DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy);
     }
 
     @Override

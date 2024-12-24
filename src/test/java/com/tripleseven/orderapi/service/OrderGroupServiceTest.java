@@ -1,9 +1,9 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequest;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
@@ -63,7 +63,7 @@ public class OrderGroupServiceTest {
     @Test
     void testGetOrderGroupById_Success() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
-        OrderGroupResponse response = orderGroupService.getOrderGroupById(1L);
+        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(1L);
 
         assertNotNull(response);
         assertEquals("Test Ordered", response.getOrderedName());
@@ -83,11 +83,11 @@ public class OrderGroupServiceTest {
 
     @Test
     void testCreateOrderGroup_Success() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponse.fromEntity(wrapping));
+        when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponseDTO.fromEntity(wrapping));
         when(orderGroupRepository.save(any())).thenReturn(orderGroup);
 
-        OrderGroupResponse response = orderGroupService.createOrderGroup(
-                new OrderGroupCreateRequest(
+        OrderGroupResponseDTO response = orderGroupService.createOrderGroup(
+                new OrderGroupCreateRequestDTO(
                         orderGroup.getUserId(),
                         1L,
                         orderGroup.getOrderedName(),
@@ -109,7 +109,7 @@ public class OrderGroupServiceTest {
     void testCreateOrderGroup_Fail() {
         when(wrappingService.getWrappingById(anyLong())).thenReturn(null);
         assertThrows(RuntimeException.class, () -> orderGroupService.createOrderGroup(
-                new OrderGroupCreateRequest(
+                new OrderGroupCreateRequestDTO(
                         orderGroup.getUserId(),
                         1L,
                         orderGroup.getOrderedName(),
@@ -125,9 +125,9 @@ public class OrderGroupServiceTest {
     void testUpdateAddressOrderGroup_Success() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
 
-        OrderGroupResponse response = orderGroupService.updateAddressOrderGroup(
+        OrderGroupResponseDTO response = orderGroupService.updateAddressOrderGroup(
                 1L,
-                new OrderGroupUpdateAddressRequest("Test Address"));
+                new OrderGroupUpdateAddressRequestDTO("Test Address"));
 
         assertNotNull(response);
         assertEquals("Test Ordered", response.getOrderedName());
@@ -144,7 +144,7 @@ public class OrderGroupServiceTest {
 
         assertThrows(RuntimeException.class, () -> orderGroupService.updateAddressOrderGroup(
                 1L,
-                new OrderGroupUpdateAddressRequest(null)));
+                new OrderGroupUpdateAddressRequestDTO(null)));
 
         verify(orderGroupRepository, times(1)).findById(anyLong());
     }
@@ -171,7 +171,7 @@ public class OrderGroupServiceTest {
         orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
         when(orderGroupRepository.findAllByUserId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(orderGroup, orderGroup2), pageable, 2));
 
-        Page<OrderGroupResponse> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);
+        Page<OrderGroupResponseDTO> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());

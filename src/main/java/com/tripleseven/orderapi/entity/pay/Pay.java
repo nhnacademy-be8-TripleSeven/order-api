@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.entity.pay;
 
-import com.tripleseven.orderapi.dto.pay.Payment;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.json.simple.JSONObject;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Entity

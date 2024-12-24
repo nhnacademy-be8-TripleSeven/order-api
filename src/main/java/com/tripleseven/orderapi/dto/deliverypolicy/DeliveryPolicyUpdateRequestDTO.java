@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 @Value
-public class DeliveryPolicyUpdateRequest {
+public class DeliveryPolicyUpdateRequestDTO {
     @NotNull
     @NotBlank
     String name;

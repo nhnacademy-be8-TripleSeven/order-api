@@ -1,10 +1,10 @@
 package com.tripleseven.orderapi.service.orderdetail;
 
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequest;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponse;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequest;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDTO;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
@@ -28,58 +28,58 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderDetailResponse getOrderDetailService(Long id) {
+    public OrderDetailResponseDTO getOrderDetailService(Long id) {
         Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
         if (optionalOrderDetail.isEmpty()) {
             throw new RuntimeException();
         }
 
-        return OrderDetailResponse.fromEntity(optionalOrderDetail.get());
+        return OrderDetailResponseDTO.fromEntity(optionalOrderDetail.get());
     }
 
     @Override
     @Transactional
-    public OrderDetailResponse createOrderDetail(OrderDetailCreateRequest orderDetailCreateRequest) {
+    public OrderDetailResponseDTO createOrderDetail(OrderDetailCreateRequestDTO orderDetailCreateRequestDTO) {
         OrderDetail orderDetail = new OrderDetail();
 
-        WrappingResponse wrappingResponse = wrappingService.getWrappingById(orderDetailCreateRequest.getWrappingId());
+        WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderDetailCreateRequestDTO.getWrappingId());
         Wrapping wrapping = new Wrapping();
-        wrapping.ofCreate(wrappingResponse.getName(), wrappingResponse.getPrice());
+        wrapping.ofCreate(wrappingResponseDTO.getName(), wrappingResponseDTO.getPrice());
 
-        OrderGroupResponse orderGroupResponse = orderGroupService.getOrderGroupById(orderDetailCreateRequest.getOrderGroupId());
+        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.getOrderGroupById(orderDetailCreateRequestDTO.getOrderGroupId());
         OrderGroup orderGroup = new OrderGroup();
         orderGroup.ofCreate(
-                orderGroupResponse.getUserId(),
-                orderGroupResponse.getOrderedName(),
-                orderGroupResponse.getRecipientName(),
-                orderGroupResponse.getRecipientPhone(),
-                orderGroupResponse.getDeliveryPrice(),
-                orderGroupResponse.getAddress(),
+                orderGroupResponseDTO.getUserId(),
+                orderGroupResponseDTO.getOrderedName(),
+                orderGroupResponseDTO.getRecipientName(),
+                orderGroupResponseDTO.getRecipientPhone(),
+                orderGroupResponseDTO.getDeliveryPrice(),
+                orderGroupResponseDTO.getAddress(),
                 wrapping);
 
         orderDetail.ofCreate(
-                orderDetailCreateRequest.getBookId(),
-                orderDetailCreateRequest.getAmount(),
-                orderDetailCreateRequest.getPrice(),
+                orderDetailCreateRequestDTO.getBookId(),
+                orderDetailCreateRequestDTO.getAmount(),
+                orderDetailCreateRequestDTO.getPrice(),
                 wrapping,
                 orderGroup);
 
         OrderDetail savedOrderDetail = orderDetailRepository.save(orderDetail);
 
-        return OrderDetailResponse.fromEntity(savedOrderDetail);
+        return OrderDetailResponseDTO.fromEntity(savedOrderDetail);
     }
 
     @Override
     @Transactional
-    public OrderDetailResponse updateOrderDetailStatus(Long id, OrderDetailUpdateStatusRequest orderDetailUpdateStatusRequest) {
+    public OrderDetailResponseDTO updateOrderDetailStatus(Long id, OrderDetailUpdateStatusRequestDTO orderDetailUpdateStatusRequestDTO) {
         Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
         if (optionalOrderDetail.isEmpty()) {
             throw new RuntimeException();
         }
         OrderDetail orderDetail = optionalOrderDetail.get();
-        orderDetail.ofUpdateStatus(orderDetailUpdateStatusRequest.getStatus());
+        orderDetail.ofUpdateStatus(orderDetailUpdateStatusRequestDTO.getStatus());
 
-        return OrderDetailResponse.fromEntity(orderDetail);
+        return OrderDetailResponseDTO.fromEntity(orderDetail);
     }
 
     @Override
@@ -93,19 +93,19 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderDetailResponse> getOrderDetailsToList(Long orderGroupId) {
+    public List<OrderDetailResponseDTO> getOrderDetailsToList(Long orderGroupId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderGroupId(orderGroupId);
 
         if (orderDetails.isEmpty()) {
             throw new RuntimeException();
         }
 
-        return orderDetails.stream().map(OrderDetailResponse::fromEntity).toList();
+        return orderDetails.stream().map(OrderDetailResponseDTO::fromEntity).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderDetailResponse> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
+    public List<OrderDetailResponseDTO> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
         return List.of();
     }
 }

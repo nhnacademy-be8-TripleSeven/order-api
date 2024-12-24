@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,8 +30,8 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
     })
-    public ResponseEntity<OrderGroupResponse> getOrderGroupById(@PathVariable Long id) {
-        OrderGroupResponse response = orderGroupService.getOrderGroupById(id);
+    public ResponseEntity<OrderGroupResponseDTO> getOrderGroupById(@PathVariable Long id) {
+        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(id);
         return ResponseEntity.ok(response); // 반환: 주문 그룹 정보 (OrderGroupResponse)
     }
 
@@ -42,10 +42,10 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
     })
-    public ResponseEntity<Page<OrderGroupResponse>> getOrderGroupsByUserId(
+    public ResponseEntity<Page<OrderGroupResponseDTO>> getOrderGroupsByUserId(
             @RequestHeader("X-USER") Long userId, // 사용자 ID를 요청 헤더에서 가져옵니다.
             Pageable pageable) {
-        Page<OrderGroupResponse> responses = orderGroupService.getOrderGroupPagesByUserId(userId, pageable);
+        Page<OrderGroupResponseDTO> responses = orderGroupService.getOrderGroupPagesByUserId(userId, pageable);
         return ResponseEntity.ok(responses); // 반환: 주문 그룹 페이지 (Page<OrderGroupResponse>)
     }
 
@@ -56,8 +56,8 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    public ResponseEntity<OrderGroupResponse> createOrderGroup(@RequestBody OrderGroupCreateRequest request) {
-        OrderGroupResponse response = orderGroupService.createOrderGroup(request);
+    public ResponseEntity<OrderGroupResponseDTO> createOrderGroup(@RequestBody OrderGroupCreateRequestDTO request) {
+        OrderGroupResponseDTO response = orderGroupService.createOrderGroup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 그룹 (OrderGroupResponse)
     }
 
@@ -82,13 +82,13 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
             @ApiResponse(responseCode = "404", description = "주문 그룹을 찾을 수 없음")
     })
-    public ResponseEntity<Page<OrderGroupResponse>> getOrderGroupPeriod(
+    public ResponseEntity<Page<OrderGroupResponseDTO>> getOrderGroupPeriod(
             @RequestHeader("X-USER") Long memberId,
             @RequestParam(value = "startDate", required = false) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) LocalDate endDate,
             Pageable pageable) {
 
-        Page<OrderGroupResponse> orderGroupResponses = orderGroupService.getOrderGroupPeriodByUserId(memberId, startDate, endDate, pageable);
+        Page<OrderGroupResponseDTO> orderGroupResponses = orderGroupService.getOrderGroupPeriodByUserId(memberId, startDate, endDate, pageable);
         return ResponseEntity.ok(orderGroupResponses);
     }
 }

@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequest;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
-import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequest;
+import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
@@ -40,7 +40,7 @@ public class WrappingServiceTest {
     void testGetWrappingById_Success() {
         when(wrappingRepository.findById(anyLong())).thenReturn(Optional.of(wrapping));
 
-        WrappingResponse response = wrappingService.getWrappingById(1L);
+        WrappingResponseDTO response = wrappingService.getWrappingById(1L);
 
 
         assertNotNull(response);
@@ -62,7 +62,7 @@ public class WrappingServiceTest {
         when(wrappingRepository.save(any())).thenReturn(wrapping);
         when(wrappingRepository.findById(any())).thenReturn(Optional.of(wrapping));
 
-        WrappingResponse response = wrappingService.createWrapping(new WrappingCreateRequest("Test Wrapping", 100));
+        WrappingResponseDTO response = wrappingService.createWrapping(new WrappingCreateRequestDTO("Test Wrapping", 100));
 
         assertNotNull(response);
         assertEquals("Test Wrapping", response.getName());
@@ -78,15 +78,15 @@ public class WrappingServiceTest {
     void testCreateWrapping_Fail() {
         assertThrows(RuntimeException.class, () ->
                 wrappingService.createWrapping(
-                        new WrappingCreateRequest(null, -1)));
+                        new WrappingCreateRequestDTO(null, -1)));
     }
 
     @Test
     void testUpdateWrapping_Success() {
-        WrappingUpdateRequest updateRequest = new WrappingUpdateRequest("Updated Wrapping", 150);
+        WrappingUpdateRequestDTO updateRequest = new WrappingUpdateRequestDTO("Updated Wrapping", 150);
         when(wrappingRepository.findById(1L)).thenReturn(Optional.of(wrapping));
 
-        WrappingResponse response = wrappingService.updateWrapping(1L, updateRequest);
+        WrappingResponseDTO response = wrappingService.updateWrapping(1L, updateRequest);
 
         assertNotNull(response);
         assertEquals("Updated Wrapping", response.getName());
@@ -95,7 +95,7 @@ public class WrappingServiceTest {
 
     @Test
     void testUpdateWrapping_Fail() {
-        WrappingUpdateRequest updateRequest = new WrappingUpdateRequest("Updated Wrapping", 150);
+        WrappingUpdateRequestDTO updateRequest = new WrappingUpdateRequestDTO("Updated Wrapping", 150);
         when(wrappingRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> wrappingService.updateWrapping(1L, updateRequest));

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 @Value
-public class OrderGroupUpdateAddressRequest {
+public class OrderGroupUpdateAddressRequestDTO {
     @NotNull
     String address;
 }

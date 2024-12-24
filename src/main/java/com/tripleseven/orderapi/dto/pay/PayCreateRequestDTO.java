@@ -1,10 +1,9 @@
 package com.tripleseven.orderapi.dto.pay;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class PayCreateRequest {
+public class PayCreateRequestDTO {
 
     private String orderId;
     private int amount;

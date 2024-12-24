@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.paytypes.PayTypeCreateRequest;
-import com.tripleseven.orderapi.dto.paytypes.PayTypesResponse;
+import com.tripleseven.orderapi.dto.paytypes.PayTypeCreateRequestDTO;
+import com.tripleseven.orderapi.dto.paytypes.PayTypesResponseDTO;
 import com.tripleseven.orderapi.service.paytypes.PayTypesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,8 +28,8 @@ public class PayTypesController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ResponseEntity<List<PayTypesResponse>> getAllPayTypes() {
-        List<PayTypesResponse> payTypes = payTypesService.getAllPayTypes();
+    public ResponseEntity<List<PayTypesResponseDTO>> getAllPayTypes() {
+        List<PayTypesResponseDTO> payTypes = payTypesService.getAllPayTypes();
         return ResponseEntity.ok(payTypes);
     }
 
@@ -40,8 +40,8 @@ public class PayTypesController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을 수 없음")
     })
-    public ResponseEntity<PayTypesResponse> getPayTypeById(@PathVariable Long id) {
-        PayTypesResponse payType = payTypesService.getPayTypeById(id);
+    public ResponseEntity<PayTypesResponseDTO> getPayTypeById(@PathVariable Long id) {
+        PayTypesResponseDTO payType = payTypesService.getPayTypeById(id);
         return ResponseEntity.ok(payType);
     }
 
@@ -52,8 +52,8 @@ public class PayTypesController {
             @ApiResponse(responseCode = "201", description = "결제 유형 생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ResponseEntity<PayTypesResponse> createPayType(@RequestBody PayTypeCreateRequest request) {
-        PayTypesResponse createdPayType = payTypesService.createPayType(request);
+    public ResponseEntity<PayTypesResponseDTO> createPayType(@RequestBody PayTypeCreateRequestDTO request) {
+        PayTypesResponseDTO createdPayType = payTypesService.createPayType(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPayType);
     }
 
@@ -65,8 +65,8 @@ public class PayTypesController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "404", description = "해당 결제 유형을 찾을 수 없음")
     })
-    public ResponseEntity<PayTypesResponse> updatePayType(@PathVariable Long id, @RequestBody PayTypeCreateRequest request) {
-        PayTypesResponse updatedPayType = payTypesService.updatePayType(id, request);
+    public ResponseEntity<PayTypesResponseDTO> updatePayType(@PathVariable Long id, @RequestBody PayTypeCreateRequestDTO request) {
+        PayTypesResponseDTO updatedPayType = payTypesService.updatePayType(id, request);
         return ResponseEntity.ok(updatedPayType);
     }
 

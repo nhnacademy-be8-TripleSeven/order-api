@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Getter @Setter
-public class PointPolicyCreateRequest {
+public class PointPolicyCreateRequestDTO {
     private String name;
 
     private int amount;
