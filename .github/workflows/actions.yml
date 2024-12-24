@@ -23,6 +23,12 @@ jobs:
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
 
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=tripleseven-order-api -Dsonar.projectName='tripleseven-order-api'
+
       - name: Build Docker image
         run: |
           docker build -t lushlife99/nhn-order:${{ github.sha }} .
