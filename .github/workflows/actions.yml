@@ -19,12 +19,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-      - name: test
-        run : ls -al libs/
+    
       - name: Install LogNCrash With Maven
         run: | 
             mvn install:install-file \            
-            -Dfile=/libs/toast-logncrash-logback-sdk-3.0.5.jar \
+            -Dfile=libs/toast-logncrash-logback-sdk-3.0.5.jar \
             -DgroupId=com.toast.java.logncrash \
             -DartifactId=logncrash-logback-sdk \
             -Dversion=3.0.5 \
