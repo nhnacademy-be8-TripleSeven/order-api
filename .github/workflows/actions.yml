@@ -22,7 +22,7 @@ jobs:
     
       - name: Install LogNCrash With Maven
         run: | 
-            mvn install:install-file \            
+            mvn install:install-file -e -X \            
             -Dfile=libs/toast-logncrash-logback-sdk-3.0.5.jar \
             -DgroupId=com.toast.java.logncrash \
             -DartifactId=logncrash-logback-sdk \
