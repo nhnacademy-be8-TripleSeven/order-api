@@ -28,17 +28,6 @@ spring:
 logging:
   config: classpath:logback-spring.xml
 
-#eureka:
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://admin:1234@eureka-server:8761/eureka
-#  instance:
-#    instance-id: order-api
-#    hostname: localhost
-#    prefer-ip-address: true
-
 payment:
   toss:
     test_widget_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
