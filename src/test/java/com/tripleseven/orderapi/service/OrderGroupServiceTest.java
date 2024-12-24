@@ -21,7 +21,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,12 +53,15 @@ public class OrderGroupServiceTest {
     @BeforeEach
     void setUp() {
         wrapping = new Wrapping();
+        ReflectionTestUtils.setField(wrapping, "id", 1L);
         wrapping.ofCreate("Test Wrapping", 100);
 
         orderGroup = new OrderGroup();
+        ReflectionTestUtils.setField(orderGroup, "id", 1L);
         orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
 
         deliveryInfo = new DeliveryInfo();
+        ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
         deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
     }
 
@@ -169,6 +174,7 @@ public class OrderGroupServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         OrderGroup orderGroup2 = new OrderGroup();
         orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
+        ReflectionTestUtils.setField(orderGroup2, "id", 2L);
         when(orderGroupRepository.findAllByUserId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(orderGroup, orderGroup2), pageable, 2));
 
         Page<OrderGroupResponseDTO> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);

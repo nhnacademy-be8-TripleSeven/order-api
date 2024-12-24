@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.dto.wrapping;
 
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,7 @@ public class WrappingResponseDTO {
 
     @Builder
     private WrappingResponseDTO(Long id, String name, int price) {
-        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
+        if (Objects.isNull(id)) {
             log.error("Wrapping id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }

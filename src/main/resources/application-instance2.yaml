@@ -30,9 +30,9 @@ management:
   endpoint:
     jolokia:
       enable: true
-  pause:
+    pause:
       enabled: true
-  resume:
+    resume:
       enabled: true
   info:
     env:

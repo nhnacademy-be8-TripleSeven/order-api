@@ -34,15 +34,14 @@
 
     <springProfile name="instance1">
         <root level="ERROR">
+
             <appender-ref ref="LOGNCRASH"/>
         </root>
     </springProfile>
 
 
     <springProfile name="instance2">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-        </root>
+
         <root level="ERROR">
             <appender-ref ref="LOGNCRASH"/>
         </root>

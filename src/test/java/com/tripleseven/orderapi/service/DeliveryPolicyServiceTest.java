@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -32,6 +33,7 @@ public class DeliveryPolicyServiceTest {
     @BeforeEach
     void setUp() {
         deliveryPolicy = new DeliveryPolicy();
+        ReflectionTestUtils.setField(deliveryPolicy, "id", 1L);
         deliveryPolicy.ofCreate("Test DeliveryPolicy", 1000);
     }
 

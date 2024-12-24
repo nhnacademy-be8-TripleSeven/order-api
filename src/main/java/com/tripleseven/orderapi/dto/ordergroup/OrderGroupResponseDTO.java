@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.dto.ordergroup;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import com.tripleseven.orderapi.common.environmentutils.EnvironmentUtil;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,7 @@ public class OrderGroupResponseDTO {
 
     @Builder
     private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
-        if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
+        if (Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }

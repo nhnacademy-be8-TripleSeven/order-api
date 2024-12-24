@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -43,9 +44,11 @@ public class DeliveryInfoServiceTest {
     @BeforeEach
     void setUp() {
         Wrapping wrapping = new Wrapping();
+        ReflectionTestUtils.setField(wrapping, "id", 1L);
         wrapping.ofCreate("Test Wrapping", 100);
 
         orderGroup = new OrderGroup();
+        ReflectionTestUtils.setField(orderGroup, "id", 1L);
         orderGroup.ofCreate(1L,
                 "Test Ordered",
                 "Test Recipient",
@@ -55,6 +58,7 @@ public class DeliveryInfoServiceTest {
                 wrapping);
 
         deliveryInfo = new DeliveryInfo();
+        ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
         deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
 
         arrivedAt = ZonedDateTime.parse("2024-12-17T11:24:00+09:00[Asia/Seoul]");

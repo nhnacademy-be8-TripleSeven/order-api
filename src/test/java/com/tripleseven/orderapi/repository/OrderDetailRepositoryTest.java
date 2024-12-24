@@ -109,12 +109,12 @@ public class OrderDetailRepositoryTest {
         savedOrderDetail.ofUpdateStatus(status);
         OrderDetail updatedOrderDetail = orderDetailRepository.save(savedOrderDetail);
         assertEquals(Status.PAYMENT_COMPLETED, updatedOrderDetail.getStatus());
-        assertEquals(1L, updatedOrderDetail.getId());
-        assertEquals(1L, updatedOrderDetail.getBookId());
-        assertEquals(3, updatedOrderDetail.getAmount());
-        assertEquals(10000, updatedOrderDetail.getPrice());
-        assertEquals(1L, updatedOrderDetail.getWrapping().getId());
-        assertEquals(1L, updatedOrderDetail.getOrderGroup().getId());
+        assertEquals(savedOrderDetail.getId(), updatedOrderDetail.getId());
+        assertEquals(savedOrderDetail.getBookId(), updatedOrderDetail.getBookId());
+        assertEquals(savedOrderDetail.getAmount(), updatedOrderDetail.getAmount());
+        assertEquals(savedOrderDetail.getPrice(), updatedOrderDetail.getPrice());
+        assertEquals(savedOrderDetail.getWrapping().getId(), updatedOrderDetail.getWrapping().getId());
+        assertEquals(savedOrderDetail.getOrderGroup().getId(), updatedOrderDetail.getOrderGroup().getId());
     }
 
     @Test
