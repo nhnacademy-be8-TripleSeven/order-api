@@ -27,19 +27,27 @@
         </appender>
 
     <springProfile name="dev">
-        <!-- Root Logger -->
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
 
-    <springProfile name="prod">
-        <!-- Root Logger -->
+    <springProfile name="instance1">
         <root level="ERROR">
-            <appender-ref ref="CONSOLE"/>
             <appender-ref ref="LOGNCRASH"/>
         </root>
     </springProfile>
+
+
+    <springProfile name="instance2">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <root level="ERROR">
+            <appender-ref ref="LOGNCRASH"/>
+        </root>
+    </springProfile>
+
     <!-- Common Logging Configuration -->
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.hibernate" level="WARN"/>

@@ -2,7 +2,7 @@ package com.tripleseven.orderapi.service.skm;
 
 
 
-import com.tripleseven.orderapi.dto.secure.KeyResponseDto;
+import com.tripleseven.orderapi.dto.secure.KeyResponseDTO;
 import com.tripleseven.orderapi.exception.KeyManagerException;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -112,11 +112,11 @@ public class SecureKeyManagerService {
                     .expand(appKey, keyId)
                     .toUri();
 
-            ResponseEntity<KeyResponseDto> response = restTemplate.exchange(
+            ResponseEntity<KeyResponseDTO> response = restTemplate.exchange(
                     uri,
                     HttpMethod.GET,
                     new HttpEntity<>(headers),
-                    KeyResponseDto.class
+                    KeyResponseDTO.class
             );
 
 

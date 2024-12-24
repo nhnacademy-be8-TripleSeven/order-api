@@ -2,7 +2,7 @@ package com.tripleseven.orderapi.dto.secure;
 
 
 
-public class KeyResponseDto {
+public class KeyResponseDTO {
 
     // KeyResponseDto에 각각 헤더랑 바디 등록
     private Header header;
