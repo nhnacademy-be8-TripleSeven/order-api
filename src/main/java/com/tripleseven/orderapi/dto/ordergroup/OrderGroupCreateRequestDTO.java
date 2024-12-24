@@ -7,7 +7,7 @@ import lombok.Value;
 import org.hibernate.validator.constraints.Length;
 
 @Value
-public class OrderGroupCreateRequest {
+public class OrderGroupCreateRequestDTO {
     @NotNull
     Long userId;
 

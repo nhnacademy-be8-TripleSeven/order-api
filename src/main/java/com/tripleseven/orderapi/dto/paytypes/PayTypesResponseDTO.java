@@ -7,12 +7,12 @@ import lombok.Getter;
 import java.util.Objects;
 
 @Getter
-public class PayTypesResponse {
+public class PayTypesResponseDTO {
     private final Long id;
     private final String name;
 
     @Builder
-    private PayTypesResponse(Long id, String name) {
+    private PayTypesResponseDTO(Long id, String name) {
         if(Objects.isNull(id)) {
             throw new IllegalArgumentException("id can not be null");
         }
@@ -22,8 +22,8 @@ public class PayTypesResponse {
         this.id = id;
         this.name = name;
     }
-    public static PayTypesResponse fromEntity(PayTypes payTypes){
-        return new PayTypesResponse(
+    public static PayTypesResponseDTO fromEntity(PayTypes payTypes){
+        return new PayTypesResponseDTO(
                 payTypes.getId(),
                 payTypes.getName()
         );

@@ -1,16 +1,16 @@
 package com.tripleseven.orderapi.service.pointpolicy;
 
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponse;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
 
 import java.util.List;
 
 public interface PointPolicyService {
-    PointPolicyResponse findById(Long id);
-    PointPolicyResponse save(PointPolicyCreateRequest request);
-    PointPolicyResponse update(Long id,PointPolicyUpdateRequest request);
+    PointPolicyResponseDTO findById(Long id);
+    PointPolicyResponseDTO save(PointPolicyCreateRequestDTO request);
+    PointPolicyResponseDTO update(Long id, PointPolicyUpdateRequestDTO request);
     void delete(Long id);
-    List<PointPolicyResponse> findAll();
+    List<PointPolicyResponseDTO> findAll();
 
 }

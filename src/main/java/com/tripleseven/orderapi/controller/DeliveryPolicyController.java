@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponse;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.service.deliverypolicy.DeliveryPolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,7 +26,7 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
     })
-    public ResponseEntity<DeliveryPolicyResponse> getDeliveryPolicy(@PathVariable Long id) {
+    public ResponseEntity<DeliveryPolicyResponseDTO> getDeliveryPolicy(@PathVariable Long id) {
         return ResponseEntity.ok(deliveryPolicyService.getDeliveryPolicy(id));
     }
 
@@ -36,8 +36,8 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    public ResponseEntity<DeliveryPolicyResponse> createDeliveryPolicy(@RequestBody DeliveryPolicyCreateRequest request) {
-        DeliveryPolicyResponse response = deliveryPolicyService.createDeliveryPolicy(request);
+    public ResponseEntity<DeliveryPolicyResponseDTO> createDeliveryPolicy(@RequestBody DeliveryPolicyCreateRequestDTO request) {
+        DeliveryPolicyResponseDTO response = deliveryPolicyService.createDeliveryPolicy(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -47,9 +47,9 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "200", description = "수정 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
     })
-    public ResponseEntity<DeliveryPolicyResponse> updateDeliveryPolicy(
-            @PathVariable Long id, @RequestBody DeliveryPolicyUpdateRequest request) {
-        DeliveryPolicyResponse response = deliveryPolicyService.updateDeliveryPolicy(id, request);
+    public ResponseEntity<DeliveryPolicyResponseDTO> updateDeliveryPolicy(
+            @PathVariable Long id, @RequestBody DeliveryPolicyUpdateRequestDTO request) {
+        DeliveryPolicyResponseDTO response = deliveryPolicyService.updateDeliveryPolicy(id, request);
         return ResponseEntity.ok(response);
     }
 

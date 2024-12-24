@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.pay.PayCancelRequest;
+import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.service.pay.PayService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,10 +31,8 @@ public class PayApiController {
 
     @Value("${payment.toss.test_widget_api_key}")
     private String WIDGET_SECRET_KEY;
-
     @Value("${payment.toss.test_secret_api_key}")
     private String API_SECRET_KEY;
-
     private final Map<String, String> billingKeyMap = new HashMap<>();
     private final PayService payService;
 

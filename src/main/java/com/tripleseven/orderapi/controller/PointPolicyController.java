@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponse;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,8 +30,8 @@ public class PointPolicyController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "조회 실패")
     })
-    public ResponseEntity<List<PointPolicyResponse>> getAllPointPolicies(){
-        List<PointPolicyResponse> responses =  pointPolicyService.findAll();
+    public ResponseEntity<List<PointPolicyResponseDTO>> getAllPointPolicies(){
+        List<PointPolicyResponseDTO> responses =  pointPolicyService.findAll();
         return ResponseEntity.ok(responses);
     }
 
@@ -41,8 +41,8 @@ public class PointPolicyController {
             @ApiResponse(responseCode = "200",description = "조회 성공"),
             @ApiResponse(responseCode = "404",description = "해당하는 포인트 정책 없음.")
     })
-    public ResponseEntity<PointPolicyResponse> getPointPolicy(@PathVariable String pointPolicyId) {
-        PointPolicyResponse response = pointPolicyService.findById(Long.parseLong(pointPolicyId));
+    public ResponseEntity<PointPolicyResponseDTO> getPointPolicy(@PathVariable String pointPolicyId) {
+        PointPolicyResponseDTO response = pointPolicyService.findById(Long.parseLong(pointPolicyId));
         return  ResponseEntity.ok(response);
     }
 
@@ -53,8 +53,8 @@ public class PointPolicyController {
             @ApiResponse(responseCode = "201",description = "생성 성공"),
             @ApiResponse(responseCode = "400",description = "잘못된 요청")
     })
-    public ResponseEntity<PointPolicyResponse> createPointPolicy(@RequestBody PointPolicyCreateRequest request) {
-        PointPolicyResponse savedPointPolicy = pointPolicyService.save(request);
+    public ResponseEntity<PointPolicyResponseDTO> createPointPolicy(@RequestBody PointPolicyCreateRequestDTO request) {
+        PointPolicyResponseDTO savedPointPolicy = pointPolicyService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPointPolicy);
     }
 
@@ -65,7 +65,7 @@ public class PointPolicyController {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
             @ApiResponse(responseCode = "404", description = "해당하는 포인트 정책 없음")
     })
-    public ResponseEntity<PointPolicyResponse> deletePointPolicy(@PathVariable String pointPolicyId) {
+    public ResponseEntity<PointPolicyResponseDTO> deletePointPolicy(@PathVariable String pointPolicyId) {
         pointPolicyService.delete(Long.parseLong(pointPolicyId));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -76,9 +76,9 @@ public class PointPolicyController {
             @ApiResponse(responseCode = "204", description = "수정 성공"),
             @ApiResponse(responseCode = "404", description = "해당하는 포인트 정책 없음")
     })
-    public ResponseEntity<PointPolicyResponse> updatePointPolicy(@PathVariable Long pointPolicyId, @RequestBody PointPolicyUpdateRequest request) {
+    public ResponseEntity<PointPolicyResponseDTO> updatePointPolicy(@PathVariable Long pointPolicyId, @RequestBody PointPolicyUpdateRequestDTO request) {
 
-        PointPolicyResponse response = pointPolicyService.update(pointPolicyId,request);
+        PointPolicyResponseDTO response = pointPolicyService.update(pointPolicyId,request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }

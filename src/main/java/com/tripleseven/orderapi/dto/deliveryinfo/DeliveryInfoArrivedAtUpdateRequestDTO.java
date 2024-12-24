@@ -6,7 +6,7 @@ import lombok.Value;
 import java.time.ZonedDateTime;
 
 @Value
-public class DeliveryInfoArrivedAtUpdateRequest {
+public class DeliveryInfoArrivedAtUpdateRequestDTO {
     @NotNull
     ZonedDateTime arrivedAt;
 }

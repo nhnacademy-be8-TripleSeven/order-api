@@ -6,6 +6,6 @@ import lombok.Value;
 import java.util.List;
 
 @Value
-public class CartItemRequest {
+public class CartItemRequestDTO {
     List<CartItem> cartItems;
 }
