@@ -21,7 +21,7 @@ jobs:
           cache: maven
 
       - name: Set File Permissions
-        run: chmod 644 toast-logncrash-logback-sdk-3.0.5.jar
+        run: chmod 644 libs/toast-logncrash-logback-sdk-3.0.5.jar
         
       - name: List files for debugging
         run: ls -al libs
