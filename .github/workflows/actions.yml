@@ -32,7 +32,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
+          
+      - name: Remove unused Docker images
+        run: |
+          docker image prune -a --filter "until=72h"
+        
       - name: Push Docker image
         run: |
           docker push lushlife99/nhn-order:${{ github.sha }}
