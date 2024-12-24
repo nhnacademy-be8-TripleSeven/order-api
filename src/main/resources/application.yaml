@@ -3,7 +3,7 @@ spring:
     name: order-api
 
   profiles:
-    active: instance2
+    active: dev
   jpa:
     open-in-view: false
 
@@ -28,16 +28,16 @@ spring:
 logging:
   config: classpath:logback-spring.xml
 
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://admin:1234@eureka-server:8761/eureka
-  instance:
-    instance-id: order-api
-    hostname: localhost
-    prefer-ip-address: true
+#eureka:
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defaultZone: http://admin:1234@eureka-server:8761/eureka
+#  instance:
+#    instance-id: order-api
+#    hostname: localhost
+#    prefer-ip-address: true
 
 payment:
   toss:
