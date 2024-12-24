@@ -58,7 +58,7 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 취소 실패")
     })
     @PostMapping("payments/{paymentKey}/cancel")
-    public ResponseEntity<JSONObject> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequest request) throws Exception {
+    public ResponseEntity<JSONObject> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
         JSONObject requestData = convertToJSONObject(request);
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
         JSONObject response = sendRequest(requestData, API_SECRET_KEY, url);
@@ -124,7 +124,7 @@ public class PayApiController {
         }
     }
 
-    private JSONObject convertToJSONObject(PayCancelRequest request) {
+    private JSONObject convertToJSONObject(PayCancelRequestDTO request) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writeValueAsString(request);
