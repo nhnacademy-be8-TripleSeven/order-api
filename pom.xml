@@ -18,6 +18,16 @@
         <spring-cloud.version>2024.0.0</spring-cloud.version>
         <querydsl.version>5.1.0</querydsl.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>private</id>
+            <name>private-name</name>
+            <url>https://raw.githubusercontent.com/nhnacademy-be8-TripleSeven/private-dependecies/refs/heads/main/</url>
+        </repository>
+
+    </repositories>
+
     <dependencies>
         <!-- Spring Boot Starter -->
         <dependency>
@@ -100,8 +110,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.toast.java.logncrash</groupId>
-            <artifactId>logncrash-logback-sdk</artifactId>
+            <groupId>com.toast.java.logncrash.logback</groupId>
+            <artifactId>logncrash-java-sdk3</artifactId>
             <version>3.0.5</version>
         </dependency>
 
