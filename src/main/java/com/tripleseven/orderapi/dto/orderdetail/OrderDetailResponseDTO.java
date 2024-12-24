@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Getter
 @Slf4j
-public class OrderDetailResponse {
+public class OrderDetailResponseDTO {
     private final Long id;
 
     private final Long bookId;
@@ -27,7 +27,7 @@ public class OrderDetailResponse {
     private final Long orderGroupId;
 
     @Builder
-    private OrderDetailResponse(Long id, Long bookId, int amount, Status status, int price, Long wrappingId, Long orderGroupId) {
+    private OrderDetailResponseDTO(Long id, Long bookId, int amount, Status status, int price, Long wrappingId, Long orderGroupId) {
         if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("OrderDetail id cannot be null");
             throw new IllegalArgumentException("id or bookId cannot be null");
@@ -41,8 +41,8 @@ public class OrderDetailResponse {
         this.orderGroupId = orderGroupId;
     }
 
-    public static OrderDetailResponse fromEntity(OrderDetail orderDetail) {
-        return OrderDetailResponse.builder()
+    public static OrderDetailResponseDTO fromEntity(OrderDetail orderDetail) {
+        return OrderDetailResponseDTO.builder()
                 .id(orderDetail.getId())
                 .bookId(orderDetail.getBookId())
                 .amount(orderDetail.getAmount())

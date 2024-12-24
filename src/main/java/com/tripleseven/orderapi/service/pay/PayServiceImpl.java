@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.service.pay;
 
-import com.tripleseven.orderapi.dto.pay.Payment;
 import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import lombok.RequiredArgsConstructor;

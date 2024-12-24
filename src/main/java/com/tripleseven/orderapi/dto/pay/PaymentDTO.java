@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class Payment {
+public class PaymentDTO {
     private String paymentKey;    // 결제 고유 키
     private Long orderId;         // 주문 아이디
     private Long totalAmount;     // 총 결제 금액

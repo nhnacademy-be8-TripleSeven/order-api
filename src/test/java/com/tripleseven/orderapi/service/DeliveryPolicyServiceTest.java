@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponse;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import com.tripleseven.orderapi.service.deliverypolicy.DeliveryPolicyServiceImpl;
@@ -39,7 +39,7 @@ public class DeliveryPolicyServiceTest {
     void testFindById_Success() {
         when(deliveryPolicyRepository.findById(anyLong())).thenReturn(Optional.of(deliveryPolicy));
 
-        DeliveryPolicyResponse response = deliveryPolicyService.getDeliveryPolicy(1L);
+        DeliveryPolicyResponseDTO response = deliveryPolicyService.getDeliveryPolicy(1L);
 
         assertNotNull(response);
         assertEquals("Test DeliveryPolicy", response.getName());
@@ -61,8 +61,8 @@ public class DeliveryPolicyServiceTest {
         when(deliveryPolicyRepository.save(any())).thenReturn(deliveryPolicy);
         when(deliveryPolicyRepository.findById(any())).thenReturn(Optional.of(deliveryPolicy));
 
-        DeliveryPolicyResponse response = deliveryPolicyService.createDeliveryPolicy(
-                new DeliveryPolicyCreateRequest(
+        DeliveryPolicyResponseDTO response = deliveryPolicyService.createDeliveryPolicy(
+                new DeliveryPolicyCreateRequestDTO(
                         deliveryPolicy.getName(),
                         deliveryPolicy.getPrice()
                 ));
@@ -83,17 +83,17 @@ public class DeliveryPolicyServiceTest {
     @Test
     void testCreateDeliveryPolicy_Fail() {
         assertThrows(RuntimeException.class, () -> deliveryPolicyService.createDeliveryPolicy(
-                new DeliveryPolicyCreateRequest(
+                new DeliveryPolicyCreateRequestDTO(
                         null,
                         -1)));
     }
 
     @Test
     void testUpdateDeliveryPolicy_Success() {
-        DeliveryPolicyUpdateRequest updateRequest = new DeliveryPolicyUpdateRequest("Updated DeliveryPolicy", 1500);
+        DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.of(deliveryPolicy));
 
-        DeliveryPolicyResponse response = deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest);
+        DeliveryPolicyResponseDTO response = deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest);
 
         assertNotNull(response);
         assertEquals("Updated DeliveryPolicy", response.getName());
@@ -103,7 +103,7 @@ public class DeliveryPolicyServiceTest {
 
     @Test
     void testUpdateDeliveryPolicy_Fail() {
-        DeliveryPolicyUpdateRequest updateRequest = new DeliveryPolicyUpdateRequest("Updated DeliveryPolicy", 1500);
+        DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));

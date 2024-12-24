@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class PointPolicyUpdateRequest {
+public class PointPolicyUpdateRequestDTO {
     private String name;
 
     private int amount;

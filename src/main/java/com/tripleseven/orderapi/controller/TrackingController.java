@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.dto.properties.ApiProperties;
 import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeService;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
@@ -19,7 +19,7 @@ public class TrackingController {
 
     @PostMapping("/tracking/{id}")
     public RedirectView showDeliveryInfo(@PathVariable Long id) {
-        DeliveryInfoResponse response = deliveryInfoService.getDeliveryInfoById(id);
+        DeliveryInfoResponseDTO response = deliveryInfoService.getDeliveryInfoById(id);
         String code = deliveryCodeService.getDeliveryCodeToName(response.getName());
         String apiUrl = "https://info.sweettracker.co.kr/tracking/4?" +
                 "t_code=" + code +

@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service.pointpolicy;
 
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponse;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
 import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
@@ -22,29 +22,29 @@ public class PointPolicyServiceImpl implements PointPolicyService {
 
     // ID로 조회
     @Override
-    public PointPolicyResponse findById(Long id) {
+    public PointPolicyResponseDTO findById(Long id) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(id)
                 .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + id + " not found"));
-        return PointPolicyResponse.fromEntity(pointPolicy);
+        return PointPolicyResponseDTO.fromEntity(pointPolicy);
     }
 
     // 새로운 정책 저장
     @Override
-    public PointPolicyResponse save(PointPolicyCreateRequest request) {
+    public PointPolicyResponseDTO save(PointPolicyCreateRequestDTO request) {
         PointPolicy pointPolicy = PointPolicy.ofCreate(request);
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
-        return PointPolicyResponse.fromEntity(savedPolicy);
+        return PointPolicyResponseDTO.fromEntity(savedPolicy);
     }
 
     // 기존 정책 업데이트
     @Override
-    public PointPolicyResponse update(Long id, PointPolicyUpdateRequest request) {
+    public PointPolicyResponseDTO update(Long id, PointPolicyUpdateRequestDTO request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(id)
                 .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + id + " not found"));
 
         pointPolicy.ofUpdate(request);
         PointPolicy updatedPolicy = pointPolicyRepository.save(pointPolicy);
-        return PointPolicyResponse.fromEntity(updatedPolicy);
+        return PointPolicyResponseDTO.fromEntity(updatedPolicy);
     }
 
     // 정책 삭제
@@ -58,7 +58,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
 
     // 전체 정책 조회
     @Override
-    public List<PointPolicyResponse> findAll() {
+    public List<PointPolicyResponseDTO> findAll() {
         List<PointPolicy> pointPolicies = pointPolicyRepository.findAll();
 
         if (pointPolicies.isEmpty()) {
@@ -66,7 +66,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
         }
 
         return pointPolicies.stream()
-                .map(PointPolicyResponse::fromEntity)
+                .map(PointPolicyResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 }

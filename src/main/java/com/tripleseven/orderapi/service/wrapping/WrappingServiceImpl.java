@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service.wrapping;
 
-import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequest;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
-import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequest;
+import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,49 +20,49 @@ public class WrappingServiceImpl implements WrappingService {
 
     @Override
     @Transactional(readOnly = true)
-    public WrappingResponse getWrappingById(Long id) {
+    public WrappingResponseDTO getWrappingById(Long id) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
 
         if (optionalWrapping.isEmpty()) {
             throw new RuntimeException();
         }
 
-        return WrappingResponse.fromEntity(optionalWrapping.get());
+        return WrappingResponseDTO.fromEntity(optionalWrapping.get());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<WrappingResponse> getWrappingsToList() {
+    public List<WrappingResponseDTO> getWrappingsToList() {
         List<Wrapping> list = wrappingRepository.findAll();
 
         if (list.isEmpty()) {
             throw new RuntimeException();
         }
 
-        return list.stream().map(WrappingResponse::fromEntity).toList();
+        return list.stream().map(WrappingResponseDTO::fromEntity).toList();
     }
 
     @Override
     @Transactional
-    public WrappingResponse createWrapping(WrappingCreateRequest wrappingCreateRequest) {
+    public WrappingResponseDTO createWrapping(WrappingCreateRequestDTO wrappingCreateRequestDTO) {
         Wrapping wrapping = new Wrapping();
-        wrapping.ofCreate(wrappingCreateRequest.getName(), wrappingCreateRequest.getPrice());
+        wrapping.ofCreate(wrappingCreateRequestDTO.getName(), wrappingCreateRequestDTO.getPrice());
         Wrapping createWrapping = wrappingRepository.save(wrapping);
 
-        return WrappingResponse.fromEntity(createWrapping);
+        return WrappingResponseDTO.fromEntity(createWrapping);
     }
 
     @Override
     @Transactional
-    public WrappingResponse updateWrapping(Long id, WrappingUpdateRequest wrappingUpdateRequest) {
+    public WrappingResponseDTO updateWrapping(Long id, WrappingUpdateRequestDTO wrappingUpdateRequestDTO) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
         if (optionalWrapping.isEmpty()) {
             throw new RuntimeException();
         }
         Wrapping wrapping = optionalWrapping.get();
-        wrapping.ofUpdate(wrappingUpdateRequest.getName(), wrappingUpdateRequest.getPrice());
+        wrapping.ofUpdate(wrappingUpdateRequestDTO.getName(), wrappingUpdateRequestDTO.getPrice());
 
-        return WrappingResponse.fromEntity(wrapping);
+        return WrappingResponseDTO.fromEntity(wrapping);
     }
 
     @Override

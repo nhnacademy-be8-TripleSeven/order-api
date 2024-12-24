@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
@@ -64,7 +64,7 @@ public class DeliveryInfoServiceTest {
     void testFindById_Success() {
         when(deliveryInfoRepository.findById(anyLong())).thenReturn(Optional.of(deliveryInfo));
 
-        DeliveryInfoResponse response = deliveryInfoService.getDeliveryInfoById(1L);
+        DeliveryInfoResponseDTO response = deliveryInfoService.getDeliveryInfoById(1L);
 
         assertNotNull(response);
         assertEquals("Test DeliveryInfo", response.getName());
@@ -85,8 +85,8 @@ public class DeliveryInfoServiceTest {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
         when(deliveryInfoRepository.save(any())).thenReturn(deliveryInfo);
 
-        DeliveryInfoResponse response = deliveryInfoService.createDeliveryInfo(
-                new DeliveryInfoCreateRequest(
+        DeliveryInfoResponseDTO response = deliveryInfoService.createDeliveryInfo(
+                new DeliveryInfoCreateRequestDTO(
                         1L,
                         "Test DeliveryInfo",
                         12345678
@@ -102,7 +102,7 @@ public class DeliveryInfoServiceTest {
     @Test
     void testCreateDeliveryInfo_Fail() {
         assertThrows(RuntimeException.class, () -> deliveryInfoService.createDeliveryInfo(
-                new DeliveryInfoCreateRequest(
+                new DeliveryInfoCreateRequestDTO(
                         null,
                         null,
                         -1)));
@@ -110,10 +110,10 @@ public class DeliveryInfoServiceTest {
 
     @Test
     void testUpdateArrivedDeliveryInfo_Success() {
-        DeliveryInfoArrivedAtUpdateRequest updateRequest = new DeliveryInfoArrivedAtUpdateRequest(arrivedAt);
+        DeliveryInfoArrivedAtUpdateRequestDTO updateRequest = new DeliveryInfoArrivedAtUpdateRequestDTO(arrivedAt);
         when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.of(deliveryInfo));
 
-        DeliveryInfoResponse response = deliveryInfoService.updateDeliveryInfoArrivedAt(1L, updateRequest);
+        DeliveryInfoResponseDTO response = deliveryInfoService.updateDeliveryInfoArrivedAt(1L, updateRequest);
 
         assertNotNull(response);
         assertEquals("Test DeliveryInfo", response.getName());
@@ -125,7 +125,7 @@ public class DeliveryInfoServiceTest {
 
     @Test
     void testUpdateArrivedDeliveryInfo_Fail() {
-        DeliveryInfoArrivedAtUpdateRequest updateRequest = new DeliveryInfoArrivedAtUpdateRequest(arrivedAt);
+        DeliveryInfoArrivedAtUpdateRequestDTO updateRequest = new DeliveryInfoArrivedAtUpdateRequestDTO(arrivedAt);
         when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(RuntimeException.class, () -> deliveryInfoService.updateDeliveryInfoArrivedAt(1L, updateRequest));
         verify(deliveryInfoRepository, times(1)).findById(1L);

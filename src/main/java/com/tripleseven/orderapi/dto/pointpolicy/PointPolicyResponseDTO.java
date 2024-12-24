@@ -8,14 +8,14 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
-public class PointPolicyResponse {
+public class PointPolicyResponseDTO {
     private final Long id;
     private final String name;
     private final int amount;
     private final BigDecimal rate;
 
     @Builder
-    public PointPolicyResponse(Long id, String name, int amount, BigDecimal rate) {
+    public PointPolicyResponseDTO(Long id, String name, int amount, BigDecimal rate) {
         // Validate input parameters
         if (Objects.isNull(id)) {
             throw new IllegalArgumentException("ID cannot be null");
@@ -36,9 +36,9 @@ public class PointPolicyResponse {
         this.rate = rate;
     }
 
-    public static PointPolicyResponse fromEntity(PointPolicy pointPolicy) {
+    public static PointPolicyResponseDTO fromEntity(PointPolicy pointPolicy) {
 
-        return new PointPolicyResponse(
+        return new PointPolicyResponseDTO(
                 pointPolicy.getId(),
                 pointPolicy.getName(),
                 pointPolicy.getAmount(),

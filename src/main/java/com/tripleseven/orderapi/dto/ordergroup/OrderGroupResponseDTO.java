@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Getter
 @Slf4j
-public class OrderGroupResponse {
+public class OrderGroupResponseDTO {
     private final Long id;
 
     private final Long userId;
@@ -31,7 +31,7 @@ public class OrderGroupResponse {
     private final String address;
 
     @Builder
-    private OrderGroupResponse(Long id, Long userId, Long wrappingId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
+    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
         if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
@@ -47,8 +47,8 @@ public class OrderGroupResponse {
         this.address = address;
     }
 
-    public static OrderGroupResponse fromEntity(OrderGroup orderGroup) {
-        return OrderGroupResponse.builder()
+    public static OrderGroupResponseDTO fromEntity(OrderGroup orderGroup) {
+        return OrderGroupResponseDTO.builder()
                 .id(orderGroup.getId())
                 .userId(orderGroup.getUserId())
                 .orderedName(orderGroup.getOrderedName())

@@ -1,16 +1,14 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
-import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeService;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +28,8 @@ public class DeliveryInfoController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
     })
-    public ResponseEntity<DeliveryInfoResponse> getDeliveryInfo(@PathVariable Long id) {
-        DeliveryInfoResponse response = deliveryInfoService.getDeliveryInfoById(id);
+    public ResponseEntity<DeliveryInfoResponseDTO> getDeliveryInfo(@PathVariable Long id) {
+        DeliveryInfoResponseDTO response = deliveryInfoService.getDeliveryInfoById(id);
 
         return ResponseEntity.ok(response); // 반환: 배송 정보 (DeliveryInfoResponse)
     }
@@ -43,8 +41,8 @@ public class DeliveryInfoController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    public ResponseEntity<DeliveryInfoResponse> createDeliveryInfo(@RequestBody DeliveryInfoCreateRequest request) {
-        DeliveryInfoResponse response = deliveryInfoService.createDeliveryInfo(request);
+    public ResponseEntity<DeliveryInfoResponseDTO> createDeliveryInfo(@RequestBody DeliveryInfoCreateRequestDTO request) {
+        DeliveryInfoResponseDTO response = deliveryInfoService.createDeliveryInfo(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 배송 정보 (DeliveryInfoResponse)
     }
 
@@ -55,9 +53,9 @@ public class DeliveryInfoController {
             @ApiResponse(responseCode = "200", description = "업데이트 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
     })
-    public ResponseEntity<DeliveryInfoResponse> updateDeliveryArrivedAt(
-            @PathVariable Long id, @RequestBody DeliveryInfoArrivedAtUpdateRequest request) {
-        DeliveryInfoResponse response = deliveryInfoService.updateDeliveryInfoArrivedAt(id, request);
+    public ResponseEntity<DeliveryInfoResponseDTO> updateDeliveryArrivedAt(
+            @PathVariable Long id, @RequestBody DeliveryInfoArrivedAtUpdateRequestDTO request) {
+        DeliveryInfoResponseDTO response = deliveryInfoService.updateDeliveryInfoArrivedAt(id, request);
         return ResponseEntity.ok(response); // 반환: 업데이트된 배송 정보 (DeliveryInfoResponse)
     }
 

@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.service.paytypes;
 
-import com.tripleseven.orderapi.dto.paytypes.PayTypeCreateRequest;
-import com.tripleseven.orderapi.dto.paytypes.PayTypesResponse;
+import com.tripleseven.orderapi.dto.paytypes.PayTypeCreateRequestDTO;
+import com.tripleseven.orderapi.dto.paytypes.PayTypesResponseDTO;
 import com.tripleseven.orderapi.entity.paytypes.PayTypes;
 import com.tripleseven.orderapi.exception.notfound.PayTypeNotFoundException;
 import com.tripleseven.orderapi.repository.paytypes.PayTypesRepository;
@@ -20,30 +20,30 @@ public class PayTypesServiceImpl implements PayTypesService {
     private final PayTypesRepository payTypesRepository;
 
     @Override
-    public List<PayTypesResponse> getAllPayTypes() {
+    public List<PayTypesResponseDTO> getAllPayTypes() {
         List<PayTypes> payTypesList = payTypesRepository.findAll();
         if (payTypesList.isEmpty()) {
             throw new PayTypeNotFoundException("No PayTypes found.");
         }
         return payTypesList.stream()
-                .map(PayTypesResponse::fromEntity)
+                .map(PayTypesResponseDTO::fromEntity)
                 .toList();
     }
 
     @Override
-    public PayTypesResponse createPayType(PayTypeCreateRequest request) {
+    public PayTypesResponseDTO createPayType(PayTypeCreateRequestDTO request) {
         PayTypes newPayType = PayTypes.ofCreate(request.getName());
         PayTypes savedPayType = payTypesRepository.save(newPayType);
-        return PayTypesResponse.fromEntity(savedPayType);
+        return PayTypesResponseDTO.fromEntity(savedPayType);
     }
 
     @Override
-    public PayTypesResponse getPayTypeById(Long id) {
+    public PayTypesResponseDTO getPayTypeById(Long id) {
         Optional<PayTypes> payType = payTypesRepository.findById(id);
         if (payType.isEmpty()) {
             throw new PayTypeNotFoundException("PayType with id " + id + " not found.");
         }
-        return PayTypesResponse.fromEntity(payType.get());
+        return PayTypesResponseDTO.fromEntity(payType.get());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class PayTypesServiceImpl implements PayTypesService {
     }
 
     @Override
-    public PayTypesResponse updatePayType(Long id, PayTypeCreateRequest request) {
+    public PayTypesResponseDTO updatePayType(Long id, PayTypeCreateRequestDTO request) {
         Optional<PayTypes> existingPayType = payTypesRepository.findById(id);
         if (existingPayType.isEmpty()) {
             throw new PayTypeNotFoundException("PayType with id " + id + " not found.");
@@ -63,6 +63,6 @@ public class PayTypesServiceImpl implements PayTypesService {
 
         PayTypes updatedPayType = existingPayType.get().ofUpdate(request.getName());
         PayTypes savedPayType = payTypesRepository.save(updatedPayType);
-        return PayTypesResponse.fromEntity(savedPayType);
+        return PayTypesResponseDTO.fromEntity(savedPayType);
     }
 }

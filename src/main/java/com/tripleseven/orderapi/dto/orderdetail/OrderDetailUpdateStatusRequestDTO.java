@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 @Value
-public class OrderDetailUpdateStatusRequest {
+public class OrderDetailUpdateStatusRequestDTO {
     @NotNull
     @NotBlank
     Status status;

@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service.pointservice;
 
-import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponse;
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 
 public interface PointService {
-    PointHistoryResponse createPointHistoryForPaymentSpend(Long memberId, int usedPoint);
-    PointHistoryResponse createPointHistoryForPaymentEarn(Long memberId, int usedMoney, Long pointPolicyId);
+    PointHistoryResponseDTO createPointHistoryForPaymentSpend(Long memberId, int usedPoint);
+    PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, int usedMoney, Long pointPolicyId);
 }

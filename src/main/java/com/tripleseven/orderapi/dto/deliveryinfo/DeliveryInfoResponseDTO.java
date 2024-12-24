@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Getter
 @Slf4j
-public class DeliveryInfoResponse {
+public class DeliveryInfoResponseDTO {
     private final Long id;
 
     private final String name;
@@ -21,7 +21,7 @@ public class DeliveryInfoResponse {
     private final ZonedDateTime arrivedAt;
 
     @Builder
-    private DeliveryInfoResponse(Long id, String name, int invoiceNumber, ZonedDateTime arrivedAt) {
+    private DeliveryInfoResponseDTO(Long id, String name, int invoiceNumber, ZonedDateTime arrivedAt) {
         if (!EnvironmentUtil.isTestEnvironment() && Objects.isNull(id)) {
             log.error("DeliveryInfo id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
@@ -32,8 +32,8 @@ public class DeliveryInfoResponse {
         this.arrivedAt = arrivedAt;
     }
 
-    public static DeliveryInfoResponse fromEntity(DeliveryInfo deliveryInfo) {
-        return DeliveryInfoResponse.builder()
+    public static DeliveryInfoResponseDTO fromEntity(DeliveryInfo deliveryInfo) {
+        return DeliveryInfoResponseDTO.builder()
                 .id(deliveryInfo.getId())
                 .name(deliveryInfo.getName())
                 .invoiceNumber(deliveryInfo.getInvoiceNumber())

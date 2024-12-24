@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.pay.PayCancelRequest;
+import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.service.pay.PayService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -91,7 +91,7 @@ public class PayApiController {
         }
     }
 
-    private JSONObject convertToJSONObject(PayCancelRequest request) {
+    private JSONObject convertToJSONObject(PayCancelRequestDTO request) {
         try {
             // Jackson ObjectMapper로 객체를 JSON 문자열로 변환
             ObjectMapper objectMapper = new ObjectMapper();
@@ -107,7 +107,7 @@ public class PayApiController {
 
     //주문 취소
     @PostMapping("/payments/{paymentKey}/cancel")
-    public ResponseEntity<JSONObject> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequest request) throws Exception {
+    public ResponseEntity<JSONObject> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
         JSONObject requestData = convertToJSONObject(request);
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey +"/cancel";
         JSONObject response = sendRequest(requestData, API_SECRET_KEY, url);

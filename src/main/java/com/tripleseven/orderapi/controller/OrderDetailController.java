@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequest;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponse;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequest;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDTO;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +30,8 @@ public class OrderDetailController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
-    public ResponseEntity<OrderDetailResponse> getOrderDetailById(@PathVariable Long id) {
-        OrderDetailResponse response = orderDetailService.getOrderDetailService(id);
+    public ResponseEntity<OrderDetailResponseDTO> getOrderDetailById(@PathVariable Long id) {
+        OrderDetailResponseDTO response = orderDetailService.getOrderDetailService(id);
         return ResponseEntity.ok(response); // 반환: 주문 상세 정보 (OrderDetailResponse)
     }
 
@@ -42,8 +42,8 @@ public class OrderDetailController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    public ResponseEntity<OrderDetailResponse> createOrderDetail(@RequestBody OrderDetailCreateRequest request) {
-        OrderDetailResponse response = orderDetailService.createOrderDetail(request);
+    public ResponseEntity<OrderDetailResponseDTO> createOrderDetail(@RequestBody OrderDetailCreateRequestDTO request) {
+        OrderDetailResponseDTO response = orderDetailService.createOrderDetail(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 상세 (OrderDetailResponse)
     }
 
@@ -54,9 +54,9 @@ public class OrderDetailController {
             @ApiResponse(responseCode = "200", description = "업데이트 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
-    public ResponseEntity<OrderDetailResponse> updateOrderDetailStatus(
-            @PathVariable Long id, @RequestBody OrderDetailUpdateStatusRequest request) {
-        OrderDetailResponse response = orderDetailService.updateOrderDetailStatus(id, request);
+    public ResponseEntity<OrderDetailResponseDTO> updateOrderDetailStatus(
+            @PathVariable Long id, @RequestBody OrderDetailUpdateStatusRequestDTO request) {
+        OrderDetailResponseDTO response = orderDetailService.updateOrderDetailStatus(id, request);
         return ResponseEntity.ok(response); // 반환: 업데이트된 주문 상세 (OrderDetailResponse)
     }
 
@@ -79,8 +79,8 @@ public class OrderDetailController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
-    public ResponseEntity<List<OrderDetailResponse>> getOrderDetailsByOrderGroupId(@PathVariable Long orderGroupId) {
-        List<OrderDetailResponse> responses = orderDetailService.getOrderDetailsToList(orderGroupId);
+    public ResponseEntity<List<OrderDetailResponseDTO>> getOrderDetailsByOrderGroupId(@PathVariable Long orderGroupId) {
+        List<OrderDetailResponseDTO> responses = orderDetailService.getOrderDetailsToList(orderGroupId);
         return ResponseEntity.ok(responses); // 반환: 주문 상세 목록 (List<OrderDetailResponse>)
     }
 
@@ -93,10 +93,10 @@ public class OrderDetailController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 그룹 또는 상태에 해당하는 주문 상세가 존재하지 않음")
     })
-    public ResponseEntity<List<OrderDetailResponse>> listOrderDetailsByStatus(
+    public ResponseEntity<List<OrderDetailResponseDTO>> listOrderDetailsByStatus(
             @PathVariable Long orderGroupId,
             @PathVariable Status status) {
-        List<OrderDetailResponse> responses = orderDetailService.getOrderDetailsForGroupWithStatus(orderGroupId, status);
+        List<OrderDetailResponseDTO> responses = orderDetailService.getOrderDetailsForGroupWithStatus(orderGroupId, status);
         return ResponseEntity.ok(responses);
     }
 
