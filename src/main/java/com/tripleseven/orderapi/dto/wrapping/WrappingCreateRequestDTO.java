@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 @Value
-public class WrappingUpdateRequest {
+public class WrappingCreateRequestDTO {
     @NotNull
     @NotBlank
     String name;

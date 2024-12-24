@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.service.pointhistory;
 
-import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequest;
-import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponse;
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
@@ -27,25 +27,25 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     private final PointPolicyRepository pointPolicyRepository;
 
     @Override
-    public Page<PointHistoryResponse> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
+    public Page<PointHistoryResponseDTO> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAllByMemberId(memberId, pageable);
 
         if (histories.isEmpty()) {
             throw new PointHistoryNotFoundException(String.format("No point histories found for memberId=%d", memberId));
         }
 
-        return histories.map(PointHistoryResponse::fromEntity);
+        return histories.map(PointHistoryResponseDTO::fromEntity);
     }
 
     @Override
-    public Page<PointHistoryResponse> getPointHistories(Pageable pageable) {
+    public Page<PointHistoryResponseDTO> getPointHistories(Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAll(pageable);
 
         if (histories.isEmpty()) {
             throw new PointHistoryNotFoundException("No point histories found.");
         }
 
-        return histories.map(PointHistoryResponse::fromEntity);
+        return histories.map(PointHistoryResponseDTO::fromEntity);
     }
 
     @Override
@@ -63,17 +63,17 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public PointHistoryResponse getPointHistory(Long pointHistoryId) {
+    public PointHistoryResponseDTO getPointHistory(Long pointHistoryId) {
         PointHistory history = pointHistoryRepository.findById(pointHistoryId)
                 .orElseThrow(() -> new PointHistoryNotFoundException(
                         String.format("PointHistory with id=%d not found", pointHistoryId)
                 ));
 
-        return PointHistoryResponse.fromEntity(history);
+        return PointHistoryResponseDTO.fromEntity(history);
     }
 
     @Override
-    public PointHistoryResponse createPointHistory(Long memberId, PointHistoryCreateRequest request) {
+    public PointHistoryResponseDTO createPointHistory(Long memberId, PointHistoryCreateRequestDTO request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(request.getPointPolicyId())
                 .orElseThrow(() -> new PointPolicyNotFoundException(
                         String.format("PointPolicy with id=%d not found", request.getPointPolicyId())
@@ -87,7 +87,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         );
 
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
-        return PointHistoryResponse.fromEntity(savedHistory);
+        return PointHistoryResponseDTO.fromEntity(savedHistory);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         return pointHistoryRepository.sumAmount(memberId);
     }
 
-    public Page<PointHistoryResponse> getPointHistoriesWithinPeriod(Long memberId, LocalDate startDate, LocalDate endDate,String sortDirection, Pageable pageable) {
+    public Page<PointHistoryResponseDTO> getPointHistoriesWithinPeriod(Long memberId, LocalDate startDate, LocalDate endDate, String sortDirection, Pageable pageable) {
         LocalDateTime startDateTime = startDate.atStartOfDay();         // 시작일 00:00:00
         LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay(); // 종료일의 다음날 00:00:00
 
@@ -107,16 +107,16 @@ public class PointHistoryServiceImpl implements PointHistoryService {
             throw new PointHistoryNotFoundException("No point histories found.");
         }
 
-        return histories.map(PointHistoryResponse::fromEntity);
+        return histories.map(PointHistoryResponseDTO::fromEntity);
     }
 
     @Override
-    public Page<PointHistoryResponse> getPointHistoriesWithState(Long memberId, HistoryTypes state, Pageable pageable) {
+    public Page<PointHistoryResponseDTO> getPointHistoriesWithState(Long memberId, HistoryTypes state, Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAllByMemberIdAndTypes(memberId, state, pageable);
         if (histories.isEmpty()) {
             throw new PointHistoryNotFoundException("No point histories found.");
         }
-        return histories.map(PointHistoryResponse::fromEntity);
+        return histories.map(PointHistoryResponseDTO::fromEntity);
     }
 
 }

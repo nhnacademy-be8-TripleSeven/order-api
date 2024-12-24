@@ -1,16 +1,16 @@
 package com.tripleseven.orderapi.service.deliverypolicy;
 
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequest;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponse;
-import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequest;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
+import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 
 public interface DeliveryPolicyService {
 
-    DeliveryPolicyResponse getDeliveryPolicy(Long id);
+    DeliveryPolicyResponseDTO getDeliveryPolicy(Long id);
 
-    DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest deliveryPolicyCreateRequest);
+    DeliveryPolicyResponseDTO createDeliveryPolicy(DeliveryPolicyCreateRequestDTO deliveryPolicyCreateRequestDTO);
 
-    DeliveryPolicyResponse updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequest deliveryPolicyUpdateRequest);
+    DeliveryPolicyResponseDTO updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequestDTO deliveryPolicyUpdateRequestDTO);
 
     void deleteDeliveryPolicy(Long id);
 

@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service.deliveryinfo;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequest;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponse;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
@@ -21,40 +21,40 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryInfoResponse getDeliveryInfoById(Long id) {
+    public DeliveryInfoResponseDTO getDeliveryInfoById(Long id) {
         Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
         if (optionalDeliveryInfo.isEmpty()) {
             throw new RuntimeException();
         }
 
-        return DeliveryInfoResponse.fromEntity(optionalDeliveryInfo.get());
+        return DeliveryInfoResponseDTO.fromEntity(optionalDeliveryInfo.get());
     }
 
     @Override
     @Transactional
-    public DeliveryInfoResponse createDeliveryInfo(DeliveryInfoCreateRequest deliveryInfoCreateRequest) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(deliveryInfoCreateRequest.getId());
+    public DeliveryInfoResponseDTO createDeliveryInfo(DeliveryInfoCreateRequestDTO deliveryInfoCreateRequestDTO) {
+        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(deliveryInfoCreateRequestDTO.getId());
 
         if (optionalOrderGroup.isEmpty()) {
             throw new RuntimeException();
         }
 
         DeliveryInfo deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate(deliveryInfoCreateRequest.getName(), deliveryInfoCreateRequest.getInvoiceNumber(), optionalOrderGroup.get());
+        deliveryInfo.ofCreate(deliveryInfoCreateRequestDTO.getName(), deliveryInfoCreateRequestDTO.getInvoiceNumber(), optionalOrderGroup.get());
         DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
-        return DeliveryInfoResponse.fromEntity(savedDeliveryInfo);
+        return DeliveryInfoResponseDTO.fromEntity(savedDeliveryInfo);
     }
 
     @Override
     @Transactional
-    public DeliveryInfoResponse updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequest deliveryInfoArrivedAtUpdateRequest) {
+    public DeliveryInfoResponseDTO updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequestDTO deliveryInfoArrivedAtUpdateRequestDTO) {
         Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
         if (optionalDeliveryInfo.isEmpty()) {
             throw new RuntimeException();
         }
         DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
-        deliveryInfo.ofUpdateArrived(deliveryInfoArrivedAtUpdateRequest.getArrivedAt());
-        return DeliveryInfoResponse.fromEntity(deliveryInfo);
+        deliveryInfo.ofUpdateArrived(deliveryInfoArrivedAtUpdateRequestDTO.getArrivedAt());
+        return DeliveryInfoResponseDTO.fromEntity(deliveryInfo);
     }
 
     @Override

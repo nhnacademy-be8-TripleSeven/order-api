@@ -1,9 +1,9 @@
 package com.tripleseven.orderapi.service.ordergroup;
 
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequest;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponse;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequest;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
@@ -28,49 +28,49 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderGroupResponse getOrderGroupById(Long id) {
+    public OrderGroupResponseDTO getOrderGroupById(Long id) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
 
         if (optionalOrderGroup.isEmpty()) {
             throw new RuntimeException();
         }
 
-        return OrderGroupResponse.fromEntity(optionalOrderGroup.get());
+        return OrderGroupResponseDTO.fromEntity(optionalOrderGroup.get());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderGroupResponse> getOrderGroupPagesByUserId(Long userId, Pageable pageable) {
+    public Page<OrderGroupResponseDTO> getOrderGroupPagesByUserId(Long userId, Pageable pageable) {
         Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
-        return orderGroups.map(OrderGroupResponse::fromEntity);
+        return orderGroups.map(OrderGroupResponseDTO::fromEntity);
     }
 
     @Override
     @Transactional
-    public OrderGroupResponse createOrderGroup(OrderGroupCreateRequest orderGroupCreateRequest) {
+    public OrderGroupResponseDTO createOrderGroup(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();
 
-        WrappingResponse wrappingResponse = wrappingService.getWrappingById(orderGroupCreateRequest.getWrappingId());
+        WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupCreateRequestDTO.getWrappingId());
         Wrapping wrapping = new Wrapping();
-        wrapping.ofCreate(wrappingResponse.getName(), wrappingResponse.getPrice());
+        wrapping.ofCreate(wrappingResponseDTO.getName(), wrappingResponseDTO.getPrice());
 
         orderGroup.ofCreate(
-                orderGroupCreateRequest.getUserId(),
-                orderGroupCreateRequest.getOrderedName(),
-                orderGroupCreateRequest.getRecipientName(),
-                orderGroupCreateRequest.getRecipientPhone(),
-                orderGroupCreateRequest.getDeliveryPrice(),
-                orderGroupCreateRequest.getAddress(),
+                orderGroupCreateRequestDTO.getUserId(),
+                orderGroupCreateRequestDTO.getOrderedName(),
+                orderGroupCreateRequestDTO.getRecipientName(),
+                orderGroupCreateRequestDTO.getRecipientPhone(),
+                orderGroupCreateRequestDTO.getDeliveryPrice(),
+                orderGroupCreateRequestDTO.getAddress(),
                 wrapping);
 
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
 
-        return OrderGroupResponse.fromEntity(savedOrderGroup);
+        return OrderGroupResponseDTO.fromEntity(savedOrderGroup);
     }
 
     @Override
     @Transactional
-    public OrderGroupResponse updateAddressOrderGroup(Long id, OrderGroupUpdateAddressRequest orderGroupUpdateAddressRequest) {
+    public OrderGroupResponseDTO updateAddressOrderGroup(Long id, OrderGroupUpdateAddressRequestDTO orderGroupUpdateAddressRequestDTO) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
 
         if (optionalOrderGroup.isEmpty()) {
@@ -78,9 +78,9 @@ public class OrderGroupServiceImpl implements OrderGroupService {
         }
 
         OrderGroup orderGroup = optionalOrderGroup.get();
-        orderGroup.ofUpdate(orderGroupUpdateAddressRequest.getAddress());
+        orderGroup.ofUpdate(orderGroupUpdateAddressRequestDTO.getAddress());
 
-        return OrderGroupResponse.fromEntity(orderGroup);
+        return OrderGroupResponseDTO.fromEntity(orderGroup);
 
     }
 
@@ -95,7 +95,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderGroupResponse> getOrderGroupPeriodByUserId(Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    public Page<OrderGroupResponseDTO> getOrderGroupPeriodByUserId(Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
         ZonedDateTime startDateTime = startDate.atStartOfDay().atZone(ZoneId.systemDefault());
         ZonedDateTime endDateTime = endDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault());
 
@@ -104,7 +104,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
             throw new RuntimeException();
         }
 
-        return savedOrderGroup.map(OrderGroupResponse::fromEntity);
+        return savedOrderGroup.map(OrderGroupResponseDTO::fromEntity);
     }
 
 }

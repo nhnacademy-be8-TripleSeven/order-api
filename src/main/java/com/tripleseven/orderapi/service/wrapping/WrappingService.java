@@ -1,19 +1,19 @@
 package com.tripleseven.orderapi.service.wrapping;
 
-import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequest;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
-import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequest;
+import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 
 import java.util.List;
 
 public interface WrappingService {
-    WrappingResponse getWrappingById(Long id);
+    WrappingResponseDTO getWrappingById(Long id);
 
-    List<WrappingResponse> getWrappingsToList();
+    List<WrappingResponseDTO> getWrappingsToList();
 
-    WrappingResponse createWrapping(WrappingCreateRequest wrappingCreateRequest);
+    WrappingResponseDTO createWrapping(WrappingCreateRequestDTO wrappingCreateRequestDTO);
 
-    WrappingResponse updateWrapping(Long id, WrappingUpdateRequest wrappingUpdateRequest);
+    WrappingResponseDTO updateWrapping(Long id, WrappingUpdateRequestDTO wrappingUpdateRequestDTO);
 
     void deleteWrapping(Long id);
 }

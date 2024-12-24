@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
-public class PointHistoryResponse {
+public class PointHistoryResponseDTO {
     private final Long id;
 
     @Enumerated(EnumType.STRING)
@@ -24,7 +24,7 @@ public class PointHistoryResponse {
     private final String comment;
 
     @Builder
-    public PointHistoryResponse(Long id, HistoryTypes types, int amount, LocalDateTime changed_at, String comment) {
+    public PointHistoryResponseDTO(Long id, HistoryTypes types, int amount, LocalDateTime changed_at, String comment) {
         // Validate input parameters using Objects.isNull()
         if (Objects.isNull(id)) {
             throw new IllegalArgumentException("ID cannot be null");
@@ -47,8 +47,8 @@ public class PointHistoryResponse {
         this.comment = comment;
     }
 
-    public static PointHistoryResponse fromEntity(PointHistory pointHistory) {
-        return new PointHistoryResponse(
+    public static PointHistoryResponseDTO fromEntity(PointHistory pointHistory) {
+        return new PointHistoryResponseDTO(
                 pointHistory.getId(),
                 pointHistory.getTypes(),
                 pointHistory.getAmount(),

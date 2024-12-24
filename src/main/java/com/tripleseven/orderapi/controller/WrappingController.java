@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequest;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponse;
+import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
+import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.service.wrapping.WrappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,8 +28,8 @@ public class WrappingController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "해당하는 포장지 없음")
     })
-    public ResponseEntity<List<WrappingResponse>> getAllWrappings() {
-        List<WrappingResponse> responses = wrappingService.getWrappingsToList();
+    public ResponseEntity<List<WrappingResponseDTO>> getAllWrappings() {
+        List<WrappingResponseDTO> responses = wrappingService.getWrappingsToList();
         return ResponseEntity.ok().body(responses);
     }
 
@@ -40,8 +40,8 @@ public class WrappingController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ResponseEntity<WrappingResponse> createWrapping(@RequestBody WrappingCreateRequest request) {
-        WrappingResponse response = wrappingService.createWrapping(request);
+    public ResponseEntity<WrappingResponseDTO> createWrapping(@RequestBody WrappingCreateRequestDTO request) {
+        WrappingResponseDTO response = wrappingService.createWrapping(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

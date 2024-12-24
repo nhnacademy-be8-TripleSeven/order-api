@@ -7,7 +7,7 @@ import lombok.Value;
 import org.hibernate.validator.constraints.Length;
 
 @Value
-public class DeliveryInfoCreateRequest {
+public class DeliveryInfoCreateRequestDTO {
     @NotNull
     @NotBlank
     Long id;

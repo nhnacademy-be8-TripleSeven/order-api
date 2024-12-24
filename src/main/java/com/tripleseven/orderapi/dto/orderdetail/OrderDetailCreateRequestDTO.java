@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 @Value
-public class OrderDetailCreateRequest {
+public class OrderDetailCreateRequestDTO {
     @NotNull
     Long bookId;
 
