@@ -4,14 +4,13 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
-import com.tripleseven.orderapi.service.wrapping.WrappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +22,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
-    private final WrappingService wrappingService;
     private final OrderGroupService orderGroupService;
+    private final WrappingRepository wrappingRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -40,13 +39,12 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional
     public OrderDetailResponseDTO createOrderDetail(OrderDetailCreateRequestDTO orderDetailCreateRequestDTO) {
-        OrderDetail orderDetail = new OrderDetail();
-
-        WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderDetailCreateRequestDTO.getWrappingId());
-        Wrapping wrapping = new Wrapping();
-        wrapping.ofCreate(wrappingResponseDTO.getName(), wrappingResponseDTO.getPrice());
-
         OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.getOrderGroupById(orderDetailCreateRequestDTO.getOrderGroupId());
+
+        Long wrappingId = orderGroupResponseDTO.getWrappingId();
+        // 엔티티 프록시 객체를 생성하여 사용
+        Wrapping wrapping = wrappingRepository.getReferenceById(wrappingId);
+
         OrderGroup orderGroup = new OrderGroup();
         orderGroup.ofCreate(
                 orderGroupResponseDTO.getUserId(),
@@ -55,13 +53,15 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderGroupResponseDTO.getRecipientPhone(),
                 orderGroupResponseDTO.getDeliveryPrice(),
                 orderGroupResponseDTO.getAddress(),
-                wrapping);
+                wrapping
+        );
 
+        OrderDetail orderDetail = new OrderDetail();
         orderDetail.ofCreate(
                 orderDetailCreateRequestDTO.getBookId(),
                 orderDetailCreateRequestDTO.getAmount(),
-                orderDetailCreateRequestDTO.getPrice(),
-                wrapping,
+                orderDetailCreateRequestDTO.getPrimePrice(),
+                orderDetailCreateRequestDTO.getDiscountPrice(),
                 orderGroup);
 
         OrderDetail savedOrderDetail = orderDetailRepository.save(orderDetail);

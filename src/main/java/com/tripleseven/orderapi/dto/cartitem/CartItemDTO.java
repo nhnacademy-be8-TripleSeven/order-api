@@ -1,11 +1,11 @@
-package com.tripleseven.orderapi.domain;
+package com.tripleseven.orderapi.dto.cartitem;
 
 import lombok.Getter;
 
 @Getter
-public class CartItem {
+public class CartItemDTO {
     Long bookId;
-    Long amount;
+    int amount;
     int discountPrice;
     int PrimePrice;
 }

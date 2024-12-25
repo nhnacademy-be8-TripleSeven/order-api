@@ -1,7 +1,9 @@
 package com.tripleseven.orderapi.business.pay;
 
-public interface OrderProcessingStrategy {
-    void processSingleOrder();
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 
-    void processMultipleOrder();
+public interface OrderProcessingStrategy {
+    void processSingleOrder(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO);
+
+    void processMultipleOrder(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO);
 }

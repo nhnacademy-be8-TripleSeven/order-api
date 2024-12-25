@@ -23,26 +23,25 @@ public class LogTestController {
         return "Error log sent!";
     }
 
-    private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
-
-    @Autowired
-    RabbitTemplate rabbitTemplate;
-    @GetMapping("/orders/processing")
-    public String samplePublish() {
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "order.routing.key", "order + SpringBoot = Success");
-        return "order";
-    }
-
-    @GetMapping("/orders/point")
-    public String pointPublish() {
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "point.routing.key", "point + SpringBoot = Success");
-        return "point";
-    }
-
-    @GetMapping("/orders/cart")
-    public String cartPublish() {
-        memberApiClient.getMember();
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "cart.routing.key", "cart + SpringBoot = Success");
-        return "cart";
-    }
+//    private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
+//
+//    @Autowired
+//    RabbitTemplate rabbitTemplate;
+//    @GetMapping("/orders/processing")
+//    public String samplePublish() {
+//        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "order.routing.key", "order + SpringBoot = Success");
+//        return "order";
+//    }
+//
+//    @GetMapping("/orders/point")
+//    public String pointPublish() {
+//        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "point.routing.key", "point + SpringBoot = Success");
+//        return "point";
+//    }
+//
+//    @GetMapping("/orders/cart")
+//    public String cartPublish() {
+//        rabbitTemplate.convertAndSend(EXCHANGE_NAME, "cart.routing.key", "cart + SpringBoot = Success");
+//        return "cart";
+//    }
 }

@@ -10,6 +10,7 @@ import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailServiceImpl;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.wrapping.WrappingService;
@@ -33,7 +34,7 @@ public class OrderDetailServiceTest {
     private OrderDetailRepository orderDetailRepository;
 
     @Mock
-    private WrappingService wrappingService;
+    private WrappingRepository wrappingRepository;
 
     @Mock
     private OrderGroupService orderGroupService;
@@ -60,7 +61,7 @@ public class OrderDetailServiceTest {
 
         orderDetail = new OrderDetail();
         ReflectionTestUtils.setField(orderDetail, "id", 1L);
-        orderDetail.ofCreate(1L, 3, 10000, wrapping, orderGroup);
+        orderDetail.ofCreate(1L, 3, 10000, 9000, orderGroup);
     }
 
     @Test
@@ -72,7 +73,9 @@ public class OrderDetailServiceTest {
         assertNotNull(response);
         assertEquals(1L, response.getBookId());
         assertEquals(3, response.getAmount());
-        assertEquals(10000, response.getPrice());
+        assertEquals(10000, response.getPrimePrice());
+        assertEquals(9000, response.getDiscountPrice());
+
 
         verify(orderDetailRepository, times(1)).findById(1L);
     }
@@ -87,7 +90,7 @@ public class OrderDetailServiceTest {
 
     @Test
     void testCreateOrderDetail_Success() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponseDTO.fromEntity(wrapping));
+        when(wrappingRepository.getReferenceById(anyLong())).thenReturn(wrapping);
         when(orderGroupService.getOrderGroupById(anyLong())).thenReturn(OrderGroupResponseDTO.fromEntity(orderGroup));
         when(orderDetailRepository.save(any())).thenReturn(orderDetail);
 
@@ -95,28 +98,28 @@ public class OrderDetailServiceTest {
                 new OrderDetailCreateRequestDTO(
                         orderDetail.getBookId(),
                         orderDetail.getAmount(),
-                        orderDetail.getPrice(),
-                        1L,
+                        orderDetail.getPrimePrice(),
+                        orderDetail.getDiscountPrice(),
                         1L));
 
         assertNotNull(response);
         assertEquals(1L, response.getBookId());
         assertEquals(3, response.getAmount());
-        assertEquals(10000, response.getPrice());
+        assertEquals(10000, response.getPrimePrice());
+        assertEquals(9000, response.getDiscountPrice());
+
 
         verify(orderDetailRepository, times(1)).save(any());
     }
 
     @Test
     void testCreateOrderDetail_Fail() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(null);
-
         assertThrows(RuntimeException.class, () -> orderDetailService.createOrderDetail(
                 new OrderDetailCreateRequestDTO(
                         null,
                         -1,
                         0,
-                        1L,
+                        0,
                         1L)));
     }
 
@@ -131,7 +134,9 @@ public class OrderDetailServiceTest {
         assertNotNull(response);
         assertEquals(1L, response.getBookId());
         assertEquals(3, response.getAmount());
-        assertEquals(10000, response.getPrice());
+        assertEquals(10000, response.getPrimePrice());
+        assertEquals(9000, response.getDiscountPrice());
+
         assertEquals(Status.PAYMENT_COMPLETED, response.getStatus());
 
         verify(orderDetailRepository, times(1)).findById(anyLong());
@@ -165,7 +170,7 @@ public class OrderDetailServiceTest {
     void testGetOrderDetailsToList_Success() {
         OrderDetail orderDetail2 = new OrderDetail();
         ReflectionTestUtils.setField(orderDetail2, "id", 2L);
-        orderDetail2.ofCreate(2L, 2, 5000, wrapping, orderGroup);
+        orderDetail2.ofCreate(2L, 2, 5000, 4000, orderGroup);
         when(orderDetailRepository.findAllByOrderGroupId(anyLong())).thenReturn(List.of(orderDetail, orderDetail2));
 
         List<OrderDetailResponseDTO> response = orderDetailService.getOrderDetailsToList(1L);
@@ -174,7 +179,9 @@ public class OrderDetailServiceTest {
         assertEquals(2, response.size());
         assertEquals(1L, response.getFirst().getBookId());
         assertEquals(3, response.getFirst().getAmount());
-        assertEquals(10000, response.getFirst().getPrice());
+        assertEquals(10000, response.getFirst().getPrimePrice());
+        assertEquals(9000, response.getFirst().getDiscountPrice());
+
 
         verify(orderDetailRepository, times(1)).findAllByOrderGroupId(anyLong());
     }

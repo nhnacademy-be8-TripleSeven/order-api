@@ -15,10 +15,11 @@ public class OrderDetailCreateRequestDTO {
 
     @NotNull
     @Min(100)
-    int price;
+    int primePrice;
 
     @NotNull
-    Long wrappingId;
+    @Min(100)
+    int discountPrice;
 
     @NotNull
     Long orderGroupId;

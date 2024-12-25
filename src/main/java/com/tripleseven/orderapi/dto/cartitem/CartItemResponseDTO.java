@@ -1,30 +1,30 @@
 package com.tripleseven.orderapi.dto.cartitem;
 
-import com.tripleseven.orderapi.domain.CartItem;
+
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class CartItemResponseDTO {
     private final Long bookId;
-    private final Long amount;
+    private final int amount;
     private final int discountedPrice;
-    private final int totalPrice;
+    private final int primePrice;
 
     @Builder
-    private CartItemResponseDTO(Long bookId, Long amount, int discountedPrice, int totalPrice) {
+    private CartItemResponseDTO(Long bookId, int amount, int discountedPrice, int primePrice) {
         this.bookId = bookId;
         this.amount = amount;
         this.discountedPrice = discountedPrice;
-        this.totalPrice = totalPrice;
+        this.primePrice = primePrice;
     }
 
-    public static CartItemResponseDTO fromEntity(CartItem cartItem) {
+    public static CartItemResponseDTO fromEntity(CartItemDTO cartItem) {
         return CartItemResponseDTO.builder()
                 .bookId(cartItem.getBookId())
                 .amount(cartItem.getAmount())
                 .discountedPrice(cartItem.getDiscountPrice())
-                .totalPrice(cartItem.getPrimePrice())
+                .primePrice(cartItem.getPrimePrice())
                 .build();
     }
 }
