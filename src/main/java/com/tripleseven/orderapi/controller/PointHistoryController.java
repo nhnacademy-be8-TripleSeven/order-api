@@ -110,7 +110,14 @@ public class PointHistoryController {
         Integer balance = pointHistoryService.getTotalPointByMemberId(memberId);
         return ResponseEntity.ok(balance);
     }
+
+
     @GetMapping("/user/point-histories/period")
+    @Operation(summary = "회원의 기간 포인트 기록 조회", description = "특정 회원의 포인트 기록을 기간으로 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "조회 성공"),
+            @ApiResponse(responseCode = "404",description = "포인트 기록을 찾을 수 없음")
+    })
     public ResponseEntity<Page<PointHistoryResponseDTO>> getPointHistoriesWithinPeriod(
             @RequestHeader("X-USER") Long memberId,
             @RequestParam(value = "startDate", required = false) LocalDate startDate,

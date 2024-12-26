@@ -15,9 +15,9 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
     void deleteAllByMemberId(Long memberId);
     @Query("select SUM(p.amount) from PointHistory p where p.memberId = ?1")
     int sumAmount(Long memberId);
-    @Query("SELECT ph FROM PointHistory ph WHERE ph.memberId = : memberId AND ph.changedAt >= :startDate AND ph.changedAt < :endDate")
+    @Query("SELECT ph FROM PointHistory ph WHERE ph.memberId = :memberId AND ph.changedAt >= :startDate AND ph.changedAt < :endDate")
     Page<PointHistory> findAllByChangedAtBetween(
-            @Param(("memberId")) Long memberId,
+            @Param("memberId") Long memberId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
