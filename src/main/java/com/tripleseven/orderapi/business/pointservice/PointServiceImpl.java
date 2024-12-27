@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.service.pointservice;
+package com.tripleseven.orderapi.business.pointservice;
 
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;

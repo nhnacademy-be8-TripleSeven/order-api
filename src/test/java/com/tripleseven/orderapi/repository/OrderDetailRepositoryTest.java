@@ -40,7 +40,7 @@ public class OrderDetailRepositoryTest {
         orderGroupRepository.save(orderGroup);
 
         orderDetail = new OrderDetail();
-        orderDetail.ofCreate(1L, 3, 10000, wrapping, orderGroup);
+        orderDetail.ofCreate(1L, 3, 10000, 9000, orderGroup);
     }
 
     @Test
@@ -50,8 +50,8 @@ public class OrderDetailRepositoryTest {
         assertNotNull(savedOrderDetail.getId());
         assertEquals(1L, savedOrderDetail.getBookId());
         assertEquals(3, savedOrderDetail.getAmount());
-        assertEquals(10000, savedOrderDetail.getPrice());
-        assertEquals(100, savedOrderDetail.getWrapping().getPrice());
+        assertEquals(10000, savedOrderDetail.getPrimePrice());
+        assertEquals(9000, savedOrderDetail.getDiscountPrice());
         assertEquals(1000, savedOrderDetail.getOrderGroup().getDeliveryPrice());
         assertEquals("Test Ordered", savedOrderDetail.getOrderGroup().getOrderedName());
         assertEquals("Test Recipient", savedOrderDetail.getOrderGroup().getRecipientName());
@@ -69,8 +69,8 @@ public class OrderDetailRepositoryTest {
         assertTrue(foundOrderDetail.isPresent());
         assertEquals(1L, savedOrderDetail.getBookId());
         assertEquals(3, savedOrderDetail.getAmount());
-        assertEquals(10000, savedOrderDetail.getPrice());
-        assertEquals(100, savedOrderDetail.getWrapping().getPrice());
+        assertEquals(10000, savedOrderDetail.getPrimePrice());
+        assertEquals(9000, savedOrderDetail.getDiscountPrice());
         assertEquals(1000, savedOrderDetail.getOrderGroup().getDeliveryPrice());
         assertEquals("Test Ordered", savedOrderDetail.getOrderGroup().getOrderedName());
         assertEquals("Test Recipient", savedOrderDetail.getOrderGroup().getRecipientName());
@@ -112,8 +112,8 @@ public class OrderDetailRepositoryTest {
         assertEquals(savedOrderDetail.getId(), updatedOrderDetail.getId());
         assertEquals(savedOrderDetail.getBookId(), updatedOrderDetail.getBookId());
         assertEquals(savedOrderDetail.getAmount(), updatedOrderDetail.getAmount());
-        assertEquals(savedOrderDetail.getPrice(), updatedOrderDetail.getPrice());
-        assertEquals(savedOrderDetail.getWrapping().getId(), updatedOrderDetail.getWrapping().getId());
+        assertEquals(savedOrderDetail.getPrimePrice(), updatedOrderDetail.getPrimePrice());
+        assertEquals(savedOrderDetail.getDiscountPrice(), updatedOrderDetail.getDiscountPrice());
         assertEquals(savedOrderDetail.getOrderGroup().getId(), updatedOrderDetail.getOrderGroup().getId());
     }
 

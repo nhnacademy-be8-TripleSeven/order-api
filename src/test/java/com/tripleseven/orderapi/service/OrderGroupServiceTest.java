@@ -48,8 +48,6 @@ public class OrderGroupServiceTest {
 
     private Wrapping wrapping;
 
-    private DeliveryInfo deliveryInfo;
-
     @BeforeEach
     void setUp() {
         wrapping = new Wrapping();
@@ -59,10 +57,6 @@ public class OrderGroupServiceTest {
         orderGroup = new OrderGroup();
         ReflectionTestUtils.setField(orderGroup, "id", 1L);
         orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
-
-        deliveryInfo = new DeliveryInfo();
-        ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
-        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
     }
 
     @Test
