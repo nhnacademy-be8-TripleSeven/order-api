@@ -5,6 +5,7 @@ import lombok.Value;
 import java.util.List;
 
 @Value
-public class CartItemRequestDTO {
-    List<CartItemDTO> cartItems;
+public class CartUpdateRequestDTO {
+    Long userId;
+    List<Long> bookIds;
 }

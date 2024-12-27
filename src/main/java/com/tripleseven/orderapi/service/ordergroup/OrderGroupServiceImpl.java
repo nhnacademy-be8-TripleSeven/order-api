@@ -7,6 +7,7 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.wrapping.WrappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +25,7 @@ import java.util.Optional;
 public class OrderGroupServiceImpl implements OrderGroupService {
 
     private final OrderGroupRepository orderGroupRepository;
-    private final WrappingService wrappingService;
+    private final WrappingRepository wrappingRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -50,9 +51,11 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     public OrderGroupResponseDTO createOrderGroup(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();
 
-        WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupCreateRequestDTO.getWrappingId());
-        Wrapping wrapping = new Wrapping();
-        wrapping.ofCreate(wrappingResponseDTO.getName(), wrappingResponseDTO.getPrice());
+        Optional<Wrapping> optionalWrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId());
+
+        if(optionalWrapping.isEmpty()){
+            throw new RuntimeException();
+        }
 
         orderGroup.ofCreate(
                 orderGroupCreateRequestDTO.getUserId(),
@@ -61,7 +64,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 orderGroupCreateRequestDTO.getRecipientPhone(),
                 orderGroupCreateRequestDTO.getDeliveryPrice(),
                 orderGroupCreateRequestDTO.getAddress(),
-                wrapping);
+                optionalWrapping.get());
 
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
 

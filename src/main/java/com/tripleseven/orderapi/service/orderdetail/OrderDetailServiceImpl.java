@@ -9,6 +9,7 @@ import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
-    private final OrderGroupService orderGroupService;
+    private final OrderGroupRepository orderGroupRepository;
     private final WrappingRepository wrappingRepository;
 
     @Override
@@ -39,22 +40,13 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional
     public OrderDetailResponseDTO createOrderDetail(OrderDetailCreateRequestDTO orderDetailCreateRequestDTO) {
-        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.getOrderGroupById(orderDetailCreateRequestDTO.getOrderGroupId());
+        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderDetailCreateRequestDTO.getOrderGroupId());
 
-        Long wrappingId = orderGroupResponseDTO.getWrappingId();
-        // 엔티티 프록시 객체를 생성하여 사용
-        Wrapping wrapping = wrappingRepository.getReferenceById(wrappingId);
+        if(optionalOrderGroup.isEmpty()){
+            throw new RuntimeException();
+        }
 
-        OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(
-                orderGroupResponseDTO.getUserId(),
-                orderGroupResponseDTO.getOrderedName(),
-                orderGroupResponseDTO.getRecipientName(),
-                orderGroupResponseDTO.getRecipientPhone(),
-                orderGroupResponseDTO.getDeliveryPrice(),
-                orderGroupResponseDTO.getAddress(),
-                wrapping
-        );
+        OrderGroup orderGroup = optionalOrderGroup.get();
 
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.ofCreate(
