@@ -102,10 +102,7 @@ public class PayApiController {
 
     @PostMapping("/payments/order")
     public ResponseEntity<OrderInfoResponseDTO> responseOrderInfo(@RequestBody OrderInfoRequestDTO request) throws Exception {
-        OrderInfoResponseDTO response = new OrderInfoResponseDTO();
-        response.setOrderId(UUID.randomUUID().getLeastSignificantBits());
-        response.setUsedPoints(request.getUsedPoints());
-        response.setTotalAmount(request.getTotalAmount());
+        OrderInfoResponseDTO response = payService.getOrderInfo(request);
         return ResponseEntity.ok(response);
     }
 //

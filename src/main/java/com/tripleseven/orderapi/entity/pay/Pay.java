@@ -18,6 +18,7 @@ public class Pay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //orderGroup 엔터티의 키
     private Long orderGroupId;
 
     private Long payTypeId;
@@ -30,6 +31,7 @@ public class Pay {
 
     private String paymentKey;  //결제의 키 값, 결제 데이터 관리를 위해 반드시 저장해야함
 
+    
     private String orderId;
 
 

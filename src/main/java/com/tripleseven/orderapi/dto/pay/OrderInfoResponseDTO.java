@@ -11,6 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OrderInfoResponseDTO {
     private Long orderId;
-    private Long usedPoints;
     private Long totalAmount;
 }
