@@ -1,13 +1,10 @@
 package com.tripleseven.orderapi.business.pay.strategy;
 
 import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
-import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
 import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
-import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,18 +35,13 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY);
     }
-    // Todo 요청 받을때 DTO에 userId의 정보를 가지고 있을지 고민,,
+
     @Override
     public void processMemberOrder(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         // Todo 장바구니 주문
         //  RabbitMQ 와 연결 (Listener 실행)
         //  주문 버튼 누르면 Redis에 저장된 장바구니 데이터 가져옴
         List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
-
-        WrappingCartItemDTO wrappingCartItemDTO = new WrappingCartItemDTO();
-        wrappingCartItemDTO.ofCreate(cartItems);
-
-        CombinedMessageDTO orderObject = new CombinedMessageDTO(wrappingCartItemDTO, orderGroupCreateRequestDTO);
 
         // 1. 도서 API에서 가격 및 재고 확인
 //        int price = 0;
@@ -59,9 +51,16 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         // 2. 포인트, 쿠폰 체크
 //        int userPoint = pointHistoryService.getTotalPointByMemberId(1L);
 
+        WrappingCartItemDTO wrappingCartItemDTO = new WrappingCartItemDTO();
+        wrappingCartItemDTO.ofCreate(cartItems);
+
+        CombinedMessageDTO combinedMessageDTO = new CombinedMessageDTO();
+        combinedMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);
+        combinedMessageDTO.addObject("UserId", userId);
+        combinedMessageDTO.addObject("OrderGroupCreateRequestDTO", orderGroupCreateRequestDTO);
 
         // 검증 이후
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY, orderObject);
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY, combinedMessageDTO);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY);
     }

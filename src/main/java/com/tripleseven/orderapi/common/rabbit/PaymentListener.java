@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -33,17 +34,21 @@ public class PaymentListener {
     private final RetryStateService retryStateService;
 
     @RabbitListener(queues = "nhn24.order.queue")
-    public void processSaveOrder(CombinedMessageDTO messageObject, Channel channel, Message message) {
+    public void processSaveOrder(CombinedMessageDTO messageDTO, Channel channel, Message message) {
         // Todo 주문 내역 저장
         try {
             log.info("Saving Order...");
-            WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) messageObject.getObject1();
+            WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) messageDTO.getObject("WrappingCartItemDTO");
             List<CartItemDTO> cartItems = wrappingCartItemDTO.getCartItemList();
+            if(cartItems.isEmpty()){
+                throw new RuntimeException();
+            }
+            OrderGroupCreateRequestDTO orderGroupCreateRequestDTO = (OrderGroupCreateRequestDTO) messageDTO.getObject("OrderGroupCreateRequestDTO");
 
-            OrderGroupCreateRequestDTO orderGroupCreateRequestDTO = (OrderGroupCreateRequestDTO) messageObject.getObject2();
+            Long userId = (Long) messageDTO.getObject("UserId");
 
             // OrderGroup 생성
-            OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(orderGroupCreateRequestDTO);
+            OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(userId, orderGroupCreateRequestDTO);
             Long id = orderGroupResponseDTO.getId();
 
             //OrderDetail 저장
@@ -68,16 +73,16 @@ public class PaymentListener {
     }
 
     @RabbitListener(queues = "nhn24.cart.queue")
-    public void processClearCart(CombinedMessageDTO combinedMessageDTO, Channel channel, Message message) {
+    public void processClearCart(CombinedMessageDTO messageDTO, Channel channel, Message message) {
         // Todo 장바구니 초기화
         try {
             log.info("Clearing Cart...");
 
-            WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) combinedMessageDTO.getObject1();
+            WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) messageDTO.getObject("WrappingCartItemDTO");
             List<Long> bookIds = new ArrayList<>();
             List<CartItemDTO> cartItems = wrappingCartItemDTO.getCartItemList();
 
-            Long userId = (Long) combinedMessageDTO.getObject2();
+            Long userId = (Long) messageDTO.getObject("UserId");
 
             for (CartItemDTO cartItem : cartItems) {
                 bookIds.add(cartItem.getBookId());
@@ -85,7 +90,7 @@ public class PaymentListener {
 
             CartUpdateRequestDTO cartUpdateRequestDTO = new CartUpdateRequestDTO(userId, bookIds);
             memberApiClient.updateCart(cartUpdateRequestDTO);
-            // redis 주문데이터 초기화는 member-api 에서
+            // redis 주문서 데이터 초기화는 member-api 에서
             log.info("Completed Clearing Cart!!");
 
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -124,7 +129,7 @@ public class PaymentListener {
         int count = retryStateService.getRetryCount(message.getMessageProperties().getReceivedRoutingKey()).incrementAndGet();
 
         try {
-            if (count > 3) {
+            if (count > 2) {
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
                 retryStateService.resetRetryCount(message.getMessageProperties().getReceivedRoutingKey());
             }

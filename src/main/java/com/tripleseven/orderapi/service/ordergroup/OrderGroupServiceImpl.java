@@ -48,7 +48,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
     @Override
     @Transactional
-    public OrderGroupResponseDTO createOrderGroup(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
+    public OrderGroupResponseDTO createOrderGroup(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();
 
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId());
@@ -58,7 +58,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
         }
 
         orderGroup.ofCreate(
-                orderGroupCreateRequestDTO.getUserId(),
+                userId,
                 orderGroupCreateRequestDTO.getOrderedName(),
                 orderGroupCreateRequestDTO.getRecipientName(),
                 orderGroupCreateRequestDTO.getRecipientPhone(),

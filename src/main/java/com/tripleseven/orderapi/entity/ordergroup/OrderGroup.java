@@ -14,7 +14,7 @@ public class OrderGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    // 비회원은 NULL
     private Long userId;
 
     @NotNull
