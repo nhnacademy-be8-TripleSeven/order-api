@@ -1,6 +1,8 @@
 package com.tripleseven.orderapi.common.rabbit;
 
 import com.rabbitmq.client.Channel;
+import com.tripleseven.orderapi.business.pointservice.PointService;
+import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
@@ -9,6 +11,7 @@ import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
+import com.tripleseven.orderapi.dto.point.PointDTO;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +32,14 @@ public class PaymentListener {
 
     private final OrderGroupService orderGroupService;
     private final OrderDetailService orderDetailService;
+
+    private final PointService pointService;
+
     private final MemberApiClient memberApiClient;
+    private final BookCouponApiClient bookCouponApiClient;
+
     private final RetryStateService retryStateService;
+
 
     @RabbitListener(queues = "nhn24.order.queue")
     public void processSaveOrder(CombinedMessageDTO messageDTO, Channel channel, Message message) {
@@ -40,7 +48,7 @@ public class PaymentListener {
             log.info("Saving Order...");
             WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) messageDTO.getObject("WrappingCartItemDTO");
             List<CartItemDTO> cartItems = wrappingCartItemDTO.getCartItemList();
-            if(cartItems.isEmpty()){
+            if (cartItems.isEmpty()) {
                 throw new RuntimeException();
             }
             OrderGroupCreateRequestDTO orderGroupCreateRequestDTO = (OrderGroupCreateRequestDTO) messageDTO.getObject("OrderGroupCreateRequestDTO");
@@ -99,30 +107,40 @@ public class PaymentListener {
         }
     }
 
+    @RabbitListener(queues = "nhn24.coupon.queue")
+    public void useCoupon(CombinedMessageDTO messageDTO, Channel channel, Message message) {
+        try {
+            log.info("Used Coupon Update...");
+
+            Long couponId = (Long) messageDTO.getObject("couponId");
+            bookCouponApiClient.updateUseCoupon(couponId);
+
+            log.info("Completed Update Coupon!!");
+        } catch (Exception e) {
+            retryQueue(e, channel, message);
+        }
+    }
+
     @RabbitListener(queues = "nhn24.point.queue")
-    public void processPoint(Channel channel, Message message) {
-        // Todo 포인트 적립 및 사용
+    public void processPoint(CombinedMessageDTO messageDTO, Channel channel, Message message) {
+        // Todo 구매 후 포인트 적립 및 사용
         try {
             log.info("Processing Point...");
-            // Todo 포인트 서비스 생성해서 구현,,,
-//        pointService.createPointHistoryForPaymentEarn(earn);
-//        pointService.createPointHistoryForPaymentSpend(spend);
+            PointDTO pointDTO = (PointDTO) messageDTO.getObject("point");
+            Long userId = (Long) messageDTO.getObject("userId");
+
+            // 포인트 사용 및 적립
+            if (pointDTO.getSpendPoint() > 0){
+                pointService.createPointHistoryForPaymentSpend(userId, pointDTO.getSpendPoint());
+            }
+            pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getEarnPoint());
+
             log.info("Completed Processing Point!!");
         } catch (Exception e) {
             retryQueue(e, channel, message);
         }
     }
 
-    @RabbitListener(queues = "nhn24.coupon.queue")
-    public void useCoupon(Channel channel, Message message) {
-        try {
-            log.info("Used Coupon Update...");
-            // Todo 포인트 서비스 생성해서 구현,,,
-            log.info("Completed Update Coupon!!");
-        } catch (Exception e) {
-            retryQueue(e, channel, message);
-        }
-    }
 
     // DLQ 보내기 전에 큐 요청 재시도
     private void retryQueue(Exception e, Channel channel, Message message) {
