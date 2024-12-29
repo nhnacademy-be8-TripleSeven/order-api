@@ -27,7 +27,7 @@ spring:
     properties:
       hibernate.format_sql: true
 
-
+#sonarqube 용 DB
 #spring:
 #  datasource:
 #    url: jdbc:h2:mem:testdb

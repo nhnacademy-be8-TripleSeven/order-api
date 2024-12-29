@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Length;
 public class DeliveryInfoCreateRequestDTO {
     @NotNull
     @NotBlank
-    Long id;
+    Long orderGroupId;
 
     @NotNull
     @NotBlank

@@ -3,12 +3,12 @@ package com.tripleseven.orderapi.service.ordergroup;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
-import com.tripleseven.orderapi.service.wrapping.WrappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
 
         if (optionalOrderGroup.isEmpty()) {
-            throw new RuntimeException();
+            throw new OrderGroupNotFoundException(id);
         }
 
         return OrderGroupResponseDTO.fromEntity(optionalOrderGroup.get());
@@ -53,8 +53,8 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId());
 
-        if(optionalWrapping.isEmpty()){
-            throw new RuntimeException();
+        if (optionalWrapping.isEmpty()) {
+            throw new WrappingNotFoundException(orderGroupCreateRequestDTO.getWrappingId());
         }
 
         orderGroup.ofCreate(
@@ -77,7 +77,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
 
         if (optionalOrderGroup.isEmpty()) {
-            throw new RuntimeException();
+            throw new OrderGroupNotFoundException(id);
         }
 
         OrderGroup orderGroup = optionalOrderGroup.get();
@@ -91,7 +91,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     @Transactional
     public void deleteOrderGroup(Long id) {
         if (!orderGroupRepository.existsById(id)) {
-            throw new RuntimeException();
+            throw new OrderGroupNotFoundException(id);
         }
         orderGroupRepository.deleteById(id);
     }
