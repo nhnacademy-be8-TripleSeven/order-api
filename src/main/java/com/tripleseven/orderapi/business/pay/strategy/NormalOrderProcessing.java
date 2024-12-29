@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.business.pay.strategy;
 
 import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
 import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
@@ -58,7 +57,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
 
         // 장바구니 체크
-        if(Objects.isNull(cartItems)){
+        if (Objects.isNull(cartItems)) {
             throw new RuntimeException();
         }
 
@@ -103,7 +102,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
     }
 
     // 결제 요청 하기 전 체크 할 사항들 (임시 위치)
-    public void checkValid(Long userId){
+    public void checkValid(Long userId) {
 
         List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
         Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
@@ -111,19 +110,18 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
 
         List<Long> bookIds = new ArrayList<>();
-        for(CartItemDTO cartItem: cartItems){
+        for (CartItemDTO cartItem : cartItems) {
             bookIds.add(cartItem.getBookId());
         }
 
         // 1. 도서 API에서 가격 및 재고 확인
         List<CartItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
 
-        for(CartItemDTO cartItem: realItems){
+        for (CartItemDTO cartItem : realItems) {
         }
 
         int price = 0;
         int totalPrice = 0;
-
 
 
         int memberPoint = pointHistoryService.getTotalPointByMemberId(userId);
