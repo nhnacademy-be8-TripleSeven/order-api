@@ -20,7 +20,13 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-          
+      - name: Set P12 file as environment variable
+        run: |
+          echo "${{ secrets.P12_FILE }}" | base64 --decode > p12_encoded_file
+          P12_FILE_CONTENT=$(cat p12_encoded_file | base64 -w 0)
+          echo "P12_FILE=$P12_FILE_CONTENT" >> $GITHUB_ENV
+          rm p12_encoded_file
+      
       - name: Build with Maven 
         run: mvn -B package -DskipTests --file pom.xml
 
@@ -68,7 +74,13 @@ jobs:
               docker stop order-api-instance-1 || true
               docker rm -f order-api-instance-1 || true
             fi
-              docker run --name order-api-instance-1 --network nhn-book-store-network -p 8088:8088 -e SPRING_PROFILES_ACTIVE=instance1 -d lushlife99/nhn-order:${{ github.sha }}
+              docker run --name order-api-instance-1 \
+              --network nhn-book-store-network \
+              -p 8088:8088 \
+              -e SPRING_PROFILES_ACTIVE=instance1 \
+              -e P12_FILE="$(echo ${{ secrets.P12_FILE }} | base64 --decode | base64 -w 0)" \
+              -e P12_PASSWORD=${{ secrets.P12_PASSWORD }} \
+              -d lushlife99/nhn-order:${{ github.sha }}
 
 
 
@@ -84,4 +96,9 @@ jobs:
               docker stop order-api-instance-2 || true
               docker rm -f order-api-instance-2 || true
             fi
-              docker run --name order-api-instance-2 --network nhn-book-store-network -p 8089:8089 -e SPRING_PROFILES_ACTIVE=instance2 -d lushlife99/nhn-order:${{ github.sha }}
+              docker run --name order-api-instance-2 \
+              --network nhn-book-store-network \
+              -p 8089:8089 -e SPRING_PROFILES_ACTIVE=instance2 \
+              -e P12_FILE="$(echo ${{ secrets.P12_FILE }} | base64 --decode | base64 -w 0)" \
+              -e P12_PASSWORD=${{ secrets.P12_PASSWORD }} \
+              -d lushlife99/nhn-order:${{ github.sha }}
