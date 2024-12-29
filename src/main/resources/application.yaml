@@ -7,6 +7,7 @@ spring:
   jpa:
     open-in-view: false
 
+
   rabbitmq:
     username: admin
     password: nhnacademy123!

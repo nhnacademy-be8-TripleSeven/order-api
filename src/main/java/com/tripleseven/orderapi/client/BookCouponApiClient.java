@@ -1,13 +1,25 @@
 package com.tripleseven.orderapi.client;
 
-import com.tripleseven.orderapi.domain.CartItem;
+import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
 @FeignClient(name = "book-coupon-api")
 public interface BookCouponApiClient {
-    @GetMapping("/api/books/price")
-    List<CartItem> getBookPriceList(List<Long> bookIds);
+
+    @PostMapping("/coupons/use/{couponId}")
+    void updateUseCoupon(@PathVariable("couponId") Long couponId);
+
+    @GetMapping("/coupons/policy/{couponId}")
+    CouponDTO getCoupon(@PathVariable("couponId") Long couponId);
+
+    @GetMapping("/books/cart")
+    List<CartItemDTO> getCartItems(@RequestBody List<Long> bookIds);
+
 }

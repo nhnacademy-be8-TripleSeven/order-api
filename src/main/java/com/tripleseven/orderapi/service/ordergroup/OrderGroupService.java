@@ -14,7 +14,7 @@ public interface OrderGroupService {
 
     Page<OrderGroupResponseDTO> getOrderGroupPagesByUserId(Long userId, Pageable pageable);
 
-    OrderGroupResponseDTO createOrderGroup(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO);
+    OrderGroupResponseDTO createOrderGroup(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO);
 
     OrderGroupResponseDTO updateAddressOrderGroup(Long id, OrderGroupUpdateAddressRequestDTO orderGroupUpdateAddressRequestDTO);
 
