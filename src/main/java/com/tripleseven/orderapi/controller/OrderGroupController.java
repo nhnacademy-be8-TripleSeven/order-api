@@ -49,17 +49,17 @@ public class OrderGroupController {
         return ResponseEntity.ok(responses); // 반환: 주문 그룹 페이지 (Page<OrderGroupResponse>)
     }
 
-    // 3. 주문 그룹 생성
-    @PostMapping("/order-groups")
-    @Operation(summary = "주문 그룹 생성", description = "새로운 주문 그룹을 생성합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
-    })
-    public ResponseEntity<OrderGroupResponseDTO> createOrderGroup(@RequestBody OrderGroupCreateRequestDTO request) {
-        OrderGroupResponseDTO response = orderGroupService.createOrderGroup(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 그룹 (OrderGroupResponse)
-    }
+    // 3. 주문 그룹 생성 ( 아마 직접 생성하는 일은 없음 )
+//    @PostMapping("/order-groups")
+//    @Operation(summary = "주문 그룹 생성", description = "새로운 주문 그룹을 생성합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "201", description = "생성 성공"),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+//    })
+//    public ResponseEntity<OrderGroupResponseDTO> createOrderGroup(@RequestBody OrderGroupCreateRequestDTO request) {
+//        OrderGroupResponseDTO response = orderGroupService.createOrderGroup(request);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 그룹 (OrderGroupResponse)
+//    }
 
     // 5. 주문 그룹 삭제
     @DeleteMapping("/order-groups/{id}")

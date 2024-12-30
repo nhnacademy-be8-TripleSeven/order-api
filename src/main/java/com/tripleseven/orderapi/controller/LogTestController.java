@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,16 +43,16 @@ public class LogTestController {
         List<CartItemDTO> cartItemDTOList = new ArrayList<>();
         cartItemDTOList.add(cartItemDTO);
         redisTemplate.opsForHash().put(userId.toString(), "CartItems", cartItemDTOList);
+
         Wrapping wrapping = new Wrapping();
         wrapping.ofCreate("Test Wrapping", 100);
-        wrappingRepository.save(wrapping);
+        Wrapping savedWrapping = wrappingRepository.save(wrapping);
 
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
+        orderGroup.ofCreate(userId, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
         OrderGroupCreateRequestDTO orderGroupCreateRequestDTO =
                 new OrderGroupCreateRequestDTO(
-                        orderGroup.getUserId(),
-                        1L,
+                        savedWrapping.getId(),
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),

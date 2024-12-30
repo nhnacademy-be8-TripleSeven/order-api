@@ -4,10 +4,10 @@ import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
-import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupServiceImpl;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,10 +35,7 @@ public class OrderGroupServiceTest {
     private OrderGroupRepository orderGroupRepository;
 
     @Mock
-    private WrappingServiceImpl wrappingService;
-
-    @Mock
-    private DeliveryInfoServiceImpl deliveryInfoService;
+    private WrappingRepository wrappingRepository;
 
     @InjectMocks
     private OrderGroupServiceImpl orderGroupService;
@@ -82,13 +78,13 @@ public class OrderGroupServiceTest {
 
     @Test
     void testCreateOrderGroup_Success() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponseDTO.fromEntity(wrapping));
+        when(wrappingRepository.findById(anyLong())).thenReturn(Optional.of(wrapping));
         when(orderGroupRepository.save(any())).thenReturn(orderGroup);
 
         OrderGroupResponseDTO response = orderGroupService.createOrderGroup(
+                orderGroup.getId(),
                 new OrderGroupCreateRequestDTO(
-                        orderGroup.getUserId(),
-                        1L,
+                        wrapping.getId(),
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),
@@ -106,11 +102,10 @@ public class OrderGroupServiceTest {
 
     @Test
     void testCreateOrderGroup_Fail() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(null);
         assertThrows(RuntimeException.class, () -> orderGroupService.createOrderGroup(
+                orderGroup.getId(),
                 new OrderGroupCreateRequestDTO(
-                        orderGroup.getUserId(),
-                        1L,
+                        wrapping.getId(),
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),

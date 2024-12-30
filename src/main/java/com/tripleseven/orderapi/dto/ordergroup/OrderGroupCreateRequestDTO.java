@@ -9,9 +9,6 @@ import org.hibernate.validator.constraints.Length;
 @Value
 public class OrderGroupCreateRequestDTO {
     @NotNull
-    Long userId;
-
-    @NotNull
     Long wrappingId;
 
     @NotNull

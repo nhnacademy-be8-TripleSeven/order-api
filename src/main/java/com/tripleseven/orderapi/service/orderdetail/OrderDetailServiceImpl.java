@@ -3,15 +3,11 @@ package com.tripleseven.orderapi.service.orderdetail;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDTO;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
-import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
-import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +20,6 @@ import java.util.Optional;
 public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderGroupRepository orderGroupRepository;
-    private final WrappingRepository wrappingRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,7 +37,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public OrderDetailResponseDTO createOrderDetail(OrderDetailCreateRequestDTO orderDetailCreateRequestDTO) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderDetailCreateRequestDTO.getOrderGroupId());
 
-        if(optionalOrderGroup.isEmpty()){
+        if (optionalOrderGroup.isEmpty()) {
             throw new RuntimeException();
         }
 

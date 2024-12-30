@@ -1,8 +1,6 @@
 package com.tripleseven.orderapi.common.rabbit;
 
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
-import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
-import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -11,7 +9,6 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,14 +20,18 @@ public class RabbitConfig {
     private static final String ORDER_QUEUE_NAME = "nhn24.order.queue";
     private static final String POINT_QUEUE_NAME = "nhn24.point.queue";
     private static final String CART_QUEUE_NAME = "nhn24.cart.queue";
+    private static final String COUPON_QUEUE_NAME = "nhn24.coupon.queue";
 
     private static final String ORDER_ROUTING_KEY = "order.routing.key";
     private static final String POINT_ROUTING_KEY = "point.routing.key";
     private static final String CART_ROUTING_KEY = "cart.routing.key";
+    private static final String COUPON_ROUTING_KEY = "coupon.routing.key";
+
 
     private static final String ORDER_DEAD_ROUTING_KEY = "order.dlk.key";
     private static final String POINT_DEAD_ROUTING_KEY = "point.dlk.key";
     private static final String CART_DEAD_ROUTING_KEY = "cart.dlk.key";
+    private static final String COUPON_DEAD_ROUTING_KEY = "coupon.dlk.key";
 
 
     @Bean
@@ -48,13 +49,28 @@ public class RabbitConfig {
 
     @Bean
     Queue pointQueue() {
-        return new Queue(POINT_QUEUE_NAME);
+        return QueueBuilder.durable(POINT_QUEUE_NAME)
+                .deadLetterExchange(DEAD_EXCHANGE_NAME)
+                .deadLetterRoutingKey(POINT_DEAD_ROUTING_KEY)
+                .build();
     }
 
     @Bean
     Queue cartQueue() {
-        return new Queue(CART_QUEUE_NAME);
+        return QueueBuilder.durable(CART_QUEUE_NAME)
+                .deadLetterExchange(DEAD_EXCHANGE_NAME)
+                .deadLetterRoutingKey(CART_DEAD_ROUTING_KEY)
+                .build();
     }
+
+    @Bean
+    Queue couponQueue() {
+        return QueueBuilder.durable(COUPON_QUEUE_NAME)
+                .deadLetterExchange(DEAD_EXCHANGE_NAME)
+                .deadLetterRoutingKey(COUPON_DEAD_ROUTING_KEY)
+                .build();
+    }
+
 
     @Bean
     Binding orderBinding(Queue orderQueue, DirectExchange exchange) {
@@ -69,6 +85,11 @@ public class RabbitConfig {
     @Bean
     Binding cartBinding(Queue cartQueue, DirectExchange exchange) {
         return BindingBuilder.bind(cartQueue).to(exchange).with(CART_ROUTING_KEY);
+    }
+
+    @Bean
+    Binding couponBinding(Queue couponQueue, DirectExchange exchange) {
+        return BindingBuilder.bind(couponQueue).to(exchange).with(COUPON_ROUTING_KEY);
     }
 
     @Bean
