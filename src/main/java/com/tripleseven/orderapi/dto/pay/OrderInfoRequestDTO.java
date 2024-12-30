@@ -1,15 +1,15 @@
 package com.tripleseven.orderapi.dto.pay;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderInfoRequestDTO {
+
+
     // 주문자 정보
     private String customerName;       // 주문자 이름
     private String customerPhone;      // 주문자 휴대폰 번호

@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.controller;
 
+import com.tripleseven.orderapi.dto.pay.OrderInfoDTO;
 import com.tripleseven.orderapi.dto.pay.OrderInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.OrderInfoResponseDTO;
 import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
@@ -48,14 +49,14 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 승인 실패")
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
-    public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request, @RequestBody String jsonBody) throws Exception {
+    public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request, @RequestHeader("X-USER")Long userId,@RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
         int statusCode = response.containsKey("error") ? 400 : 200;
 
         if(statusCode == 200){
-            payService.save(response);
+            payService.save(userId,response);   //redis에 저장한것 mysql에 저장
         }
         return ResponseEntity.status(statusCode).body(response);
     }
@@ -101,8 +102,10 @@ public class PayApiController {
     }
 
     @PostMapping("/payments/order")
-    public ResponseEntity<OrderInfoResponseDTO> responseOrderInfo(@RequestBody OrderInfoRequestDTO request) throws Exception {
-        OrderInfoResponseDTO response = payService.getOrderInfo(request);
+    public ResponseEntity<OrderInfoResponseDTO> responseOrderInfo(
+            @RequestHeader("X-USER")Long userId,
+            @RequestBody OrderInfoRequestDTO request) throws Exception {
+        OrderInfoResponseDTO response = payService.getOrderInfo(userId,request);
         return ResponseEntity.ok(response);
     }
 //

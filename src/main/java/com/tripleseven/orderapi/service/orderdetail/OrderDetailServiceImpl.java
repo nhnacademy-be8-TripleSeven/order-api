@@ -100,4 +100,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public List<OrderDetailResponseDTO> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
         return List.of();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasUserPurchasedBook(Long userId, Long bookId) {
+        // OrderGroup과 OrderDetail을 조인하여 해당 유저가 특정 도서를 구매했는지 확인
+        return orderDetailRepository.existsByOrderGroupUserIdAndBookId(userId, bookId);
+    }
 }
