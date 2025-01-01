@@ -6,10 +6,11 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: http://admin:1234@localhost:8761/eureka
+      defaultZone: http://admin:1234@localhost:8761/eureka/
 #    상황에 따라 eureka 설정
     enabled: true
   instance:
+    health-check-url: /actuator/health
     instance-id: order-api
     hostname: localhost
     prefer-ip-address: true
@@ -22,7 +23,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate.format_sql: true

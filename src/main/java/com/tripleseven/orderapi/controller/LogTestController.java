@@ -4,7 +4,10 @@ import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
+import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,10 +17,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class LogTestController {
     private final OrderProcessingStrategy orderProcessingStrategy;
     private final WrappingRepository wrappingRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final PointHistoryRepository pointHistoryRepository;
 
     @GetMapping("/test-error")
     public String testErrorLogging() {
@@ -36,7 +39,7 @@ public class LogTestController {
 
 
     @GetMapping("/test-rabbit")
-    public void testRabbitMQ(@RequestHeader("X-User") Long userId) {
+    public void testRabbitMQ(@RequestHeader("X-USER") Long userId) {
 
         CartItemDTO cartItemDTO = new CartItemDTO();
         cartItemDTO.ofCreateTest();
@@ -58,6 +61,18 @@ public class LogTestController {
                         orderGroup.getRecipientPhone(),
                         orderGroup.getDeliveryPrice(),
                         orderGroup.getAddress());
+
+
+        PointHistory pointHistory = new PointHistory(
+                HistoryTypes.EARN,
+                12345,
+                LocalDateTime.now(),
+                "test",
+                userId
+        );
+
+        pointHistoryRepository.save(pointHistory);
+
         orderProcessingStrategy.processMemberOrder(userId, orderGroupCreateRequestDTO);
     }
 }

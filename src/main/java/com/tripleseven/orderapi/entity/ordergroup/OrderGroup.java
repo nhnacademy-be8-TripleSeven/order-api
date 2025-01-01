@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -21,7 +21,7 @@ public class OrderGroup {
     private String orderedName;
 
     @NotNull
-    private ZonedDateTime orderedAt;
+    private LocalDate orderedAt;
 
     @NotNull
     private String recipientName;
@@ -47,7 +47,7 @@ public class OrderGroup {
         this.recipientPhone = recipientPhone;
         this.deliveryPrice = deliveryPrice;
         this.address = address;
-        this.orderedAt = ZonedDateTime.now();
+        this.orderedAt = LocalDate.now();
         this.wrapping = wrapping;
     }
 

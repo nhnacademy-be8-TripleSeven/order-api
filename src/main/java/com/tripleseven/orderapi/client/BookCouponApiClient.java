@@ -16,10 +16,12 @@ public interface BookCouponApiClient {
     @PostMapping("/coupons/use/{couponId}")
     void updateUseCoupon(@PathVariable("couponId") Long couponId);
 
-    @GetMapping("/coupons/policy/{couponId}")
+    @GetMapping("/coupons/{couponId}/coupon-polities")
     CouponDTO getCoupon(@PathVariable("couponId") Long couponId);
 
-    @GetMapping("/books/cart")
+    @PostMapping("/books/cart")
     List<CartItemDTO> getCartItems(@RequestBody List<Long> bookIds);
 
+    @GetMapping("/books/{bookId}/name")
+    String getBookName(@PathVariable("bookId") Long bookId);
 }

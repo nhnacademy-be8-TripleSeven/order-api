@@ -9,7 +9,6 @@ import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
-import com.tripleseven.orderapi.exception.RedisNullPointException;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
@@ -52,27 +51,27 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
     public void processMemberOrder(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         // Todo 회원 주문
         List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
-        Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
-        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
-        // 계산 로직은 결제 누르기 전에 검증하면서 저장
-        PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
-
-        // 장바구니 체크
-        if (Objects.isNull(cartItems)) {
-            throw new RedisNullPointException("CartItems is Null");
-        }
-
-        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
-        pointMessageDTO.addObject("point", point);
-        pointMessageDTO.addObject("userId", userId);
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
-
-        CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
-        couponMessageDTO.addObject("coupon", coupon);
-        pointMessageDTO.addObject("userId", userId);
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
+//        Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
+//        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
+//        // 계산 로직은 결제 누르기 전에 검증하면서 저장
+//        PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
+//
+//        // 장바구니 체크
+//        if (Objects.isNull(cartItems)) {
+//            throw new RedisNullPointException("CartItems is Null");
+//        }
+//
+//        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
+//        pointMessageDTO.addObject("point", point);
+//        pointMessageDTO.addObject("userId", userId);
+//
+//        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
+//
+//        CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
+//        couponMessageDTO.addObject("coupon", coupon);
+//        pointMessageDTO.addObject("userId", userId);
+//
+//        rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
 
 
         orderProcessing(userId, orderGroupCreateRequestDTO);

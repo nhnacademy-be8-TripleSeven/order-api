@@ -1,12 +1,14 @@
 package com.tripleseven.orderapi.service.ordergroup;
 
+import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+import java.util.List;
 
 public interface OrderGroupService {
 
@@ -20,5 +22,5 @@ public interface OrderGroupService {
 
     void deleteOrderGroup(Long id);
 
-    Page<OrderGroupResponseDTO> getOrderGroupPeriodByUserId(Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+    Page<OrderViewsRequestDTO> getOrderGroupPeriodByUserId(Long userId, OrderManageRequestDTO orderManageRequestDTO, Pageable pageable);
 }
