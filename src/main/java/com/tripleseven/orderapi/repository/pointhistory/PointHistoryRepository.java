@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
     Page<PointHistory> findAllByMemberId(Long memberId, Pageable pageable);
     void deleteAllByMemberId(Long memberId);
-    @Query("select SUM(p.amount) from PointHistory p where p.memberId = ?1")
-    int sumAmount(Long memberId);
+    @Query("select COALESCE(SUM(p.amount), 0) from PointHistory p where p.memberId = ?1")
+    Integer sumAmount(Long memberId);
     @Query("SELECT ph FROM PointHistory ph WHERE ph.memberId = :memberId AND ph.changedAt >= :startDate AND ph.changedAt < :endDate")
     Page<PointHistory> findAllByChangedAtBetween(
             @Param("memberId") Long memberId,
