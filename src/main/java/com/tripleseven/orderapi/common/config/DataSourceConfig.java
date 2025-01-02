@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import javax.sql.DataSource;
 
 @Configuration
-@Profile("prod")
+@Profile({"instance1", "instance2"})
 public class DataSourceConfig {
 
     @Autowired
