@@ -107,9 +107,9 @@ public class PointHistoryController {
             @ApiResponse(responseCode = "404", description = "해당하는 회원 아이디 없음")
     })
     public ResponseEntity<Integer> getPoint(
-//            @RequestHeader("X-USER") Long memberId
+            @RequestHeader("X-USER") Long memberId
     ) {
-        Integer balance = pointHistoryService.getTotalPointByMemberId(1L);
+        Integer balance = pointHistoryService.getTotalPointByMemberId(memberId);
         return ResponseEntity.ok(balance);
     }
 
