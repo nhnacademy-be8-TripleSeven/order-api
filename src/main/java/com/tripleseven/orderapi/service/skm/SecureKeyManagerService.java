@@ -31,7 +31,7 @@ import java.util.List;
 
 import java.io.InputStream;
 
-@Profile({"instance-1","instance-2"})
+@Profile({"instance1","instance2"})
 @Service
 public class SecureKeyManagerService {
 
