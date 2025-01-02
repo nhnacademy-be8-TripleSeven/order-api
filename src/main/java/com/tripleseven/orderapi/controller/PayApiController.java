@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
+@Profile({"instance1", "instance2"})
 @Tag(name = "Payment API", description = "결제 관련 API를 제공합니다.")
 public class PayApiController {
 
