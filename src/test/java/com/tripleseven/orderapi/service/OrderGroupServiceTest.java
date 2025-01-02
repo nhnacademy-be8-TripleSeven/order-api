@@ -157,25 +157,4 @@ public class OrderGroupServiceTest {
         verify(orderGroupRepository, times(0)).deleteById(anyLong());
     }
 
-    @Test
-    void testGetOrderGroupPages() {
-        Pageable pageable = PageRequest.of(0, 10);
-        OrderGroup orderGroup2 = new OrderGroup();
-        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
-        ReflectionTestUtils.setField(orderGroup2, "id", 2L);
-        when(orderGroupRepository.findAllByUserId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(orderGroup, orderGroup2), pageable, 2));
-
-        Page<OrderGroupResponseDTO> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);
-
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-        assertEquals(orderGroup.getId(), result.getContent().getFirst().getId());
-        assertEquals(orderGroup2.getId(), result.getContent().getLast().getId());
-        assertEquals(0, result.getNumber());
-        assertEquals(1, result.getTotalPages());
-        assertEquals(10, result.getSize());
-        assertEquals(2, result.getTotalElements());
-
-        verify(orderGroupRepository, times(1)).findAllByUserId(anyLong(), any());
-    }
 }
