@@ -4,6 +4,7 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.annotation.Order;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
@@ -57,7 +57,7 @@ public class WrappingServiceTest {
     void testGetWrappingById_Fail() {
         when(wrappingRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> wrappingService.getWrappingById(1L));
+        assertThrows(WrappingNotFoundException.class, () -> wrappingService.getWrappingById(1L));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class WrappingServiceTest {
 
     @Test
     void testCreateWrapping_Fail() {
-        assertThrows(RuntimeException.class, () ->
+        assertThrows(NullPointerException.class, () ->
                 wrappingService.createWrapping(
                         new WrappingCreateRequestDTO(null, -1)));
     }
@@ -101,7 +101,7 @@ public class WrappingServiceTest {
         WrappingUpdateRequestDTO updateRequest = new WrappingUpdateRequestDTO("Updated Wrapping", 150);
         when(wrappingRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> wrappingService.updateWrapping(1L, updateRequest));
+        assertThrows(WrappingNotFoundException.class, () -> wrappingService.updateWrapping(1L, updateRequest));
     }
 
     @Test
@@ -118,6 +118,6 @@ public class WrappingServiceTest {
     void testDeleteWrapping_Fail() {
         when(wrappingRepository.existsById(1L)).thenReturn(false);
 
-        assertThrows(RuntimeException.class, () -> wrappingService.deleteWrapping(1L));
+        assertThrows(WrappingNotFoundException.class, () -> wrappingService.deleteWrapping(1L));
     }
 }

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.dto.deliverycode.DeliveryCodeDTO;
 import com.tripleseven.orderapi.dto.deliverycode.DeliveryCodeResponseDTO;
 import com.tripleseven.orderapi.entity.deliverycode.DeliveryCode;
+import com.tripleseven.orderapi.exception.DeliveryCodeSaveException;
+import com.tripleseven.orderapi.exception.notfound.DeliveryCodeNotFoundException;
 import com.tripleseven.orderapi.repository.deliverycode.DeliveryCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -54,7 +56,7 @@ public class DeliveryCodeServiceImpl implements DeliveryCodeService {
                 System.err.println("Failed to fetch data: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new DeliveryCodeSaveException(e.getMessage());
         }
     }
 
@@ -63,7 +65,7 @@ public class DeliveryCodeServiceImpl implements DeliveryCodeService {
     public String getDeliveryCodeToName(String name) {
         Optional<DeliveryCode> deliveryCode = deliveryCodeRepository.findDeliveryCodeByName(name);
         if (deliveryCode.isEmpty()){
-            throw new RuntimeException();
+            throw new DeliveryCodeNotFoundException(name);
         }
 
         return deliveryCode.get().getId();

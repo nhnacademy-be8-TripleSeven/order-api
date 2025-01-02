@@ -6,6 +6,8 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDT
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
+import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +28,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public OrderDetailResponseDTO getOrderDetailService(Long id) {
         Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
         if (optionalOrderDetail.isEmpty()) {
-            throw new RuntimeException();
+            throw new OrderDetailNotFoundException(id);
         }
 
         return OrderDetailResponseDTO.fromEntity(optionalOrderDetail.get());
@@ -38,7 +40,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderDetailCreateRequestDTO.getOrderGroupId());
 
         if (optionalOrderGroup.isEmpty()) {
-            throw new RuntimeException();
+            throw new OrderGroupNotFoundException(orderDetailCreateRequestDTO.getOrderGroupId());
         }
 
         OrderGroup orderGroup = optionalOrderGroup.get();
@@ -61,7 +63,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public OrderDetailResponseDTO updateOrderDetailStatus(Long id, OrderDetailUpdateStatusRequestDTO orderDetailUpdateStatusRequestDTO) {
         Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
         if (optionalOrderDetail.isEmpty()) {
-            throw new RuntimeException();
+            throw new OrderDetailNotFoundException(id);
         }
         OrderDetail orderDetail = optionalOrderDetail.get();
         orderDetail.ofUpdateStatus(orderDetailUpdateStatusRequestDTO.getStatus());
@@ -73,7 +75,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Transactional
     public void deleteOrderDetail(Long id) {
         if (!orderDetailRepository.existsById(id)) {
-            throw new RuntimeException();
+            throw new OrderDetailNotFoundException(id);
         }
         orderDetailRepository.deleteById(id);
     }
@@ -83,8 +85,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public List<OrderDetailResponseDTO> getOrderDetailsToList(Long orderGroupId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderGroupId(orderGroupId);
 
-        if (orderDetails.isEmpty()) {
-            throw new RuntimeException();
+        if(orderDetails.isEmpty()){
+            return List.of();
         }
 
         return orderDetails.stream().map(OrderDetailResponseDTO::fromEntity).toList();

@@ -9,6 +9,7 @@ import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
+import com.tripleseven.orderapi.exception.RedisNullPointException;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
 
         // 장바구니 체크
         if (Objects.isNull(cartItems)) {
-            throw new RuntimeException();
+            throw new RedisNullPointException("CartItems is Null");
         }
 
         CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();

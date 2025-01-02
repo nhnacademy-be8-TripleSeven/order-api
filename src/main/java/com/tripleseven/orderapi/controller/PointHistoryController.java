@@ -100,14 +100,16 @@ public class PointHistoryController {
     }
 
     // 특정 회원의 포인트 잔액 조회
-    @GetMapping("user/point-histories/point")
+    @GetMapping("/user/point-histories/point")
     @Operation(summary = "포인트 잔액 조회", description = "특정 회원의 포인트 잔액을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "해당하는 회원 아이디 없음")
     })
-    public ResponseEntity<Integer> getPoint(@RequestHeader("X-USER") Long memberId) {
-        Integer balance = pointHistoryService.getTotalPointByMemberId(memberId);
+    public ResponseEntity<Integer> getPoint(
+//            @RequestHeader("X-USER") Long memberId
+    ) {
+        Integer balance = pointHistoryService.getTotalPointByMemberId(1L);
         return ResponseEntity.ok(balance);
     }
 

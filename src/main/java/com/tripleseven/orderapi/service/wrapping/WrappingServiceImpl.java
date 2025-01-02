@@ -4,6 +4,7 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class WrappingServiceImpl implements WrappingService {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
 
         if (optionalWrapping.isEmpty()) {
-            throw new RuntimeException();
+            throw new WrappingNotFoundException(id);
         }
 
         return WrappingResponseDTO.fromEntity(optionalWrapping.get());
@@ -36,7 +37,7 @@ public class WrappingServiceImpl implements WrappingService {
         List<Wrapping> list = wrappingRepository.findAll();
 
         if (list.isEmpty()) {
-            throw new RuntimeException();
+            return List.of();
         }
 
         return list.stream().map(WrappingResponseDTO::fromEntity).toList();
@@ -57,7 +58,7 @@ public class WrappingServiceImpl implements WrappingService {
     public WrappingResponseDTO updateWrapping(Long id, WrappingUpdateRequestDTO wrappingUpdateRequestDTO) {
         Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
         if (optionalWrapping.isEmpty()) {
-            throw new RuntimeException();
+            throw new WrappingNotFoundException(id);
         }
         Wrapping wrapping = optionalWrapping.get();
         wrapping.ofUpdate(wrappingUpdateRequestDTO.getName(), wrappingUpdateRequestDTO.getPrice());
@@ -69,7 +70,7 @@ public class WrappingServiceImpl implements WrappingService {
     @Transactional
     public void deleteWrapping(Long id) {
         if (!wrappingRepository.existsById(id)) {
-            throw new RuntimeException();
+            throw new WrappingNotFoundException(id);
         }
         wrappingRepository.deleteById(id);
     }

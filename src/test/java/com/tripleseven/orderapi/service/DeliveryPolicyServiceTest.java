@@ -4,6 +4,7 @@ import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDT
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
+import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import com.tripleseven.orderapi.service.deliverypolicy.DeliveryPolicyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +55,7 @@ public class DeliveryPolicyServiceTest {
     void testFindById_Fail() {
         when(deliveryPolicyRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> deliveryPolicyService.getDeliveryPolicy(1L));
+        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.getDeliveryPolicy(1L));
         verify(deliveryPolicyRepository, times(1)).findById(1L);
     }
 
@@ -84,7 +85,7 @@ public class DeliveryPolicyServiceTest {
 
     @Test
     void testCreateDeliveryPolicy_Fail() {
-        assertThrows(RuntimeException.class, () -> deliveryPolicyService.createDeliveryPolicy(
+        assertThrows(NullPointerException.class, () -> deliveryPolicyService.createDeliveryPolicy(
                 new DeliveryPolicyCreateRequestDTO(
                         null,
                         -1)));
@@ -108,7 +109,7 @@ public class DeliveryPolicyServiceTest {
         DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));
+        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));
         verify(deliveryPolicyRepository, times(1)).findById(1L);
     }
 
@@ -125,7 +126,7 @@ public class DeliveryPolicyServiceTest {
     @Test
     void testDeleteDeliveryPolicy_Fail() {
         when(deliveryPolicyRepository.existsById(1L)).thenReturn(false);
-        assertThrows(RuntimeException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
+        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
 
         verify(deliveryPolicyRepository, times(0)).deleteById(1L);
     }

@@ -9,7 +9,10 @@ import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
+import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailServiceImpl;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -34,10 +37,7 @@ public class OrderDetailServiceTest {
     private OrderDetailRepository orderDetailRepository;
 
     @Mock
-    private WrappingRepository wrappingRepository;
-
-    @Mock
-    private OrderGroupService orderGroupService;
+    private OrderGroupRepository orderGroupRepository;
 
     @InjectMocks
     private OrderDetailServiceImpl orderDetailService;
@@ -84,14 +84,13 @@ public class OrderDetailServiceTest {
     void testGetOrderDetailById_Fail() {
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> orderDetailService.getOrderDetailService(1L));
+        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.getOrderDetailService(1L));
         verify(orderDetailRepository, times(1)).findById(1L);
     }
 
     @Test
     void testCreateOrderDetail_Success() {
-        when(wrappingRepository.getReferenceById(anyLong())).thenReturn(wrapping);
-        when(orderGroupService.getOrderGroupById(anyLong())).thenReturn(OrderGroupResponseDTO.fromEntity(orderGroup));
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(orderGroup));
         when(orderDetailRepository.save(any())).thenReturn(orderDetail);
 
         OrderDetailResponseDTO response = orderDetailService.createOrderDetail(
@@ -114,12 +113,13 @@ public class OrderDetailServiceTest {
 
     @Test
     void testCreateOrderDetail_Fail() {
-        assertThrows(RuntimeException.class, () -> orderDetailService.createOrderDetail(
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(OrderGroupNotFoundException.class, () -> orderDetailService.createOrderDetail(
                 new OrderDetailCreateRequestDTO(
-                        null,
-                        -1,
-                        0,
-                        0,
+                        2L,
+                        100,
+                        100,
+                        100,
                         1L)));
     }
 
@@ -145,7 +145,7 @@ public class OrderDetailServiceTest {
     @Test
     void testUpdateOrderDetailStatus_Fail() {
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> orderDetailService.updateOrderDetailStatus(
+        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.updateOrderDetailStatus(
                 1L,
                 new OrderDetailUpdateStatusRequestDTO(Status.PAYMENT_COMPLETED)));
     }
@@ -162,7 +162,7 @@ public class OrderDetailServiceTest {
     @Test
     void testDeleteOrderDetail_Fail() {
         when(orderDetailRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(RuntimeException.class, () -> orderDetailService.deleteOrderDetail(1L));
+        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.deleteOrderDetail(1L));
         verify(orderDetailRepository, times(0)).deleteById(anyLong());
     }
 
@@ -189,7 +189,8 @@ public class OrderDetailServiceTest {
     @Test
     void testGetOrderDetailsToList_Fail() {
         when(orderDetailRepository.findAllByOrderGroupId(anyLong())).thenReturn(List.of());
-        assertThrows(RuntimeException.class, () -> orderDetailService.getOrderDetailsToList(1L));
+        List<OrderDetailResponseDTO>  orderDetailsToList = orderDetailService.getOrderDetailsToList(1L);
+        assertNotNull(orderDetailsToList);
         verify(orderDetailRepository, times(1)).findAllByOrderGroupId(anyLong());
     }
 }

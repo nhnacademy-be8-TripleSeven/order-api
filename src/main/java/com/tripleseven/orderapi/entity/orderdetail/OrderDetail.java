@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.entity.orderdetail;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +20,6 @@ public class OrderDetail {
     @NotNull
     private int amount;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -36,7 +34,7 @@ public class OrderDetail {
     @JoinColumn(name = "order_group_id")
     private OrderGroup orderGroup;
 
-    public void ofCreate(Long bookId, int amount, int primePrice, int discountPrice, OrderGroup orderGroup){
+    public void ofCreate(Long bookId, int amount, int primePrice, int discountPrice, OrderGroup orderGroup) {
         this.bookId = bookId;
         this.amount = amount;
         this.primePrice = primePrice;
@@ -45,7 +43,7 @@ public class OrderDetail {
         this.status = Status.PAYMENT_PENDING;
     }
 
-    public void ofUpdateStatus(Status status){
+    public void ofUpdateStatus(Status status) {
         this.status = status;
     }
 }
