@@ -82,11 +82,11 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "404", description = "주문 그룹을 찾을 수 없음")
     })
     public ResponseEntity<Page<OrderViewsRequestDTO>> getOrderGroupPeriod(
-//            @RequestHeader("X-USER") Long userId,
+            @RequestHeader("X-USER") Long userId,
             @RequestBody OrderManageRequestDTO manageRequestDTO,
             Pageable pageable) {
 
-        Page<OrderViewsRequestDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriodByUserId(1L, manageRequestDTO, pageable);
+        Page<OrderViewsRequestDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriodByUserId(userId, manageRequestDTO, pageable);
         return ResponseEntity.ok(orderViewsRequestDTOList);
     }
 }
