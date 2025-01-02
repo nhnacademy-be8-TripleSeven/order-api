@@ -1,6 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 
 @Tag(name = "OrderGroup-Controller", description = "주문 그룹 관리 컨트롤러")
 @RestController
@@ -49,17 +48,17 @@ public class OrderGroupController {
         return ResponseEntity.ok(responses); // 반환: 주문 그룹 페이지 (Page<OrderGroupResponse>)
     }
 
-    // 3. 주문 그룹 생성
-    @PostMapping("/order-groups")
-    @Operation(summary = "주문 그룹 생성", description = "새로운 주문 그룹을 생성합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
-    })
-    public ResponseEntity<OrderGroupResponseDTO> createOrderGroup(@RequestBody OrderGroupCreateRequestDTO request) {
-        OrderGroupResponseDTO response = orderGroupService.createOrderGroup(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 그룹 (OrderGroupResponse)
-    }
+    // 3. 주문 그룹 생성 ( 아마 직접 생성하는 일은 없음 )
+//    @PostMapping("/order-groups")
+//    @Operation(summary = "주문 그룹 생성", description = "새로운 주문 그룹을 생성합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "201", description = "생성 성공"),
+//            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+//    })
+//    public ResponseEntity<OrderGroupResponseDTO> createOrderGroup(@RequestBody OrderGroupCreateRequestDTO request) {
+//        OrderGroupResponseDTO response = orderGroupService.createOrderGroup(request);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 그룹 (OrderGroupResponse)
+//    }
 
     // 5. 주문 그룹 삭제
     @DeleteMapping("/order-groups/{id}")
@@ -74,7 +73,7 @@ public class OrderGroupController {
     }
 
 
-    @GetMapping("/order-groups/period")
+    @PostMapping("/api/orders/order-groups/period")
     @Operation(summary = "주문 그룹 기간별 조회", description = "특정 사용자에 대해 지정된 기간 내 주문 그룹을 조회합니다. " +
             "시작 날짜와 종료 날짜를 지정하지 않으면, 기본적으로 현재 날짜부터 내일 날짜까지의 범위로 조회됩니다.")
     @ApiResponses(value = {
@@ -82,13 +81,12 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
             @ApiResponse(responseCode = "404", description = "주문 그룹을 찾을 수 없음")
     })
-    public ResponseEntity<Page<OrderGroupResponseDTO>> getOrderGroupPeriod(
-            @RequestHeader("X-USER") Long memberId,
-            @RequestParam(value = "startDate", required = false) LocalDate startDate,
-            @RequestParam(value = "endDate", required = false) LocalDate endDate,
+    public ResponseEntity<Page<OrderViewsRequestDTO>> getOrderGroupPeriod(
+            @RequestHeader("X-USER") Long userId,
+            @RequestBody OrderManageRequestDTO manageRequestDTO,
             Pageable pageable) {
 
-        Page<OrderGroupResponseDTO> orderGroupResponses = orderGroupService.getOrderGroupPeriodByUserId(memberId, startDate, endDate, pageable);
-        return ResponseEntity.ok(orderGroupResponses);
+        Page<OrderViewsRequestDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriodByUserId(userId, manageRequestDTO, pageable);
+        return ResponseEntity.ok(orderViewsRequestDTOList);
     }
 }

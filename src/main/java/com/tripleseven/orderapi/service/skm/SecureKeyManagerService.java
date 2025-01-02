@@ -21,10 +21,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Base64;
 import java.util.List;
 
 import java.io.InputStream;
@@ -42,32 +44,25 @@ public class SecureKeyManagerService {
     @Value("${keyId}")
     private String keyId;
 
-    @Value("${keyStoreFilePath}")
-    private String keyStoreFilePath;
-
-    @Value("${password}")
+    @Value("${P12_PASSWORD}")
     private String password;
 
     public String fetchSecretFromKeyManager() {
         try {
 
-            System.out.println("URL: " + url);
-            System.out.println("AppKey: " + appKey);
-            System.out.println("KeyId: " + keyId);
-            System.out.println("KeyStoreFilePath: " + keyStoreFilePath);
-            System.out.println("Password: " + password);
+            // 환경변수에서 P12 파일 데이터를 읽고 디코딩
+            String p12Data = System.getenv("P12_FILE");
+            if (p12Data == null || p12Data.isEmpty()) {
+                throw new KeyManagerException("P12 file data not found in environment variables");
+            }
+            // 디코딩된 P12 데이터를 InputStream으로 변환
+            InputStream keyStoreInputStream = new ByteArrayInputStream(Base64.getDecoder().decode(p12Data));
 
             // 키 저장소 객체를 만들되 키 유형이 PKCS12인 인스턴스를 가져오기
             KeyStore clientStore = KeyStore.getInstance("PKCS12");
 
-            // 클래스패스에서 키스토어 파일을 InputStream으로 로드
-            InputStream keyStoreInputStream = getClass().getClassLoader().getResourceAsStream(keyStoreFilePath);
-            if (keyStoreInputStream == null) {
-                throw new KeyManagerException(keyStoreFilePath);
-            }
-
             // Java KeyStore (JKS) 객체에 키 저장소 파일이랑 비밀번호 입력
-            clientStore.load(keyStoreInputStream, password.toCharArray());
+            clientStore.load(keyStoreInputStream, password.toCharArray());            // 키 저장소 객체를 만들되 키 유형이 PKCS12인 인스턴스를 가져오기
 
             // SSL TLS 연결을 설정하는 과정
             // 1. 프로토콜은 TLS
@@ -118,8 +113,6 @@ public class SecureKeyManagerService {
                     new HttpEntity<>(headers),
                     KeyResponseDTO.class
             );
-
-
 
             if (response.getBody() != null && response.getBody() != null) {
                 return response.getBody().getBody().getSecret();

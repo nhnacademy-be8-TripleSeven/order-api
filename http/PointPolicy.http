@@ -1,11 +1,12 @@
+@pointPolicyId=3
 ### 모든 포인트 정책 조회
-GET localhost:8088/point-policies
+GET localhost:8088/admin/point-policies
 
-### 포인트 정책 1번 조회
-GET localhost:8088/point-policies/1
+### 포인트 정책 조회
+GET localhost:8088/admin/point-policies/{{pointPolicyId}}
 
 ### 포인트 정책 생성
-POST localhost:8088/point-policies
+POST localhost:8088/admin/point-policies
 Content-Type: application/json
 
 {
@@ -15,10 +16,10 @@ Content-Type: application/json
 }
 
 ### 포인트 정책 삭제
-DELETE localhost:8088/point-policies/1
+DELETE localhost:8088/admin/point-policies/{{pointPolicyId}}
 
 ### 포인트 정책 업데이트
-PUT localhost:8088/point-policies/1
+PUT localhost:8088/admin/point-policies/{{pointPolicyId}}
 Content-Type: application/json
 
 {

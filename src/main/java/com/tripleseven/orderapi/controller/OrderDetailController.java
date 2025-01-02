@@ -100,5 +100,15 @@ public class OrderDetailController {
         return ResponseEntity.ok(responses);
     }
 
-    
+
+    @GetMapping("/order-details/check-purchase")
+    public ResponseEntity<Boolean> checkUserPurchase(
+            @RequestParam Long userId,
+            @RequestParam Long bookId) {
+        boolean hasPurchased = orderDetailService.hasUserPurchasedBook(userId, bookId);
+        return ResponseEntity.ok(hasPurchased);
+    }
+
+
+
 }

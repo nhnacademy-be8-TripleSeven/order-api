@@ -6,6 +6,8 @@ import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
+import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
@@ -80,7 +82,7 @@ public class DeliveryInfoServiceTest {
     @Test
     void testFindById_Fail() {
         when(deliveryInfoRepository.findById(any())).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> deliveryInfoService.getDeliveryInfoById(1L));
+        assertThrows(DeliveryInfoNotFoundException.class, () -> deliveryInfoService.getDeliveryInfoById(1L));
         verify(deliveryInfoRepository, times(1)).findById(1L);
     }
 
@@ -105,7 +107,7 @@ public class DeliveryInfoServiceTest {
 
     @Test
     void testCreateDeliveryInfo_Fail() {
-        assertThrows(RuntimeException.class, () -> deliveryInfoService.createDeliveryInfo(
+        assertThrows(OrderGroupNotFoundException.class, () -> deliveryInfoService.createDeliveryInfo(
                 new DeliveryInfoCreateRequestDTO(
                         null,
                         null,
@@ -131,7 +133,7 @@ public class DeliveryInfoServiceTest {
     void testUpdateArrivedDeliveryInfo_Fail() {
         DeliveryInfoArrivedAtUpdateRequestDTO updateRequest = new DeliveryInfoArrivedAtUpdateRequestDTO(arrivedAt);
         when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> deliveryInfoService.updateDeliveryInfoArrivedAt(1L, updateRequest));
+        assertThrows(DeliveryInfoNotFoundException.class, () -> deliveryInfoService.updateDeliveryInfoArrivedAt(1L, updateRequest));
         verify(deliveryInfoRepository, times(1)).findById(1L);
     }
 
@@ -148,7 +150,7 @@ public class DeliveryInfoServiceTest {
     @Test
     void testDeleteDeliveryInfo_Fail() {
         when(deliveryInfoRepository.existsById(1L)).thenReturn(false);
-        assertThrows(RuntimeException.class, () -> deliveryInfoService.deleteDeliveryInfo(1L));
+        assertThrows(DeliveryInfoNotFoundException.class, () -> deliveryInfoService.deleteDeliveryInfo(1L));
         verify(deliveryInfoRepository, times(0)).deleteById(1L);
     }
 }

@@ -4,6 +4,7 @@ import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDT
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
+import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     public DeliveryPolicyResponseDTO getDeliveryPolicy(Long id) {
         Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
         if (optionalDeliveryPolicy.isEmpty()) {
-            throw new RuntimeException();
+            throw new DeliveryPolicyNotFoundException(id);
         }
         return DeliveryPolicyResponseDTO.fromEntity(optionalDeliveryPolicy.get());
     }
@@ -40,7 +41,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
         Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
 
         if (optionalDeliveryPolicy.isEmpty()) {
-            throw new RuntimeException();
+            throw new DeliveryPolicyNotFoundException(id);
         }
 
         DeliveryPolicy deliveryPolicy = optionalDeliveryPolicy.get();
@@ -52,7 +53,7 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     @Override
     public void deleteDeliveryPolicy(Long id) {
         if(!deliveryPolicyRepository.existsById(id)){
-            throw new RuntimeException();
+            throw new DeliveryPolicyNotFoundException(id);
         }
         deliveryPolicyRepository.deleteById(id);
     }

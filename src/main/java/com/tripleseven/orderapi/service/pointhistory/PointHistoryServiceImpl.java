@@ -15,11 +15,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PointHistoryServiceImpl implements PointHistoryService {
 
@@ -41,7 +43,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     public Page<PointHistoryResponseDTO> getPointHistories(Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAll(pageable);
 
-        if (histories.isEmpty()) {
+        if (histories.getContent().isEmpty()) {
             throw new PointHistoryNotFoundException("No point histories found.");
         }
 

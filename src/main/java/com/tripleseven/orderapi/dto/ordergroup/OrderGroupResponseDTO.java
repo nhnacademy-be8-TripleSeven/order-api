@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Getter
@@ -19,7 +19,7 @@ public class OrderGroupResponseDTO {
 
     private final String orderedName;
 
-    private final ZonedDateTime orderedAt;
+    private final LocalDate orderedAt;
 
     private final String recipientName;
 
@@ -30,7 +30,7 @@ public class OrderGroupResponseDTO {
     private final String address;
 
     @Builder
-    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, ZonedDateTime orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
+    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, LocalDate orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
         if (Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");

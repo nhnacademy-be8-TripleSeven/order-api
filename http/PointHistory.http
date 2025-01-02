@@ -1,39 +1,45 @@
 @memberId=1
+@pointHistoryId=1
+
 ### 모든 포인트 기록 조회 (페이징 포함)
 GET http://localhost:8088/admin/point-histories?page=1&size=3
 
 ### 특정 회원의 포인트 기록 조회 (페이징 포함)
 GET http://localhost:8088/api/point-histories
-X-USER: {memberId}
+X-USER: {{memberId}}
 
 ### 특정 포인트 기록 조회
-GET http://localhost:8088/point-histories/{pointHistoryId}
+GET http://localhost:8088/point-histories/{{pointHistoryId}}
 
 ### 특정 회원의 모든 포인트 기록 삭제
 DELETE http://localhost:8088/admin/point-histories
-X-USER: {memberId}
+X-USER: {{memberId}}
 
 ### 특정 포인트 기록 삭제
-DELETE http://localhost:8088/admin/point-histories/{id}
+DELETE http://localhost:8088/admin/point-histories/{{pointHistoryId}}
 
 ### 포인트 기록 생성
 POST http://localhost:8088/api/point-histories
-X-USER: {memberId}
+X-USER: {{memberId}}
 Content-Type: application/json
 
 {
   "types": "EARN",
-  "pointPolicyId": 2
+  "pointPolicyId": 4
 }
 
 ### 특정 회원의 포인트 잔액 조회
 GET http://localhost:8088/user/point-histories/point
-X-USER: {memberId}
+X-USER: {{memberId}}
 
 ### 특정 기간 동안의 포인트 기록 조회
-GET http://localhost:8088/user/point-histories/period?startDate=2024-12-01&endDate=2024-12-20&page=1&size=10
-X-USER: {memberId}
+GET http://localhost:8088/user/point-histories/period?startDate=2024-12-01&endDate=2024-12-25&page=0&size=10
+X-USER: {{memberId}}
+
+### 특정 기간 동안의 포인트 기록 조회 (오름차순)
+GET http://localhost:8088/user/point-histories/period?startDate=2024-12-01&endDate=2024-12-25&page=1&size=10&sortDirection=ASC
+X-USER: {{memberId}}
 
 ### 특정 상태의 포인트 기록 조회
-GET http://localhost:8088/point-histories/state?state=EARN&page=1&size=5
-X-USER: {memberId}
+GET http://localhost:8088/point-histories/state?state=EARN&page=0&size=5
+X-USER: {{memberId}}

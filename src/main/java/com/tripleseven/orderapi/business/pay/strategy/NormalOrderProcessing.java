@@ -2,52 +2,172 @@ package com.tripleseven.orderapi.business.pay.strategy;
 
 import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.client.MemberApiClient;
-import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
-import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.dto.CombinedMessageDTO;
+import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
+import com.tripleseven.orderapi.dto.coupon.CouponDTO;
+import com.tripleseven.orderapi.dto.coupon.CouponStatus;
+import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
+import com.tripleseven.orderapi.dto.point.PointDTO;
+import com.tripleseven.orderapi.exception.RedisNullPointException;
+import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
+import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
 // 추후 이벤트 결제 (배송비 무료 등) 상황 일 때 확장성 생각
 public class NormalOrderProcessing implements OrderProcessingStrategy {
-    private final OrderDetailService orderDetailService;
-    private final OrderGroupService orderGroupService;
+    private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
+
+    private static final String ORDER_ROUTING_KEY = "order.routing.key";
+    private static final String POINT_ROUTING_KEY = "point.routing.key";
+    private static final String CART_ROUTING_KEY = "cart.routing.key";
+    private static final String COUPON_ROUTING_KEY = "coupon.routing.key";
+
+    private final RabbitTemplate rabbitTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+
     private final BookCouponApiClient bookCouponApiClient;
-    private final MemberApiClient memberApiClient;
+
+    private final PointHistoryService pointHistoryService;
+    private final PointPolicyService pointPolicyService;
 
     @Override
-    public void processSingleOrder() {
+    public void processNonMemberOrder(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
+        // Todo 비회원 주문
+        orderProcessing(0L, orderGroupCreateRequestDTO);
+
     }
 
     @Override
-    public void processMultipleOrder() {
-        // Todo RabbitMQ 와 연결 (Listener 실행)
+    public void processMemberOrder(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
+        // Todo 회원 주문
+        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+        Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
+        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
+        // 계산 로직은 결제 누르기 전에 검증하면서 저장
+        PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
+
+        // 장바구니 체크
+        if (Objects.isNull(cartItems)) {
+            throw new RedisNullPointException("CartItems is Null");
+        }
+
+        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
+        pointMessageDTO.addObject("point", point);
+        pointMessageDTO.addObject("userId", userId);
+
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
+
+        CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
+        couponMessageDTO.addObject("coupon", coupon);
+        pointMessageDTO.addObject("userId", userId);
+
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
+
+
+        orderProcessing(userId, orderGroupCreateRequestDTO);
+
+    }
+
+    public void orderProcessing(Long userId, OrderGroupCreateRequestDTO dto) {
+        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+
+        redisTemplate.opsForHash().delete(userId.toString(), "CartItems");
+
+        WrappingCartItemDTO wrappingCartItemDTO = new WrappingCartItemDTO();
+        wrappingCartItemDTO.ofCreate(cartItems);
+
+        CombinedMessageDTO orderMessageDTO = new CombinedMessageDTO();
+        orderMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);
+        orderMessageDTO.addObject("UserId", userId);
+        orderMessageDTO.addObject("OrderGroupCreateRequestDTO", dto);
+
+        CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
+        cartMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);
+        cartMessageDTO.addObject("UserId", userId);
+
+
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY, orderMessageDTO);
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
+
+    }
+
+    // 결제 요청 하기 전 체크 할 사항들 (임시 위치)
+    public void checkValid(Long userId) {
+
+        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+        Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
+        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
+        PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
+
+        List<Long> bookIds = new ArrayList<>();
+        for (CartItemDTO cartItem : cartItems) {
+            bookIds.add(cartItem.getBookId());
+        }
 
         // 1. 도서 API에서 가격 및 재고 확인
+        List<CartItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
 
-        // 2. 가격 및 재고 검증
-
-        // 3. 주문 저장 (결제 요청을 보낼때 주문 그룹이 필요하다면 저장)
-        // 결제가 어떻게 이루어지는지가 확인 해봐야할 듯,,
-
-        // 4. RabbitMQ로 주문 성공 메시지 발행 (이 곳에서 결제 이후 과정 수행)
-//        rabbitTemplate.convertAndSend("order.exchange", "order.routing.key" ,"");
-
-        // 결제 버튼 누를 시: 재고 확인 -> 재고를 가지고 있어야하나? -> 결제 요청 -> 결제 성공
-        // 결제 성공 시: rabbitmq -> 주문 그룹 생성 -> 주문 상세 생성 -> 결제(테이블) 생성
-        // 순서 상관 없음: 포인트 적립 , 장바구니 초기화 , 성공 알림
-
-        // 주문 번호를 가져오기 위해 미리 주문 그룹을 생성 해놓을지 고민,,
-
-        /* 예상 책 수량 정보 및 가격
-        List<CartItem> cartItems = bookCouponApiClient.getBookPriceList(orderDetailCreateRequest.getBookId());
-        long totalPrice = 0L;
-        for(CartItem cartItem : cartItems){
-            totalPrice += cartItem.getDiscountPrice() * cartItem.getAmount();
+        for (CartItemDTO cartItem : realItems) {
         }
-        */
+
+        int price = 0;
+        int totalPrice = 0;
+
+
+        int memberPoint = pointHistoryService.getTotalPointByMemberId(userId);
+
+        // 포인트 사용량 체크
+        if (Objects.nonNull(point)) {
+            // 원래 보유 포인트보다 높은 경우
+            if (memberPoint != point.getTotalPoint()) {
+                throw new RuntimeException();
+            }
+
+            // 보유 포인트보다 사용량이 더 큰 경우
+            if (memberPoint < point.getSpendPoint()) {
+                throw new RuntimeException();
+            }
+
+            // 적립량이 맞지 않는 경우
+            BigDecimal earnPercent = pointPolicyService.findById(1L).getRate();
+            int earnPoint = earnPercent.multiply(BigDecimal.valueOf(price)).intValue();
+            if (point.getEarnPoint() != earnPoint) {
+                throw new RuntimeException();
+            }
+
+
+            // 최종 가격보다 사용량이 더 큰 경우
+            if (totalPrice > point.getSpendPoint()) {
+                throw new RuntimeException();
+            }
+
+            CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
+            pointMessageDTO.addObject("point", point);
+
+            rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
+        }
+
+        if (Objects.nonNull(coupon)) {
+            if (!coupon.getCouponStatus().equals(CouponStatus.NOTUSED)) {
+                throw new RuntimeException();
+            }
+
+            CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
+            couponMessageDTO.addObject("coupon", coupon);
+
+            rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
+        }
 
     }
 }

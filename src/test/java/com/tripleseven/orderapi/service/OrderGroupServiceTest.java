@@ -3,14 +3,13 @@ package com.tripleseven.orderapi.service;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
-import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
-import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
-import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupServiceImpl;
-import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,10 +34,7 @@ public class OrderGroupServiceTest {
     private OrderGroupRepository orderGroupRepository;
 
     @Mock
-    private WrappingServiceImpl wrappingService;
-
-    @Mock
-    private DeliveryInfoServiceImpl deliveryInfoService;
+    private WrappingRepository wrappingRepository;
 
     @InjectMocks
     private OrderGroupServiceImpl orderGroupService;
@@ -47,8 +42,6 @@ public class OrderGroupServiceTest {
     private OrderGroup orderGroup;
 
     private Wrapping wrapping;
-
-    private DeliveryInfo deliveryInfo;
 
     @BeforeEach
     void setUp() {
@@ -59,10 +52,6 @@ public class OrderGroupServiceTest {
         orderGroup = new OrderGroup();
         ReflectionTestUtils.setField(orderGroup, "id", 1L);
         orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
-
-        deliveryInfo = new DeliveryInfo();
-        ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
-        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
     }
 
     @Test
@@ -82,19 +71,19 @@ public class OrderGroupServiceTest {
     void testGetOrderGroupById_Fail() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> orderGroupService.getOrderGroupById(1L));
+        assertThrows(OrderGroupNotFoundException.class, () -> orderGroupService.getOrderGroupById(1L));
         verify(orderGroupRepository, times(1)).findById(1L);
     }
 
     @Test
     void testCreateOrderGroup_Success() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(WrappingResponseDTO.fromEntity(wrapping));
+        when(wrappingRepository.findById(anyLong())).thenReturn(Optional.of(wrapping));
         when(orderGroupRepository.save(any())).thenReturn(orderGroup);
 
         OrderGroupResponseDTO response = orderGroupService.createOrderGroup(
+                orderGroup.getId(),
                 new OrderGroupCreateRequestDTO(
-                        orderGroup.getUserId(),
-                        1L,
+                        wrapping.getId(),
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),
@@ -112,11 +101,10 @@ public class OrderGroupServiceTest {
 
     @Test
     void testCreateOrderGroup_Fail() {
-        when(wrappingService.getWrappingById(anyLong())).thenReturn(null);
-        assertThrows(RuntimeException.class, () -> orderGroupService.createOrderGroup(
+        assertThrows(WrappingNotFoundException.class, () -> orderGroupService.createOrderGroup(
+                orderGroup.getId(),
                 new OrderGroupCreateRequestDTO(
-                        orderGroup.getUserId(),
-                        1L,
+                        wrapping.getId(),
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),
@@ -147,7 +135,7 @@ public class OrderGroupServiceTest {
     void testUpdateAddressOrderGroup_Fail() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(null);
 
-        assertThrows(RuntimeException.class, () -> orderGroupService.updateAddressOrderGroup(
+        assertThrows(NullPointerException.class, () -> orderGroupService.updateAddressOrderGroup(
                 1L,
                 new OrderGroupUpdateAddressRequestDTO(null)));
 
@@ -165,29 +153,8 @@ public class OrderGroupServiceTest {
     @Test
     void testDeleteOrderGroup_Fail() {
         when(orderGroupRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(RuntimeException.class, () -> orderGroupService.deleteOrderGroup(1L));
+        assertThrows(OrderGroupNotFoundException.class, () -> orderGroupService.deleteOrderGroup(1L));
         verify(orderGroupRepository, times(0)).deleteById(anyLong());
     }
 
-    @Test
-    void testGetOrderGroupPages() {
-        Pageable pageable = PageRequest.of(0, 10);
-        OrderGroup orderGroup2 = new OrderGroup();
-        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
-        ReflectionTestUtils.setField(orderGroup2, "id", 2L);
-        when(orderGroupRepository.findAllByUserId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(orderGroup, orderGroup2), pageable, 2));
-
-        Page<OrderGroupResponseDTO> result = orderGroupService.getOrderGroupPagesByUserId(1L, pageable);
-
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-        assertEquals(orderGroup.getId(), result.getContent().getFirst().getId());
-        assertEquals(orderGroup2.getId(), result.getContent().getLast().getId());
-        assertEquals(0, result.getNumber());
-        assertEquals(1, result.getTotalPages());
-        assertEquals(10, result.getSize());
-        assertEquals(2, result.getTotalElements());
-
-        verify(orderGroupRepository, times(1)).findAllByUserId(anyLong(), any());
-    }
 }
