@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ public class DeliveryInfoRepositoryTest {
 
     private DeliveryInfo deliveryInfo;
 
-    private ZonedDateTime arrivedAt;
+    private LocalDate arrivedAt;
 
     @BeforeEach
     void setUp() {
@@ -41,7 +42,7 @@ public class DeliveryInfoRepositoryTest {
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
         deliveryInfo = new DeliveryInfo();
         deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, savedOrderGroup);
-        arrivedAt = ZonedDateTime.parse("2024-12-17T11:24:00+09:00[Asia/Seoul]");
+        arrivedAt = LocalDate.parse("2024-12-17");
     }
 
     @Test

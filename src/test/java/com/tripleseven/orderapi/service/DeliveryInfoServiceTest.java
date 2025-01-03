@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class DeliveryInfoServiceTest {
 
     private OrderGroup orderGroup;
 
-    private ZonedDateTime arrivedAt;
+    private LocalDate arrivedAt;
 
 
     @BeforeEach
@@ -63,7 +64,7 @@ public class DeliveryInfoServiceTest {
         ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
         deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, orderGroup);
 
-        arrivedAt = ZonedDateTime.parse("2024-12-17T11:24:00+09:00[Asia/Seoul]");
+        arrivedAt = LocalDate.parse("2024-12-17");
     }
 
     @Test
