@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderInfoRequestDTO {
+public class PayInfoRequestDTO {
 
 
     // 주문자 정보

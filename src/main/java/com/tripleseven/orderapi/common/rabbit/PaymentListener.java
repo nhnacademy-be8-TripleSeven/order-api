@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.common.rabbit;
 
 import com.rabbitmq.client.Channel;
-import com.tripleseven.orderapi.business.pointservice.PointService;
+import com.tripleseven.orderapi.business.point.PointService;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
@@ -14,7 +14,9 @@ import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.service.pay.PayService;
 import lombok.RequiredArgsConstructor;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -34,6 +36,7 @@ public class PaymentListener {
     private final OrderDetailService orderDetailService;
 
     private final PointService pointService;
+    private final PayService payService;
 
     private final MemberApiClient memberApiClient;
     private final BookCouponApiClient bookCouponApiClient;
@@ -71,6 +74,9 @@ public class PaymentListener {
                 );
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
+
+//            JSONObject jsonObject = (JSONObject) messageDTO.getObject("PaymentInfo");
+//            payService.save(userId, jsonObject);
 
             log.info("Completed Saving Order!!");
 
@@ -128,12 +134,13 @@ public class PaymentListener {
             log.info("Processing Point...");
             PointDTO pointDTO = (PointDTO) messageDTO.getObject("point");
             Long userId = (Long) messageDTO.getObject("userId");
+            Long orderId = (Long) messageDTO.getObject("orderId");
 
             // 포인트 사용 및 적립
             if (pointDTO.getSpendPoint() > 0){
-                pointService.createPointHistoryForPaymentSpend(userId, pointDTO.getSpendPoint());
+                pointService.createPointHistoryForPaymentSpend(userId, pointDTO.getSpendPoint(), orderId);
             }
-            pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getEarnPoint());
+            pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getEarnPoint(), orderId);
 
             log.info("Completed Processing Point!!");
         } catch (Exception e) {

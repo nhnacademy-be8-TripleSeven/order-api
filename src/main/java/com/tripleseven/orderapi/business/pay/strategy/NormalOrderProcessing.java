@@ -65,6 +65,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
         pointMessageDTO.addObject("point", point);
         pointMessageDTO.addObject("userId", userId);
+//        pointMessageDTO.addObject("orderId", );
 
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
 
@@ -91,6 +92,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         orderMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);
         orderMessageDTO.addObject("UserId", userId);
         orderMessageDTO.addObject("OrderGroupCreateRequestDTO", dto);
+        orderMessageDTO.addObject("PaymentInfo", "paymentInfo");
 
         CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
         cartMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);

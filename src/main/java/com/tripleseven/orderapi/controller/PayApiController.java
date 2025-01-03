@@ -1,11 +1,11 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.pay.OrderInfoDTO;
-import com.tripleseven.orderapi.dto.pay.OrderInfoRequestDTO;
-import com.tripleseven.orderapi.dto.pay.OrderInfoResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
+import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
+import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
 import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.service.pay.PayService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,7 +18,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -44,6 +42,7 @@ public class PayApiController {
     private final Map<String, String> billingKeyMap = new HashMap<>();
     private final PayService payService;
     private final PointHistoryService pointHistoryService;
+    private final OrderProcessingStrategy orderProcessingStrategy;
 
     @Operation(summary = "결제 승인 요청", description = "Widget 또는 Payment 방식을 이용하여 결제를 승인합니다.")
     @ApiResponses(value = {
@@ -51,14 +50,19 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 승인 실패")
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
-    public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request, @RequestHeader("X-USER")Long userId,@RequestBody String jsonBody) throws Exception {
+    public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
+                                                     @RequestHeader("X-USER") Long userId,
+                                                     @RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
         int statusCode = response.containsKey("error") ? 400 : 200;
 
-        if(statusCode == 200){
-            payService.save(userId,response);   //redis에 저장한것 mysql에 저장
+        if (statusCode == 200) {
+            // TODO rabbitMQ 쪽 구현
+//            orderProcessingStrategy.processMemberOrder(userId, jsonBody);
+
+
         }
         return ResponseEntity.status(statusCode).body(response);
     }
@@ -104,10 +108,10 @@ public class PayApiController {
     }
 
     @PostMapping("/payments/order")
-    public ResponseEntity<OrderInfoResponseDTO> responseOrderInfo(
-            @RequestHeader("X-USER")Long userId,
-            @RequestBody OrderInfoRequestDTO request) throws Exception {
-        OrderInfoResponseDTO response = payService.getOrderInfo(userId,request);
+    public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
+            @RequestHeader("X-USER") Long userId,
+            @RequestBody PayInfoRequestDTO request) throws Exception {
+        PayInfoResponseDTO response = payService.getOrderInfo(userId, request);
         return ResponseEntity.ok(response);
     }
 //
@@ -159,7 +163,6 @@ public class PayApiController {
         connection.setDoOutput(true);
         return connection;
     }
-
 
 
     private JSONObject parseRequestData(String jsonBody) {

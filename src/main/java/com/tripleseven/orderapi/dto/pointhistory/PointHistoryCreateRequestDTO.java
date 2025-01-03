@@ -13,4 +13,6 @@ public class PointHistoryCreateRequestDTO {
     private HistoryTypes types;
 
     private Long pointPolicyId;
+
+    private Long orderGroupId;
 }

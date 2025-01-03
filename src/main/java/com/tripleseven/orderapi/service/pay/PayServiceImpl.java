@@ -1,8 +1,9 @@
 package com.tripleseven.orderapi.service.pay;
 
-import com.tripleseven.orderapi.dto.pay.OrderInfoDTO;
-import com.tripleseven.orderapi.dto.pay.OrderInfoRequestDTO;
-import com.tripleseven.orderapi.dto.pay.OrderInfoResponseDTO;
+import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
+import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
+import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
+import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
 import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -25,11 +26,12 @@ public class PayServiceImpl implements PayService {
     private final OrderGroupService orderGroupService;
     private final RedisTemplate<String, Object> redisTemplate;
 
-
+    // TODO save 해서 반환받아야할 경우가 있는지 확인
+    //  저장되는 값 더 추가해야됨
     @Override
     public void save(Long userId, JSONObject jsonObject) {
         Pay pay = new Pay();
-        OrderInfoDTO infoDto = (OrderInfoDTO) redisTemplate.opsForHash().get(userId.toString(),"OrderInfo");
+        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "OrderInfo");
         //infoDTO를 각 db에 저장해야함
 
         pay.ofCreate(jsonObject);
@@ -47,11 +49,21 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public OrderInfoResponseDTO getOrderInfo(Long userId, OrderInfoRequestDTO requestDTO) {
+    public PayInfoResponseDTO getOrderInfo(Long userId, PayInfoRequestDTO requestDTO) {
         long orderId = UUID.randomUUID().getMostSignificantBits();
-        OrderInfoDTO orderInfoDTO = new OrderInfoDTO();
-        orderInfoDTO.ofCreate(orderId,requestDTO);
-        redisTemplate.opsForHash().put(userId.toString(),"OrderInfo",orderInfoDTO);
-        return new OrderInfoResponseDTO(orderId, requestDTO.getTotalAmount());
+        PayInfoDTO payInfoDTO = new PayInfoDTO();
+        payInfoDTO.ofCreate(orderId, requestDTO);
+        // TODO 검증 필요 (ex payCheckService)
+
+
+        // TODO 검증 후 저장
+        redisTemplate.opsForHash().put(userId.toString(), "OrderInfo", payInfoDTO);
+        return new PayInfoResponseDTO(orderId, requestDTO.getTotalAmount());
     }
+
+    public OrderPayInfoDTO getOrderPayInfo(Long orderId){
+
+        return payRepository.getDTOByOrderGroupId(orderId);
+    }
+
 }
