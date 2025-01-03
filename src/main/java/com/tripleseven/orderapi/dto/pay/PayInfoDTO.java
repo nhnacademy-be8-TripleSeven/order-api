@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderInfoDTO {
+public class PayInfoDTO {
 
     private Long orderId;
     // 주문자 정보
@@ -30,20 +30,20 @@ public class OrderInfoDTO {
     private long point;
     private long totalAmount;
 
-    public void ofCreate(Long orderId, OrderInfoRequestDTO orderInfoRequestDTO) {
+    public void ofCreate(Long orderId, PayInfoRequestDTO payInfoRequestDTO) {
         this.orderId = orderId;
-        this.customerName = orderInfoRequestDTO.getCustomerName();
-        this.customerPhone = orderInfoRequestDTO.getCustomerPhone();
-        this.customerLandline = orderInfoRequestDTO.getCustomerLandline();
-        this.customerEmail = orderInfoRequestDTO.getCustomerEmail();
-        this.customerPassword = orderInfoRequestDTO.getCustomerPassword();
-        this.recipientName = orderInfoRequestDTO.getRecipientName();
-        this.recipientPhone = orderInfoRequestDTO.getRecipientPhone();
-        this.recipientLandline = orderInfoRequestDTO.getRecipientLandline();
-        this.recipientAddress = orderInfoRequestDTO.getRecipientAddress();
-        this.wrapperId = orderInfoRequestDTO.getWrapperId();
-        this.couponId = orderInfoRequestDTO.getCouponId();
-        this.point = orderInfoRequestDTO.getPoint();
-        this.totalAmount = orderInfoRequestDTO.getTotalAmount();
+        this.customerName = payInfoRequestDTO.getCustomerName();
+        this.customerPhone = payInfoRequestDTO.getCustomerPhone();
+        this.customerLandline = payInfoRequestDTO.getCustomerLandline();
+        this.customerEmail = payInfoRequestDTO.getCustomerEmail();
+        this.customerPassword = payInfoRequestDTO.getCustomerPassword();
+        this.recipientName = payInfoRequestDTO.getRecipientName();
+        this.recipientPhone = payInfoRequestDTO.getRecipientPhone();
+        this.recipientLandline = payInfoRequestDTO.getRecipientLandline();
+        this.recipientAddress = payInfoRequestDTO.getRecipientAddress();
+        this.wrapperId = payInfoRequestDTO.getWrapperId();
+        this.couponId = payInfoRequestDTO.getCouponId();
+        this.point = payInfoRequestDTO.getPoint();
+        this.totalAmount = payInfoRequestDTO.getTotalAmount();
     }
 }

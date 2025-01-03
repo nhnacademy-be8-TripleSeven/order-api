@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DatePath;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.tripleseven.orderapi.dto.order.OrderViewDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.QOrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.Status;
@@ -15,7 +16,6 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,12 +55,13 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
                 .from(orderDetail)
                 .join(orderDetail.orderGroup, orderGroup)
                 .where(
-                        betweenDates(orderGroup.orderedAt, startTime, endTime)
-                                .and(orderDetail.status.in(statuses)))
+                        orderGroup.userId.eq(userId)
+                                .and(betweenDates(orderGroup.orderedAt, startTime, endTime))
+                                .and(orderDetail.status.in(statuses))
+                )
                 .orderBy(orderDetail.id.asc())
                 .fetch();
     }
-
 
     private BooleanExpression betweenDates(
             DatePath<LocalDate> dateTimeField,

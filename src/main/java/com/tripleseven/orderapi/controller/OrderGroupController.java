@@ -1,6 +1,8 @@
 package com.tripleseven.orderapi.controller;
 
+import com.tripleseven.orderapi.business.order.OrderService;
 import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderPayDetailDTO;
 import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderGroupController {
 
     private final OrderGroupService orderGroupService;
+    private final OrderService orderService;
 
     // 1. 주문 그룹 단건 조회
     @GetMapping("/order-groups/{id}")
@@ -82,11 +85,20 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "404", description = "주문 그룹을 찾을 수 없음")
     })
     public ResponseEntity<Page<OrderViewsRequestDTO>> getOrderGroupPeriod(
-            @RequestHeader("X-USER") Long userId,
             @RequestBody OrderManageRequestDTO manageRequestDTO,
+            @RequestHeader("X-USER") Long userId,
             Pageable pageable) {
 
         Page<OrderViewsRequestDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriodByUserId(userId, manageRequestDTO, pageable);
         return ResponseEntity.ok(orderViewsRequestDTOList);
+    }
+
+    @GetMapping("/api/orders/order-groups/{orderId}")
+    public ResponseEntity<OrderPayDetailDTO> getOrderGroupDetail(
+            @RequestHeader("X-USER") Long userId,
+            @PathVariable("orderId") Long orderId
+    ){
+        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderId);
+        return ResponseEntity.ok(orderPayDetailDTO);
     }
 }

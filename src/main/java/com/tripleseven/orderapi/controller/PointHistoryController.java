@@ -93,14 +93,14 @@ public class PointHistoryController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     public ResponseEntity<PointHistoryResponseDTO> createFromRequest(
-            @RequestHeader("X-USER")Long memberId,
+            @RequestHeader("X-USER") Long memberId,
             @RequestBody PointHistoryCreateRequestDTO request) {
         PointHistoryResponseDTO response = pointHistoryService.createPointHistory(memberId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 특정 회원의 포인트 잔액 조회
-    @GetMapping("/user/point-histories/point")
+    @GetMapping("/api/user/point-histories/point")
     @Operation(summary = "포인트 잔액 조회", description = "특정 회원의 포인트 잔액을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -114,11 +114,11 @@ public class PointHistoryController {
     }
 
 
-    @GetMapping("/user/point-histories/period")
+    @GetMapping("/api/user/point-histories/period")
     @Operation(summary = "회원의 기간 포인트 기록 조회", description = "특정 회원의 포인트 기록을 기간으로 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "조회 성공"),
-            @ApiResponse(responseCode = "404",description = "포인트 기록을 찾을 수 없음")
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "포인트 기록을 찾을 수 없음")
     })
     public ResponseEntity<Page<PointHistoryResponseDTO>> getPointHistoriesWithinPeriod(
             @RequestHeader("X-USER") Long memberId,
@@ -128,9 +128,10 @@ public class PointHistoryController {
             Pageable pageable) {
 
 
-        Page<PointHistoryResponseDTO> pointHistories = pointHistoryService.getPointHistoriesWithinPeriod(memberId, startDate, endDate,sortDirection, pageable);
+        Page<PointHistoryResponseDTO> pointHistories = pointHistoryService.getPointHistoriesWithinPeriod(memberId, startDate, endDate, sortDirection, pageable);
         return ResponseEntity.ok(pointHistories);
     }
+
     @GetMapping("/point-histories/state")
     @Operation(summary = "회원의 포인트 기록 상태별 조회", description = "특정 회원의 포인트 기록을 상태별로 조회합니다.")
     @ApiResponses(value = {

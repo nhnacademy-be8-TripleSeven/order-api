@@ -1,8 +1,13 @@
 package com.tripleseven.orderapi.repository;
 
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
+import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
+import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,15 +23,44 @@ class PointHistoryRepositoryTest {
     @Autowired
     private PointHistoryRepository pointHistoryRepository;
 
-    @Test
-    void testSavePointHistory() {
-        // given
-        PointHistory pointHistory = PointHistory.ofCreate(
+    @Autowired
+    private OrderGroupRepository orderGroupRepository;
+
+    @Autowired
+    private WrappingRepository wrappingRepository;
+
+    private PointHistory pointHistory;
+    private PointHistory useHistory;
+    @BeforeEach
+    void setUp() {
+        Wrapping wrapping = new Wrapping();
+        wrapping.ofCreate("Test Wrapping", 100);
+        wrappingRepository.save(wrapping);
+
+        OrderGroup orderGroup = new OrderGroup();
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
+        orderGroupRepository.save(orderGroup);
+        pointHistory = PointHistory.ofCreate(
                 HistoryTypes.EARN,
                 1000,
                 "Earned points for book purchase",
-                1L
+                1L,
+                orderGroup
         );
+        useHistory = PointHistory.ofCreate(
+                HistoryTypes.SPEND,
+                -1000,
+                "Used points for book purchase",
+                2L,
+                orderGroup
+        );
+
+    }
+    @Test
+    void testSavePointHistory() {
+
+        // given
+
 
         // when
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
@@ -44,13 +78,7 @@ class PointHistoryRepositoryTest {
     @Test
     void testFindPointHistoryById() {
         // given
-        PointHistory pointHistory = PointHistory.ofCreate(
-                HistoryTypes.SPEND,
-                500,
-                "Used points for book purchase",
-                2L
-        );
-        PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
+        PointHistory savedHistory = pointHistoryRepository.save(useHistory);
 
         // when
         Optional<PointHistory> retrievedHistory = pointHistoryRepository.findById(savedHistory.getId());
@@ -59,7 +87,7 @@ class PointHistoryRepositoryTest {
         assertThat(retrievedHistory).isPresent();
         PointHistory foundHistory = retrievedHistory.get();
         assertThat(foundHistory.getTypes()).isEqualTo(HistoryTypes.SPEND);
-        assertThat(foundHistory.getAmount()).isEqualTo(500);
+        assertThat(foundHistory.getAmount()).isEqualTo(-1000);
         assertThat(foundHistory.getComment()).isEqualTo("Used points for book purchase");
         assertThat(foundHistory.getMemberId()).isEqualTo(2L);
     }
@@ -67,12 +95,7 @@ class PointHistoryRepositoryTest {
     @Test
     void testUpdatePointHistory() {
         // given
-        PointHistory pointHistory = PointHistory.ofCreate(
-                HistoryTypes.EARN,
-                1000,
-                "Earned points for book purchase",
-                1L
-        );
+
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
 
         // when
@@ -89,12 +112,7 @@ class PointHistoryRepositoryTest {
     @Test
     void testDeletePointHistory() {
         // given
-        PointHistory pointHistory = PointHistory.ofCreate(
-                HistoryTypes.EARN,
-                1000,
-                "Earned points for book purchase",
-                1L
-        );
+
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
 
         // when

@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.dto.paytypes;
 
-import com.tripleseven.orderapi.entity.paytypes.PayTypes;
+import com.tripleseven.orderapi.entity.paytype.PayType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,10 +22,10 @@ public class PayTypesResponseDTO {
         this.id = id;
         this.name = name;
     }
-    public static PayTypesResponseDTO fromEntity(PayTypes payTypes){
+    public static PayTypesResponseDTO fromEntity(PayType payType){
         return new PayTypesResponseDTO(
-                payTypes.getId(),
-                payTypes.getName()
+                payType.getId(),
+                payType.getName()
         );
     }
 }

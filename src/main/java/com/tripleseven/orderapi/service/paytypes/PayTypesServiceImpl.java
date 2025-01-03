@@ -2,7 +2,7 @@ package com.tripleseven.orderapi.service.paytypes;
 
 import com.tripleseven.orderapi.dto.paytypes.PayTypeCreateRequestDTO;
 import com.tripleseven.orderapi.dto.paytypes.PayTypesResponseDTO;
-import com.tripleseven.orderapi.entity.paytypes.PayTypes;
+import com.tripleseven.orderapi.entity.paytype.PayType;
 import com.tripleseven.orderapi.exception.notfound.PayTypeNotFoundException;
 import com.tripleseven.orderapi.repository.paytypes.PayTypesRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,25 +21,25 @@ public class PayTypesServiceImpl implements PayTypesService {
 
     @Override
     public List<PayTypesResponseDTO> getAllPayTypes() {
-        List<PayTypes> payTypesList = payTypesRepository.findAll();
-        if (payTypesList.isEmpty()) {
+        List<PayType> payTypeList = payTypesRepository.findAll();
+        if (payTypeList.isEmpty()) {
             throw new PayTypeNotFoundException("No PayTypes found.");
         }
-        return payTypesList.stream()
+        return payTypeList.stream()
                 .map(PayTypesResponseDTO::fromEntity)
                 .toList();
     }
 
     @Override
     public PayTypesResponseDTO createPayType(PayTypeCreateRequestDTO request) {
-        PayTypes newPayType = PayTypes.ofCreate(request.getName());
-        PayTypes savedPayType = payTypesRepository.save(newPayType);
+        PayType newPayType = PayType.ofCreate(request.getName());
+        PayType savedPayType = payTypesRepository.save(newPayType);
         return PayTypesResponseDTO.fromEntity(savedPayType);
     }
 
     @Override
     public PayTypesResponseDTO getPayTypeById(Long id) {
-        Optional<PayTypes> payType = payTypesRepository.findById(id);
+        Optional<PayType> payType = payTypesRepository.findById(id);
         if (payType.isEmpty()) {
             throw new PayTypeNotFoundException("PayType with id " + id + " not found.");
         }
@@ -56,13 +56,13 @@ public class PayTypesServiceImpl implements PayTypesService {
 
     @Override
     public PayTypesResponseDTO updatePayType(Long id, PayTypeCreateRequestDTO request) {
-        Optional<PayTypes> existingPayType = payTypesRepository.findById(id);
+        Optional<PayType> existingPayType = payTypesRepository.findById(id);
         if (existingPayType.isEmpty()) {
             throw new PayTypeNotFoundException("PayType with id " + id + " not found.");
         }
 
-        PayTypes updatedPayType = existingPayType.get().ofUpdate(request.getName());
-        PayTypes savedPayType = payTypesRepository.save(updatedPayType);
+        PayType updatedPayType = existingPayType.get().ofUpdate(request.getName());
+        PayType savedPayType = payTypesRepository.save(updatedPayType);
         return PayTypesResponseDTO.fromEntity(savedPayType);
     }
 }
