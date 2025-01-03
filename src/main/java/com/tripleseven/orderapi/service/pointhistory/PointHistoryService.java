@@ -18,5 +18,5 @@ public interface PointHistoryService {
     Integer getTotalPointByMemberId(Long memberId);
     Page<PointHistoryResponseDTO> getPointHistoriesWithinPeriod(Long memberId, LocalDate startDate, LocalDate endDate, String sortDirection, Pageable pageable);
     Page<PointHistoryResponseDTO> getPointHistoriesWithState(Long memberId, HistoryTypes state, Pageable pageable);
-
+    int getUsedPoint(Long orderGroupId);
 }

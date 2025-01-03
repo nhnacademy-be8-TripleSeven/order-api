@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.repository;
 
-import com.tripleseven.orderapi.entity.paytypes.PayTypes;
+import com.tripleseven.orderapi.entity.paytype.PayType;
 import com.tripleseven.orderapi.repository.paytypes.PayTypesRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class PayTypesRepositoryTest {
+class PayTypeRepositoryTest {
 
     @Autowired
     private PayTypesRepository payTypesRepository;
@@ -19,10 +19,10 @@ class PayTypesRepositoryTest {
     @Test
     void testSavePayTypes() {
         // given
-        PayTypes payType = PayTypes.ofCreate("Credit Card");
+        PayType payType = PayType.ofCreate("Credit Card");
 
         // when
-        PayTypes savedPayType = payTypesRepository.save(payType);
+        PayType savedPayType = payTypesRepository.save(payType);
 
         // then
         assertThat(savedPayType).isNotNull();
@@ -33,11 +33,11 @@ class PayTypesRepositoryTest {
     @Test
     void testFindPayTypesById() {
         // given
-        PayTypes payType = PayTypes.ofCreate("Bank Transfer");
-        PayTypes savedPayType = payTypesRepository.save(payType);
+        PayType payType = PayType.ofCreate("Bank Transfer");
+        PayType savedPayType = payTypesRepository.save(payType);
 
         // when
-        Optional<PayTypes> retrievedPayType = payTypesRepository.findById(savedPayType.getId());
+        Optional<PayType> retrievedPayType = payTypesRepository.findById(savedPayType.getId());
 
         // then
         assertThat(retrievedPayType).isPresent();
@@ -47,12 +47,12 @@ class PayTypesRepositoryTest {
     @Test
     void testUpdatePayTypes() {
         // given
-        PayTypes payType = PayTypes.ofCreate("Old Name");
-        PayTypes savedPayType = payTypesRepository.save(payType);
+        PayType payType = PayType.ofCreate("Old Name");
+        PayType savedPayType = payTypesRepository.save(payType);
 
         // when
         savedPayType.ofUpdate("Updated Name");
-        PayTypes updatedPayType = payTypesRepository.save(savedPayType);
+        PayType updatedPayType = payTypesRepository.save(savedPayType);
 
         // then
         assertThat(updatedPayType.getName()).isEqualTo("Updated Name");
@@ -61,14 +61,14 @@ class PayTypesRepositoryTest {
     @Test
     void testDeletePayTypes() {
         // given
-        PayTypes payType = PayTypes.ofCreate("PayPal");
-        PayTypes savedPayType = payTypesRepository.save(payType);
+        PayType payType = PayType.ofCreate("PayPal");
+        PayType savedPayType = payTypesRepository.save(payType);
 
         // when
         payTypesRepository.deleteById(savedPayType.getId());
 
         // then
-        Optional<PayTypes> deletedPayType = payTypesRepository.findById(savedPayType.getId());
+        Optional<PayType> deletedPayType = payTypesRepository.findById(savedPayType.getId());
         assertThat(deletedPayType).isNotPresent();
     }
 }

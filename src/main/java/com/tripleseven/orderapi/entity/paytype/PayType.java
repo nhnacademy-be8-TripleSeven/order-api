@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.entity.paytypes;
+package com.tripleseven.orderapi.entity.paytype;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Entity
-public class PayTypes {
+public class PayType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,14 +18,14 @@ public class PayTypes {
     private String name;
 
     // Static factory method for creation
-    public static PayTypes ofCreate(String name) {
-        PayTypes payTypes = new PayTypes();
-        payTypes.name = name;
-        return payTypes;
+    public static PayType ofCreate(String name) {
+        PayType payType = new PayType();
+        payType.name = name;
+        return payType;
     }
 
     // Method for updating
-    public PayTypes ofUpdate(String name) {
+    public PayType ofUpdate(String name) {
         this.name = name;
         return this;
     }

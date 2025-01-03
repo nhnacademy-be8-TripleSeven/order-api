@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -20,7 +19,7 @@ public class DeliveryInfo {
     @NotNull
     private int invoiceNumber;
 
-    private ZonedDateTime arrivedAt;
+    private LocalDate arrivedAt;
 
     @OneToOne
     @MapsId
@@ -33,7 +32,7 @@ public class DeliveryInfo {
         this.orderGroup = orderGroup;
     }
 
-    public void ofUpdateArrived(ZonedDateTime arrivedAt) {
+    public void ofUpdateArrived(LocalDate arrivedAt) {
         this.arrivedAt = arrivedAt;
     }
 }

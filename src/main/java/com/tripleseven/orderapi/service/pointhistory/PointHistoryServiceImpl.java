@@ -2,11 +2,14 @@ package com.tripleseven.orderapi.service.pointhistory;
 
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
+import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
     private final PointHistoryRepository pointHistoryRepository;
     private final PointPolicyRepository pointPolicyRepository;
+    private final OrderGroupRepository orderGroupRepository;
 
     @Override
     public Page<PointHistoryResponseDTO> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
@@ -81,12 +85,15 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .orElseThrow(() -> new PointPolicyNotFoundException(
                         String.format("PointPolicy with id=%d not found", request.getPointPolicyId())
                 ));
+        OrderGroup orderGroup = orderGroupRepository.findById(request.getOrderGroupId())
+                .orElseThrow(() -> new OrderGroupNotFoundException(request.getOrderGroupId()));
 
         PointHistory pointHistory = PointHistory.ofCreate(
                 request.getTypes(),
                 pointPolicy.getAmount(),
                 pointPolicy.getName(),
-                memberId
+                memberId,
+                orderGroup
         );
 
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
@@ -120,6 +127,12 @@ public class PointHistoryServiceImpl implements PointHistoryService {
             throw new PointHistoryNotFoundException("No point histories found.");
         }
         return histories.map(PointHistoryResponseDTO::fromEntity);
+    }
+
+    @Override
+    public int getUsedPoint(Long orderId) {
+        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId);
+        return Objects.isNull(amount) ? 0 : amount;
     }
 
 }

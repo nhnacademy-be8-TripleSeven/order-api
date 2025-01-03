@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -17,10 +18,10 @@ public class DeliveryInfoResponseDTO {
 
     private final int invoiceNumber;
 
-    private final ZonedDateTime arrivedAt;
+    private final LocalDate arrivedAt;
 
     @Builder
-    private DeliveryInfoResponseDTO(Long id, String name, int invoiceNumber, ZonedDateTime arrivedAt) {
+    private DeliveryInfoResponseDTO(Long id, String name, int invoiceNumber, LocalDate arrivedAt) {
         if (Objects.isNull(id)) {
             log.error("DeliveryInfo id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
