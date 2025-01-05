@@ -8,10 +8,14 @@ import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
+import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pay.PayService;
@@ -34,6 +38,7 @@ public class PaymentListener {
 
     private final OrderGroupService orderGroupService;
     private final OrderDetailService orderDetailService;
+    private final DeliveryInfoService deliveryInfoService;
 
     private final PointService pointService;
     private final PayService payService;
@@ -61,6 +66,12 @@ public class PaymentListener {
             // OrderGroup 생성
             OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(userId, orderGroupCreateRequestDTO);
             Long id = orderGroupResponseDTO.getId();
+
+
+            // DeliveryInfo 생성
+            deliveryInfoService.createDeliveryInfo(
+                    new DeliveryInfoCreateRequestDTO(id)
+            );
 
             //OrderDetail 저장
             for (CartItemDTO cartItem : cartItems) {

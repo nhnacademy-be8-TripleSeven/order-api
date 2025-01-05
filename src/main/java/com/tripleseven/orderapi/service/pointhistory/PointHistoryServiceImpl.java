@@ -131,7 +131,13 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
     @Override
     public int getUsedPoint(Long orderId) {
-        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId);
+        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId, HistoryTypes.SPEND);
+        return Objects.isNull(amount) ? 0 : amount;
+    }
+
+    @Override
+    public int getEarnedPoint(Long orderId) {
+        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId, HistoryTypes.EARN);
         return Objects.isNull(amount) ? 0 : amount;
     }
 

@@ -7,7 +7,7 @@ import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
@@ -70,6 +70,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 orderGroupCreateRequestDTO.getOrderedName(),
                 orderGroupCreateRequestDTO.getRecipientName(),
                 orderGroupCreateRequestDTO.getRecipientPhone(),
+                orderGroupCreateRequestDTO.getRecipientHomePhone(),
                 orderGroupCreateRequestDTO.getDeliveryPrice(),
                 orderGroupCreateRequestDTO.getAddress(),
                 optionalWrapping.get());
@@ -109,10 +110,10 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     public Page<OrderViewsRequestDTO> getOrderGroupPeriodByUserId(Long userId, OrderManageRequestDTO manageRequestDTO, Pageable pageable) {
         LocalDate startDateTime = manageRequestDTO.getStartDate();
         LocalDate endDateTime = manageRequestDTO.getEndDate();
-        Status status = manageRequestDTO.getStatus();
+        OrderStatus orderStatus = manageRequestDTO.getOrderStatus();
 
         // 전체 데이터 가져오기
-        List<OrderViewDTO> orderViews = queryDslOrderDetailRepository.findAllByPeriod(userId, startDateTime, endDateTime, status);
+        List<OrderViewDTO> orderViews = queryDslOrderDetailRepository.findAllByPeriod(userId, startDateTime, endDateTime, orderStatus);
 
         // 그룹별로 데이터를 처리
         Map<Long, OrderViewsRequestDTO> groupedData = new LinkedHashMap<>();
@@ -126,8 +127,8 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 OrderViewsRequestDTO dto = groupedData.get(groupId);
 
                 // 상태값 비교 (더 높은 상태값으로 갱신)
-                if (dto.getStatus().ordinal() < orderView.getStatus().ordinal()) {
-                    dto.setStatus(orderView.getStatus());
+                if (dto.getOrderStatus().ordinal() < orderView.getOrderStatus().ordinal()) {
+                    dto.setOrderStatus(orderView.getOrderStatus());
                 }
 
                 dto.setOrderContent(String.format("%s 외 %d 종", dto.getOrderContent(), ++count));
@@ -144,7 +145,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                         orderContent,
                         orderView.getPrice() * orderView.getAmount(),
                         orderView.getAmount(),
-                        orderView.getStatus(),
+                        orderView.getOrderStatus(),
                         orderView.getOrdererName(),
                         orderView.getRecipientName()
                 ));

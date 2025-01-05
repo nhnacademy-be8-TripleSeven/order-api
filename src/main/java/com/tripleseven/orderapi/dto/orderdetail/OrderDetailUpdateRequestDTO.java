@@ -1,13 +1,12 @@
 package com.tripleseven.orderapi.dto.orderdetail;
 
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
+import java.util.List;
+
 @Value
-public class OrderDetailUpdateStatusRequestDTO {
-    @NotNull
-    @NotBlank
+public class OrderDetailUpdateRequestDTO {
+    List<Long> orderIds;
     OrderStatus orderStatus;
 }

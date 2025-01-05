@@ -13,26 +13,30 @@ public class DeliveryInfo {
     @Id
     private Long id;
 
-    @NotNull
     private String name;
 
-    @NotNull
     private int invoiceNumber;
 
     private LocalDate arrivedAt;
+
+    private LocalDate shippingAt;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "order_group_id")
     private OrderGroup orderGroup;
 
-    public void ofCreate(String name, int invoiceNumber, OrderGroup orderGroup) {
-        this.name = name;
-        this.invoiceNumber = invoiceNumber;
+    public void ofCreate(OrderGroup orderGroup) {
         this.orderGroup = orderGroup;
     }
 
-    public void ofUpdateArrived(LocalDate arrivedAt) {
+    public void ofUpdate(String name, int invoiceNumber, LocalDate arrivedAt) {
+        this.name = name;
+        this.invoiceNumber = invoiceNumber;
         this.arrivedAt = arrivedAt;
+    }
+
+    public void ofShippingUpdate(LocalDate shippingAt){
+        this.shippingAt = shippingAt;
     }
 }

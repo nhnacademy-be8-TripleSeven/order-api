@@ -38,10 +38,10 @@ public class DeliveryInfoRepositoryTest {
         wrapping.ofCreate("Test Wrapping", 100);
         Wrapping savedWrapping = wrappingRepository.save(wrapping);
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", savedWrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678","01012345678", 1000, "Test Address", savedWrapping);
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
         deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate("Test DeliveryInfo", 12345678, savedOrderGroup);
+        deliveryInfo.ofCreate(savedOrderGroup);
         arrivedAt = LocalDate.parse("2024-12-17");
     }
 
@@ -89,7 +89,7 @@ public class DeliveryInfoRepositoryTest {
     void testUpdateArrivedDeliveryInfo() {
         DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
 
-        savedDeliveryInfo.ofUpdateArrived(arrivedAt);
+        savedDeliveryInfo.ofUpdate("Test DeliveryInfo", 12345678, arrivedAt);
 
         DeliveryInfo updatedDeliveryInfo = deliveryInfoRepository.save(savedDeliveryInfo);
 

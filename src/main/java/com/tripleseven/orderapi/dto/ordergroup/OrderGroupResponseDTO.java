@@ -25,12 +25,14 @@ public class OrderGroupResponseDTO {
 
     private final String recipientPhone;
 
+    private final String recipientHomePhone;
+
     private final int deliveryPrice;
 
     private final String address;
 
     @Builder
-    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, LocalDate orderedAt, String recipientName, String recipientPhone, int deliveryPrice, String address) {
+    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, LocalDate orderedAt, String recipientName, String recipientPhone, String recipientHomePhone, int deliveryPrice, String address) {
         if (Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
@@ -42,6 +44,7 @@ public class OrderGroupResponseDTO {
         this.orderedAt = orderedAt;
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
+        this.recipientHomePhone = recipientHomePhone;
         this.deliveryPrice = deliveryPrice;
         this.address = address;
     }
@@ -54,6 +57,7 @@ public class OrderGroupResponseDTO {
                 .orderedAt(orderGroup.getOrderedAt())
                 .recipientName(orderGroup.getRecipientName())
                 .recipientPhone(orderGroup.getRecipientPhone())
+                .recipientHomePhone(orderGroup.getRecipientHomePhone())
                 .deliveryPrice(orderGroup.getDeliveryPrice())
                 .address(orderGroup.getAddress())
                 .wrappingId(orderGroup.getWrapping().getId())

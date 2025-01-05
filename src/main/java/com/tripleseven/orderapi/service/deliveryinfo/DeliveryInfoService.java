@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.service.deliveryinfo;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 
@@ -10,7 +10,9 @@ public interface DeliveryInfoService {
 
     DeliveryInfoResponseDTO createDeliveryInfo(DeliveryInfoCreateRequestDTO deliveryInfoCreateRequestDTO);
 
-    DeliveryInfoResponseDTO updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequestDTO deliveryInfoArrivedAtUpdateRequestDTO);
+    DeliveryInfoResponseDTO updateDeliveryInfo(Long id, DeliveryInfoUpdateRequestDTO deliveryInfoUpdateRequestDTO);
+
+    DeliveryInfoResponseDTO updateDeliveryInfoShippingAt(Long id);
 
     void deleteDeliveryInfo(Long id);
 

@@ -5,10 +5,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DatePath;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.tripleseven.orderapi.dto.order.OrderViewDTO;
-import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.orderdetail.QOrderDetail;
-import com.tripleseven.orderapi.entity.orderdetail.Status;
 import com.tripleseven.orderapi.entity.ordergroup.QOrderGroup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,17 +29,17 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
     private EntityManager entityManager;
 
     @Override
-    public List<OrderViewDTO> findAllByPeriod(Long userId, LocalDate startTime, LocalDate endTime, Status status) {
+    public List<OrderViewDTO> findAllByPeriod(Long userId, LocalDate startTime, LocalDate endTime, OrderStatus orderStatus) {
 
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
         QOrderDetail orderDetail = QOrderDetail.orderDetail;
-        List<Status> statuses;
+        List<OrderStatus> orderStatuses;
 
         // 주문 상태별 분기
-        if (Objects.isNull(status)) {
-            statuses = Arrays.asList(Status.ERROR, Status.PAYMENT_PENDING, Status.PAYMENT_COMPLETED, Status.SHIPPING, Status.DELIVERED);
+        if (Objects.isNull(orderStatus)) {
+            orderStatuses = Arrays.asList(OrderStatus.ERROR, OrderStatus.PAYMENT_PENDING, OrderStatus.PAYMENT_COMPLETED, OrderStatus.SHIPPING, OrderStatus.DELIVERED);
         } else {
-            statuses = List.of(status);
+            orderStatuses = List.of(orderStatus);
         }
 
         return new JPAQuery<>(entityManager).select(Projections.constructor(OrderViewDTO.class,
@@ -57,7 +56,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
                 .where(
                         orderGroup.userId.eq(userId)
                                 .and(betweenDates(orderGroup.orderedAt, startTime, endTime))
-                                .and(orderDetail.status.in(statuses))
+                                .and(orderDetail.status.in(orderStatuses))
                 )
                 .orderBy(orderDetail.id.asc())
                 .fetch();
