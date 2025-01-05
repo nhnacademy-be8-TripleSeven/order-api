@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -39,8 +38,8 @@ public class LogTestController {
 
 
     @GetMapping("/test-rabbit")
-    public void testRabbitMQ(@RequestHeader("X-USER") Long userId) {
-
+    public void testRabbitMQ() {
+        Long userId = 2L;
         CartItemDTO cartItemDTO = new CartItemDTO();
         cartItemDTO.ofCreateTest();
         List<CartItemDTO> cartItemDTOList = new ArrayList<>();
@@ -52,13 +51,14 @@ public class LogTestController {
         Wrapping savedWrapping = wrappingRepository.save(wrapping);
 
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(userId, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
+        orderGroup.ofCreate(userId, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
         OrderGroupCreateRequestDTO orderGroupCreateRequestDTO =
                 new OrderGroupCreateRequestDTO(
                         savedWrapping.getId(),
                         orderGroup.getOrderedName(),
                         orderGroup.getRecipientName(),
                         orderGroup.getRecipientPhone(),
+                        orderGroup.getRecipientHomePhone(),
                         orderGroup.getDeliveryPrice(),
                         orderGroup.getAddress());
 

@@ -13,6 +13,7 @@ import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.wrapping.WrappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final PayService payService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderInfoDTO> getOrderInfos(Long orderGroupId) {
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
 
@@ -38,7 +40,8 @@ public class OrderServiceImpl implements OrderService {
             String bookName = bookCouponApiClient.getBookName(orderDetailResponseDTO.getBookId());
 
             OrderInfoDTO orderInfoDTO = new OrderInfoDTO(
-                    orderDetailResponseDTO.getStatus(),
+                    orderDetailResponseDTO.getId(),
+                    orderDetailResponseDTO.getOrderStatus(),
                     bookName,
                     orderDetailResponseDTO.getAmount(),
                     orderDetailResponseDTO.getDiscountPrice(),
@@ -50,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderGroupInfoDTO getOrderGroupInfo(Long orderGroupId) {
         OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.getOrderGroupById(orderGroupId);
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
@@ -57,15 +61,19 @@ public class OrderServiceImpl implements OrderService {
         WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupResponseDTO.getWrappingId());
 
         int usedPoint = pointHistoryService.getUsedPoint(orderGroupId);
+        int earnedPoint = pointHistoryService.getEarnedPoint(orderGroupId);
+        // 판매가 총합
         int primeTotalPrice = 0;
+        // 할인 금액
         int discountPrice = 0;
 
         for (OrderDetailResponseDTO orderDetailResponseDTO : orderDetailResponseList) {
             primeTotalPrice += orderDetailResponseDTO.getPrimePrice();
-            discountPrice += orderDetailResponseDTO.getPrimePrice() - orderDetailResponseDTO.getDiscountPrice();
+            discountPrice += orderDetailResponseDTO.getDiscountPrice();
         }
 
-        int totalPrice = primeTotalPrice - discountPrice;
+        // 총 계산된 금액
+        int totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
 
         return new OrderGroupInfoDTO(
                 primeTotalPrice,
@@ -74,20 +82,24 @@ public class OrderServiceImpl implements OrderService {
                 wrappingResponseDTO.getName(),
                 wrappingResponseDTO.getPrice(),
                 totalPrice,
-                usedPoint);
+                usedPoint,
+                earnedPoint);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DeliveryInfoDTO getDeliveryInfo(Long orderGroupId) {
         return queryDslDeliveryInfoRepository.getDeliveryInfo(orderGroupId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderPayInfoDTO getOrderPayInfo(Long orderGroupId) {
         return payService.getOrderPayInfo(orderGroupId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderPayDetailDTO getOrderPayDetail(Long orderGroupId) {
         return new OrderPayDetailDTO(
                 getOrderInfos(orderGroupId),

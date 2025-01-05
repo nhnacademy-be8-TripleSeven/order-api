@@ -24,6 +24,9 @@ public class OrderGroupCreateRequestDTO {
     @Length(max = 15)
     String recipientPhone;
 
+    @Length(max = 15)
+    String recipientHomePhone;
+
     @NotNull
     @Min(100)
     int deliveryPrice;

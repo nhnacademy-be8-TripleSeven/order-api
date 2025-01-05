@@ -21,7 +21,7 @@ public class OrderDetail {
     private int amount;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private OrderStatus orderStatus;
 
     @NotNull
     private int primePrice;
@@ -40,10 +40,10 @@ public class OrderDetail {
         this.primePrice = primePrice;
         this.discountPrice = discountPrice;
         this.orderGroup = orderGroup;
-        this.status = Status.PAYMENT_PENDING;
+        this.orderStatus = OrderStatus.PAYMENT_PENDING;
     }
 
-    public void ofUpdateStatus(Status status) {
-        this.status = status;
+    public void ofUpdateStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
     }
 }

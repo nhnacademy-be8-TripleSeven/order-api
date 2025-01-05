@@ -31,6 +31,7 @@ class PointHistoryRepositoryTest {
 
     private PointHistory pointHistory;
     private PointHistory useHistory;
+
     @BeforeEach
     void setUp() {
         Wrapping wrapping = new Wrapping();
@@ -38,28 +39,28 @@ class PointHistoryRepositoryTest {
         wrappingRepository.save(wrapping);
 
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
-        orderGroupRepository.save(orderGroup);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
+        OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
+
         pointHistory = PointHistory.ofCreate(
                 HistoryTypes.EARN,
                 1000,
                 "Earned points for book purchase",
                 1L,
-                orderGroup
+                savedOrderGroup
         );
         useHistory = PointHistory.ofCreate(
                 HistoryTypes.SPEND,
                 -1000,
                 "Used points for book purchase",
                 2L,
-                orderGroup
+                savedOrderGroup
         );
 
     }
+
     @Test
     void testSavePointHistory() {
-
-        // given
 
 
         // when

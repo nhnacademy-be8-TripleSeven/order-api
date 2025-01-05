@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.repository.orderdetail;
 
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     List<OrderDetail> findAllByOrderGroupId(Long orderGroupId);
-    List<OrderDetail> findAllByOrderGroupIdAndStatus(Long orderGroupId, Status status);
+    List<OrderDetail> findAllByOrderGroupIdAndOrderStatus(Long orderGroupId, OrderStatus orderStatus);
     @Query("select case when count(od) > 0 then true else false end " +
             "from OrderDetail od " +
             "join od.orderGroup og " +

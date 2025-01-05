@@ -61,7 +61,7 @@ public class PayServiceImpl implements PayService {
         return new PayInfoResponseDTO(orderId, requestDTO.getTotalAmount());
     }
 
-    public OrderPayInfoDTO getOrderPayInfo(Long orderId){
+    public OrderPayInfoDTO getOrderPayInfo(Long orderId) {
 
         return payRepository.getDTOByOrderGroupId(orderId);
     }

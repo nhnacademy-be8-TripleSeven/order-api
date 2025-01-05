@@ -37,19 +37,19 @@ public class OrderGroupController {
         return ResponseEntity.ok(response); // 반환: 주문 그룹 정보 (OrderGroupResponse)
     }
 
-    // 2. 사용자별 주문 그룹 페이지 조회
-    @GetMapping("/order-groups")
-    @Operation(summary = "사용자별 주문 그룹 조회", description = "현재 사용자와 관련된 주문 그룹을 페이징하여 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
-    })
-    public ResponseEntity<Page<OrderGroupResponseDTO>> getOrderGroupsByUserId(
-            @RequestHeader("X-USER") Long userId, // 사용자 ID를 요청 헤더에서 가져옵니다.
-            Pageable pageable) {
-        Page<OrderGroupResponseDTO> responses = orderGroupService.getOrderGroupPagesByUserId(userId, pageable);
-        return ResponseEntity.ok(responses); // 반환: 주문 그룹 페이지 (Page<OrderGroupResponse>)
-    }
+//    // 2. 사용자별 주문 그룹 페이지 조회
+//    @GetMapping("/order-groups")
+//    @Operation(summary = "사용자별 주문 그룹 조회", description = "현재 사용자와 관련된 주문 그룹을 페이징하여 조회합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "조회 성공"),
+//            @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
+//    })
+//    public ResponseEntity<Page<OrderGroupResponseDTO>> getOrderGroupsByUserId(
+//            @RequestHeader("X-USER") Long userId, // 사용자 ID를 요청 헤더에서 가져옵니다.
+//            Pageable pageable) {
+//        Page<OrderGroupResponseDTO> responses = orderGroupService.getOrderGroupPagesByUserId(userId, pageable);
+//        return ResponseEntity.ok(responses); // 반환: 주문 그룹 페이지 (Page<OrderGroupResponse>)
+//    }
 
     // 3. 주문 그룹 생성 ( 아마 직접 생성하는 일은 없음 )
 //    @PostMapping("/order-groups")

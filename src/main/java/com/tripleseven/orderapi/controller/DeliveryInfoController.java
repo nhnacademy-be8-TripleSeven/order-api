@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
@@ -54,8 +54,8 @@ public class DeliveryInfoController {
             @ApiResponse(responseCode = "404", description = "배송 정보가 존재하지 않음")
     })
     public ResponseEntity<DeliveryInfoResponseDTO> updateDeliveryArrivedAt(
-            @PathVariable Long id, @RequestBody DeliveryInfoArrivedAtUpdateRequestDTO request) {
-        DeliveryInfoResponseDTO response = deliveryInfoService.updateDeliveryInfoArrivedAt(id, request);
+            @PathVariable Long id, @RequestBody DeliveryInfoUpdateRequestDTO request) {
+        DeliveryInfoResponseDTO response = deliveryInfoService.updateDeliveryInfo(id, request);
         return ResponseEntity.ok(response); // 반환: 업데이트된 배송 정보 (DeliveryInfoResponse)
     }
 
