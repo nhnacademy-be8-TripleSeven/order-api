@@ -29,6 +29,8 @@ public class OrderGroup {
     @NotNull
     private String recipientPhone;
 
+    private String recipientHomePhone;
+
     @NotNull
     private int deliveryPrice;
 
@@ -40,12 +42,13 @@ public class OrderGroup {
     @JoinColumn(name = "wrapping_id", nullable = false)
     private Wrapping wrapping;
 
-    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, int deliveryPrice, String address, Wrapping wrapping) {
+    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, String recipientHomePhone, int deliveryPrice, String address, Wrapping wrapping) {
         this.userId = userId;
         this.orderedName = orderedName;
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
         this.deliveryPrice = deliveryPrice;
+        this.recipientHomePhone = recipientHomePhone;
         this.address = address;
         this.orderedAt = LocalDate.now();
         this.wrapping = wrapping;

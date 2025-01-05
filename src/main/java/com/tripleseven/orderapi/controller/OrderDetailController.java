@@ -2,8 +2,8 @@ package com.tripleseven.orderapi.controller;
 
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDTO;
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateRequestDTO;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,17 +48,17 @@ public class OrderDetailController {
     }
 
     // 3. 주문 상세 상태 업데이트
-    @PutMapping("/order-details/{id}/status")
-    @Operation(summary = "주문 상세 상태 업데이트", description = "특정 주문 상세의 상태를 업데이트합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
-            @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
-    })
-    public ResponseEntity<OrderDetailResponseDTO> updateOrderDetailStatus(
-            @PathVariable Long id, @RequestBody OrderDetailUpdateStatusRequestDTO request) {
-        OrderDetailResponseDTO response = orderDetailService.updateOrderDetailStatus(id, request);
-        return ResponseEntity.ok(response); // 반환: 업데이트된 주문 상세 (OrderDetailResponse)
-    }
+//    @PutMapping("/order-details/{id}/status")
+//    @Operation(summary = "주문 상세 상태 업데이트", description = "특정 주문 상세의 상태를 업데이트합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
+//            @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
+//    })
+//    public ResponseEntity<OrderDetailResponseDTO> updateOrderDetailStatus(
+//            @PathVariable Long id, @RequestBody OrderDetailUpdateStatusRequestDTO request) {
+//        OrderDetailResponseDTO response = orderDetailService.updateOrderDetailStatus(id, request);
+//        return ResponseEntity.ok(response); // 반환: 업데이트된 주문 상세 (OrderDetailResponse)
+//    }
 
     // 4. 주문 상세 삭제
     @DeleteMapping("/order-details/{id}")
@@ -84,7 +84,7 @@ public class OrderDetailController {
         return ResponseEntity.ok(responses); // 반환: 주문 상세 목록 (List<OrderDetailResponse>)
     }
 
-    @GetMapping("/order-details/{orderGroupId}/status/{status}")
+    @GetMapping("/order-details/{orderGroupId}/status/{orderStatus}")
     @Operation(
             summary = "주문 그룹과 상태별 주문 상세 목록 조회",
             description = "특정 주문 그룹과 주문 상태에 해당하는 주문 상세 목록을 조회합니다."
@@ -95,8 +95,8 @@ public class OrderDetailController {
     })
     public ResponseEntity<List<OrderDetailResponseDTO>> listOrderDetailsByStatus(
             @PathVariable Long orderGroupId,
-            @PathVariable Status status) {
-        List<OrderDetailResponseDTO> responses = orderDetailService.getOrderDetailsForGroupWithStatus(orderGroupId, status);
+            @PathVariable OrderStatus orderStatus) {
+        List<OrderDetailResponseDTO> responses = orderDetailService.getOrderDetailsForGroupWithStatus(orderGroupId, orderStatus);
         return ResponseEntity.ok(responses);
     }
 
@@ -109,6 +109,13 @@ public class OrderDetailController {
         return ResponseEntity.ok(hasPurchased);
     }
 
+    @PostMapping("/api/orders/order-details/return")
+    public ResponseEntity<Void> updateOrderDetails(
+            @RequestHeader("X-USER") Long userId,
+            @RequestBody OrderDetailUpdateRequestDTO orderDetailUpdateRequestDTO) {
+        orderDetailService.updateOrderDetailStatus(orderDetailUpdateRequestDTO.getOrderIds(), orderDetailUpdateRequestDTO.getOrderStatus());
+        return ResponseEntity.ok().build();
+    }
 
 
 }

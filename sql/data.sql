@@ -70,9 +70,9 @@ INSERT INTO order_group (user_id, ordered_name, ordered_at, recipient_name, reci
 VALUES (2, 'Order 2', '2024-12-09 11:00:00', 'Jane Smith', '010-2345-6789', 5000, 2, 2);
 
 -- OrderDetail 테이블 데이터 삽입
-INSERT INTO order_detail (book_id, amount, status, price, wrapping_id, order_group_id)
+INSERT INTO order_detail (book_id, amount, orderStatus, price, wrapping_id, order_group_id)
 VALUES (1001, 2, 'PAYMENT_PENDING', 20000, 1, 1);
-INSERT INTO order_detail (book_id, amount, status, price, wrapping_id, order_group_id)
+INSERT INTO order_detail (book_id, amount, orderStatus, price, wrapping_id, order_group_id)
 VALUES (1002, 1, 'PAYMENT_PENDING', 15000, 2, 2);
 
 -- DeliveryInfo 업데이트 (필요시)

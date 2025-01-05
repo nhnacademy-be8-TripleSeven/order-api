@@ -95,7 +95,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/io.lettuce/lettuce-core -->
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+            <version>6.5.2.RELEASE</version>
+        </dependency>
         <!-- eureka-client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

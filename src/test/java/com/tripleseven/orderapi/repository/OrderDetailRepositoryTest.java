@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.repository;
 
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
@@ -36,7 +36,7 @@ public class OrderDetailRepositoryTest {
         wrappingRepository.save(wrapping);
 
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
         orderGroupRepository.save(orderGroup);
 
         orderDetail = new OrderDetail();
@@ -105,10 +105,10 @@ public class OrderDetailRepositoryTest {
     void testUpdateStatusOrderDetail() {
         OrderDetail savedOrderDetail = orderDetailRepository.save(orderDetail);
 
-        Status status = Status.PAYMENT_COMPLETED;
-        savedOrderDetail.ofUpdateStatus(status);
+        OrderStatus orderStatus = OrderStatus.PAYMENT_COMPLETED;
+        savedOrderDetail.ofUpdateStatus(orderStatus);
         OrderDetail updatedOrderDetail = orderDetailRepository.save(savedOrderDetail);
-        assertEquals(Status.PAYMENT_COMPLETED, updatedOrderDetail.getStatus());
+        assertEquals(OrderStatus.PAYMENT_COMPLETED, updatedOrderDetail.getOrderStatus());
         assertEquals(savedOrderDetail.getId(), updatedOrderDetail.getId());
         assertEquals(savedOrderDetail.getBookId(), updatedOrderDetail.getBookId());
         assertEquals(savedOrderDetail.getAmount(), updatedOrderDetail.getAmount());

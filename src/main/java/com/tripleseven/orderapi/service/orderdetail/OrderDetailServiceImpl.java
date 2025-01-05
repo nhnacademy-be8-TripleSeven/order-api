@@ -2,18 +2,22 @@ package com.tripleseven.orderapi.service.orderdetail;
 
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailUpdateStatusRequestDTO;
+import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +26,7 @@ import java.util.Optional;
 public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderGroupRepository orderGroupRepository;
+    private final DeliveryInfoRepository deliveryInfoRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -58,17 +63,60 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         return OrderDetailResponseDTO.fromEntity(savedOrderDetail);
     }
 
+    // 주문 상태 업데이트(회원)
     @Override
     @Transactional
-    public OrderDetailResponseDTO updateOrderDetailStatus(Long id, OrderDetailUpdateStatusRequestDTO orderDetailUpdateStatusRequestDTO) {
-        Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
-        if (optionalOrderDetail.isEmpty()) {
-            throw new OrderDetailNotFoundException(id);
-        }
-        OrderDetail orderDetail = optionalOrderDetail.get();
-        orderDetail.ofUpdateStatus(orderDetailUpdateStatusRequestDTO.getStatus());
+    public List<OrderDetailResponseDTO> updateOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
 
-        return OrderDetailResponseDTO.fromEntity(orderDetail);
+        List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
+
+        if (orderStatus.equals(OrderStatus.ORDER_CANCELED)) {
+
+            for (Long id : ids) {
+                Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
+
+                if (optionalOrderDetail.isEmpty()) {
+                    throw new OrderDetailNotFoundException(id);
+                }
+
+                OrderDetail orderDetail = optionalOrderDetail.get();
+
+                if (orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) || orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
+                    orderDetail.ofUpdateStatus(orderStatus);
+                }
+
+                orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
+            }
+        } else {
+            for (Long id : ids) {
+                Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
+
+                if (optionalOrderDetail.isEmpty()) {
+                    throw new OrderDetailNotFoundException(id);
+                }
+
+                OrderDetail orderDetail = optionalOrderDetail.get();
+
+                if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                    Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
+
+                    if (optionalDeliveryInfo.isEmpty()) {
+                        throw new DeliveryInfoNotFoundException(id);
+                    }
+
+                    DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
+                    LocalDate today = LocalDate.now();
+
+                    // 출고일 기준
+                    if (deliveryInfo.getShippingAt().isBefore(today.minusDays(30L))) {
+                        orderDetail.ofUpdateStatus(orderStatus);
+                    }
+                }
+
+                orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
+            }
+        }
+        return orderDetailResponses;
     }
 
     @Override
@@ -85,7 +133,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public List<OrderDetailResponseDTO> getOrderDetailsToList(Long orderGroupId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrderGroupId(orderGroupId);
 
-        if(orderDetails.isEmpty()){
+        if (orderDetails.isEmpty()) {
             return List.of();
         }
 
@@ -94,7 +142,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderDetailResponseDTO> getOrderDetailsForGroupWithStatus(Long orderGroupId, Status status) {
+    public List<OrderDetailResponseDTO> getOrderDetailsForGroupWithStatus(Long orderGroupId, OrderStatus orderStatus) {
         return List.of();
     }
 

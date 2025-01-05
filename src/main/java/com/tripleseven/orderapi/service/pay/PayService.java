@@ -8,7 +8,10 @@ import org.json.simple.JSONObject;
 
 public interface PayService {
     void save(Long userId, JSONObject response);
+
     void payCancel(JSONObject response);
+
     PayInfoResponseDTO getOrderInfo(Long userId, PayInfoRequestDTO requestDTO);
+
     OrderPayInfoDTO getOrderPayInfo(Long orderId);
 }

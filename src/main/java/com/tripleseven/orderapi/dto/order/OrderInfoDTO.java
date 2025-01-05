@@ -1,13 +1,14 @@
 package com.tripleseven.orderapi.dto.order;
 
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
 public class OrderInfoDTO {
-    Status status;
+    Long orderDetailId;
+    OrderStatus orderStatus;
     String bookName;
     int amount;
     int discountPrice;

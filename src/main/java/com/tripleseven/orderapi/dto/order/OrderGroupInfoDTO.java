@@ -13,4 +13,5 @@ public class OrderGroupInfoDTO {
     int wrappingPrice;
     int totalPrice;
     int usedPoint;
+    int earnedPoint;
 }

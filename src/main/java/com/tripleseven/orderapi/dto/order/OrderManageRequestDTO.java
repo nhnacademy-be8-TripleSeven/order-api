@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.dto.order;
 
-import com.tripleseven.orderapi.entity.orderdetail.Status;
+import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import lombok.Value;
 
 import java.time.LocalDate;
@@ -9,5 +9,5 @@ import java.time.LocalDate;
 public class OrderManageRequestDTO {
     LocalDate startDate;
     LocalDate endDate;
-    Status status;
+    OrderStatus orderStatus;
 }

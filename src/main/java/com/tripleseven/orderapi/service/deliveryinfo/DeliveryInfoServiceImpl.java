@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.service.deliveryinfo;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoArrivedAtUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -42,7 +43,7 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
         }
 
         DeliveryInfo deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate(deliveryInfoCreateRequestDTO.getName(), deliveryInfoCreateRequestDTO.getInvoiceNumber(), optionalOrderGroup.get());
+        deliveryInfo.ofCreate(optionalOrderGroup.get());
         DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
 
         return DeliveryInfoResponseDTO.fromEntity(savedDeliveryInfo);
@@ -50,13 +51,29 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
 
     @Override
     @Transactional
-    public DeliveryInfoResponseDTO updateDeliveryInfoArrivedAt(Long id, DeliveryInfoArrivedAtUpdateRequestDTO deliveryInfoArrivedAtUpdateRequestDTO) {
+    public DeliveryInfoResponseDTO updateDeliveryInfo(Long id, DeliveryInfoUpdateRequestDTO deliveryInfoUpdateRequestDTO) {
         Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
         if (optionalDeliveryInfo.isEmpty()) {
             throw new DeliveryInfoNotFoundException(id);
         }
         DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
-        deliveryInfo.ofUpdateArrived(deliveryInfoArrivedAtUpdateRequestDTO.getArrivedAt());
+        deliveryInfo.ofUpdate(
+                deliveryInfoUpdateRequestDTO.getName(),
+                deliveryInfoUpdateRequestDTO.getInvoiceNumber(),
+                deliveryInfoUpdateRequestDTO.getArrivedAt());
+        return DeliveryInfoResponseDTO.fromEntity(deliveryInfo);
+    }
+
+    @Override
+    @Transactional
+    public DeliveryInfoResponseDTO updateDeliveryInfoShippingAt(Long id){
+        Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
+        if (optionalDeliveryInfo.isEmpty()) {
+            throw new DeliveryInfoNotFoundException(id);
+        }
+        DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
+        deliveryInfo.ofShippingUpdate(LocalDate.now());
+
         return DeliveryInfoResponseDTO.fromEntity(deliveryInfo);
     }
 
