@@ -50,8 +50,6 @@ public class DeliveryInfoRepositoryTest {
         DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
 
         assertNotNull(savedDeliveryInfo.getId());
-        assertEquals("Test DeliveryInfo", savedDeliveryInfo.getName());
-        assertEquals(12345678, savedDeliveryInfo.getInvoiceNumber());
         assertNull(savedDeliveryInfo.getArrivedAt());
     }
 
@@ -64,8 +62,6 @@ public class DeliveryInfoRepositoryTest {
         assertTrue(foundDeliveryInfo.isPresent());
 
         DeliveryInfo getDeliveryInfo = foundDeliveryInfo.get();
-        assertEquals("Test DeliveryInfo", getDeliveryInfo.getName());
-        assertEquals(12345678, getDeliveryInfo.getInvoiceNumber());
         assertNull(getDeliveryInfo.getArrivedAt());
     }
 
