@@ -55,6 +55,7 @@ public class DeliveryInfoServiceTest {
                 "Test Ordered",
                 "Test Recipient",
                 "01012345678",
+                "01012345678",
                 1000,
                 "Test Address",
                 wrapping);

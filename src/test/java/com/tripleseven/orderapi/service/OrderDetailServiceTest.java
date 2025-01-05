@@ -51,7 +51,7 @@ public class OrderDetailServiceTest {
 
         orderGroup = new OrderGroup();
         ReflectionTestUtils.setField(orderGroup, "id", 1L);
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", 1000, "Test Address", wrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
 
         orderDetail = new OrderDetail();
         ReflectionTestUtils.setField(orderDetail, "id", 1L);
@@ -122,7 +122,7 @@ public class OrderDetailServiceTest {
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.of(orderDetail));
 
         List<OrderDetailResponseDTO> response = orderDetailService.updateOrderDetailStatus(
-                List.of(1L,2L),
+                List.of(1L, 2L),
                 OrderStatus.PAYMENT_COMPLETED);
 
         assertNotNull(response);
@@ -133,7 +133,7 @@ public class OrderDetailServiceTest {
 //
 //        assertEquals(Status.PAYMENT_COMPLETED, response.getStatus());
 
-        verify(orderDetailRepository, times(1)).findById(anyLong());
+        verify(orderDetailRepository, times(2)).findById(anyLong());
     }
 
     @Test
@@ -183,7 +183,7 @@ public class OrderDetailServiceTest {
     @Test
     void testGetOrderDetailsToList_Fail() {
         when(orderDetailRepository.findAllByOrderGroupId(anyLong())).thenReturn(List.of());
-        List<OrderDetailResponseDTO>  orderDetailsToList = orderDetailService.getOrderDetailsToList(1L);
+        List<OrderDetailResponseDTO> orderDetailsToList = orderDetailService.getOrderDetailsToList(1L);
         assertNotNull(orderDetailsToList);
         verify(orderDetailRepository, times(1)).findAllByOrderGroupId(anyLong());
     }

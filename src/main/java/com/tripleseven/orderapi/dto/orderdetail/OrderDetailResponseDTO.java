@@ -45,7 +45,7 @@ public class OrderDetailResponseDTO {
                 .id(orderDetail.getId())
                 .bookId(orderDetail.getBookId())
                 .amount(orderDetail.getAmount())
-                .status(orderDetail.getOrderStatus())
+                .orderStatus(orderDetail.getOrderStatus())
                 .primePrice(orderDetail.getPrimePrice())
                 .discountPrice(orderDetail.getDiscountPrice())
                 .orderGroupId(orderDetail.getOrderGroup().getId())

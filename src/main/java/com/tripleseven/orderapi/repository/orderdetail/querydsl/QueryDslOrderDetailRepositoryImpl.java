@@ -48,7 +48,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
                         orderDetail.bookId.as("bookId"),
                         orderDetail.discountPrice.as("price"),
                         orderDetail.amount.as("amount"),
-                        orderDetail.status.as("status"),
+                        orderDetail.orderStatus.as("status"),
                         orderGroup.orderedName.as("ordererName"),
                         orderGroup.recipientName.as("recipientName")))
                 .from(orderDetail)
@@ -56,7 +56,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
                 .where(
                         orderGroup.userId.eq(userId)
                                 .and(betweenDates(orderGroup.orderedAt, startTime, endTime))
-                                .and(orderDetail.status.in(orderStatuses))
+                                .and(orderDetail.orderStatus.in(orderStatuses))
                 )
                 .orderBy(orderDetail.id.asc())
                 .fetch();
