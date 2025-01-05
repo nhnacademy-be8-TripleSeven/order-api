@@ -44,6 +44,19 @@ public class PayApiController {
     private final PointHistoryService pointHistoryService;
     private final OrderProcessingStrategy orderProcessingStrategy;
 
+    @Operation(summary = "결제 페이지 정보 요청", description = "결제 페이지 요청에 필요한 정보를 요청합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "성공"),
+            @ApiResponse(responseCode = "400",description = "실패")
+    })
+    @PostMapping("/payments/order")
+    public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
+            @RequestHeader("X-USER") Long userId,
+            @RequestBody PayInfoRequestDTO request) throws Exception {
+        PayInfoResponseDTO response = payService.getOrderInfo(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "결제 승인 요청", description = "Widget 또는 Payment 방식을 이용하여 결제를 승인합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "결제 승인 성공"),
@@ -107,13 +120,7 @@ public class PayApiController {
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 
-    @PostMapping("/payments/order")
-    public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
-            @RequestHeader("X-USER") Long userId,
-            @RequestBody PayInfoRequestDTO request) throws Exception {
-        PayInfoResponseDTO response = payService.getOrderInfo(userId, request);
-        return ResponseEntity.ok(response);
-    }
+
 //
 //    private JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
 //        HttpURLConnection connection = createConnection(secretKey, urlString);
