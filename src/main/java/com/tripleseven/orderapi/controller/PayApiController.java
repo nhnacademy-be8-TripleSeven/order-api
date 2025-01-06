@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,8 +53,13 @@ public class PayApiController {
     @PostMapping("/payments/order")
     public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
             @RequestHeader("X-USER") Long userId,
+            @CookieValue("GUEST-ID") Long guesetId,
             @RequestBody PayInfoRequestDTO request) throws Exception {
-        PayInfoResponseDTO response = payService.getOrderInfo(userId, request);
+        PayInfoResponseDTO response = null;
+        if(Objects.isNull(userId)){
+            response = payService.getOrderInfo(guesetId,request);
+        }
+        response = payService.getOrderInfo(userId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -65,11 +71,13 @@ public class PayApiController {
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
     public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
                                                      @RequestHeader("X-USER") Long userId,
+                                                     @CookieValue("GUIEST-ID")Long guesetId,
                                                      @RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
         int statusCode = response.containsKey("error") ? 400 : 200;
+
 
         if (statusCode == 200) {
             // TODO rabbitMQ 쪽 구현

@@ -23,9 +23,13 @@ public class PayInfoRequestDTO {
     private String recipientLandline; // 받는 사람 일반 전화
     private String recipientAddress;  // 받는 사람 주소
 
-    private long wrapperId;
-    private long couponId;
+    private String roadAddress;     // 도로명 주소
+    private String zoneAddress;     // 지번 주소
+    private String detailAddress;   // 상세 주소
 
-    private long point;
-    private long totalAmount;
+    private long wrapperId; //포장지 아이디
+    private long couponId; //쿠폰 아이디
+
+    private long point; //사용하는 포인트
+    private long totalAmount; //총 가격
 }
