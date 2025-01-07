@@ -32,7 +32,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
-@Profile({"instance1", "instance2"})
+@Profile({"instance1", "instance2","dev"})
 @Tag(name = "Payment API", description = "결제 관련 API를 제공합니다.")
 public class PayApiController {
 
@@ -52,8 +52,8 @@ public class PayApiController {
     })
     @PostMapping("/payments/order")
     public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
-            @RequestHeader("X-USER") Long userId,
-            @CookieValue("GUEST-ID") Long guestId,
+            @RequestHeader(value = "X-USER",required = false) Long userId,
+            @CookieValue(value = "GUEST-ID",required = false) Long guestId,
             @RequestBody PayInfoRequestDTO request) throws Exception {
         PayInfoResponseDTO response = null;
         if(Objects.isNull(userId)){
@@ -70,8 +70,8 @@ public class PayApiController {
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
     public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
-                                                     @RequestHeader("X-USER") Long userId,
-                                                     @CookieValue("GUIEST-ID")Long guesetId,
+                                                     @RequestHeader(value = "X-USER",required = false) Long userId,
+                                                     @CookieValue(value = "GUIEST-ID",required = false)Long guesetId,
                                                      @RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");

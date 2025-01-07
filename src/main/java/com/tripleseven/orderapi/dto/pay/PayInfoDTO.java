@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 
 @Getter
 @NoArgsConstructor
@@ -22,13 +24,18 @@ public class PayInfoDTO {
     private String recipientName;     // 받는 사람 이름
     private String recipientPhone;    // 받는 사람 휴대폰 번호
     private String recipientLandline; // 받는 사람 일반 전화
-    private String recipientAddress;  // 받는 사람 주소
 
-    private long wrapperId;
-    private long couponId;
+    private String roadAddress;     // 도로명 주소
+    private String zoneAddress;     // 지번 주소
+    private String detailAddress;   // 상세 주소
 
-    private long point;
-    private long totalAmount;
+    private LocalDate deliveryDate;//배송 날짜
+
+    private long wrapperId; //포장지 아이디
+    private long couponId; //쿠폰 아이디
+
+    private long point; //사용하는 포인트
+    private long totalAmount; //총 가격
 
     public void ofCreate(Long orderId, PayInfoRequestDTO payInfoRequestDTO) {
         this.orderId = orderId;
@@ -40,7 +47,10 @@ public class PayInfoDTO {
         this.recipientName = payInfoRequestDTO.getRecipientName();
         this.recipientPhone = payInfoRequestDTO.getRecipientPhone();
         this.recipientLandline = payInfoRequestDTO.getRecipientLandline();
-        this.recipientAddress = payInfoRequestDTO.getRecipientAddress();
+        this.roadAddress = payInfoRequestDTO.getRoadAddress();
+        this.zoneAddress = payInfoRequestDTO.getZoneAddress();
+        this.detailAddress = payInfoRequestDTO.getDetailAddress();
+        this.deliveryDate = payInfoRequestDTO.getDeliveryDate();
         this.wrapperId = payInfoRequestDTO.getWrapperId();
         this.couponId = payInfoRequestDTO.getCouponId();
         this.point = payInfoRequestDTO.getPoint();
