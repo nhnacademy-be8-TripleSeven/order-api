@@ -53,11 +53,11 @@ public class PayApiController {
     @PostMapping("/payments/order")
     public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
             @RequestHeader("X-USER") Long userId,
-            @CookieValue("GUEST-ID") Long guesetId,
+            @CookieValue("GUEST-ID") Long guestId,
             @RequestBody PayInfoRequestDTO request) throws Exception {
         PayInfoResponseDTO response = null;
         if(Objects.isNull(userId)){
-            response = payService.getOrderInfo(guesetId,request);
+            response = payService.getOrderInfo(guestId,request);
         }
         response = payService.getOrderInfo(userId, request);
         return ResponseEntity.ok(response);
