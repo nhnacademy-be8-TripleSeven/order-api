@@ -46,15 +46,13 @@ class PointHistoryRepositoryTest {
                 HistoryTypes.EARN,
                 1000,
                 "Earned points for book purchase",
-                1L,
-                savedOrderGroup
+                1L
         );
         useHistory = PointHistory.ofCreate(
                 HistoryTypes.SPEND,
                 -1000,
                 "Used points for book purchase",
-                2L,
-                savedOrderGroup
+                2L
         );
 
     }
