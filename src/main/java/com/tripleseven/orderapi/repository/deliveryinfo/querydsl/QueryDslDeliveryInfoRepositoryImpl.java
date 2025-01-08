@@ -36,6 +36,7 @@ public class QueryDslDeliveryInfoRepositoryImpl extends QuerydslRepositorySuppor
                         orderGroup.address.as("address")))
                 .from(deliveryInfo)
                 .join(deliveryInfo.orderGroup, orderGroup)
+                .where(orderGroup.id.eq(orderGroupId))
                 .fetchOne();
     }
 }

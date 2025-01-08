@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Profile({"instance1", "instance2"})
-public class DataInitializer implements ApplicationListener<ApplicationReadyEvent> {
+public class TrackingDataInitializer implements ApplicationListener<ApplicationReadyEvent> {
 
     private final DeliveryCodeService deliveryCodeService;
 
@@ -26,7 +26,9 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
         if (initializeData) {
             String apiUrl = "https://info.sweettracker.co.kr/api/v1/companylist?t_key=" + apiKey;
             deliveryCodeService.saveDeliveryCode(apiUrl);
-            System.out.println("Data fetched and saved during server startup.");
+            System.out.println("Tracking Data fetched and saved during server startup.");
         }
+
     }
+
 }

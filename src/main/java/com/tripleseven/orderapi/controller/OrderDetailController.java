@@ -109,7 +109,7 @@ public class OrderDetailController {
         return ResponseEntity.ok(hasPurchased);
     }
 
-    @PostMapping("/api/orders/order-details/return")
+    @PostMapping("/api/orders/order-details/status")
     public ResponseEntity<Void> updateOrderDetails(
             @RequestHeader("X-USER") Long userId,
             @RequestBody OrderDetailUpdateRequestDTO orderDetailUpdateRequestDTO) {

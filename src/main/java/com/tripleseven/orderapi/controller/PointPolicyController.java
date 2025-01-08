@@ -24,7 +24,7 @@ public class PointPolicyController {
 
     private final PointPolicyService pointPolicyService;
 
-    @GetMapping("/admin/point-policies")
+    @GetMapping("/admin/orders/point-policies")
     @Operation(summary = "모든 포인트 정책 조회", description = "모든 포인트 정책을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -35,7 +35,7 @@ public class PointPolicyController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/admin/point-policies/{pointPolicyId}")
+    @GetMapping("/admin/orders/point-policies/{pointPolicyId}")
     @Operation(summary = "포인트 정책 단건 조회", description = "해당하는 포인트 정책을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "조회 성공"),
@@ -47,7 +47,7 @@ public class PointPolicyController {
     }
 
 
-    @PostMapping("admin/point-policies")
+    @PostMapping("/admin/orders/point-policies")
     @Operation(summary = "포인트 정책 생성", description = "포인트 정책을 생성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",description = "생성 성공"),
@@ -59,7 +59,7 @@ public class PointPolicyController {
     }
 
 
-    @DeleteMapping("/admin/point-policies/{pointPolicyId}")
+    @DeleteMapping("/admin/orders/point-policies/{pointPolicyId}")
     @Operation(summary = "포인트 정책 삭제", description = "해당 포인트 정책을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
@@ -70,7 +70,7 @@ public class PointPolicyController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PutMapping("admin/point-policies/{pointPolicyId}")
+    @PutMapping("/admin/orders/point-policies/{pointPolicyId}")
     @Operation(summary = "포인트 정책 수정", description = "해당 포인트 정책을 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "수정 성공"),
@@ -79,6 +79,6 @@ public class PointPolicyController {
     public ResponseEntity<PointPolicyResponseDTO> updatePointPolicy(@PathVariable Long pointPolicyId, @RequestBody PointPolicyUpdateRequestDTO request) {
 
         PointPolicyResponseDTO response = pointPolicyService.update(pointPolicyId,request);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

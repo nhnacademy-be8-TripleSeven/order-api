@@ -19,7 +19,7 @@ public class TrackingController {
     private final DeliveryCodeService deliveryCodeService;
     private final ApiProperties apiProperties;
 
-    @PostMapping("/orders/tracking/{id}")
+    @PostMapping("/api/orders/tracking/{id}")
     public RedirectView showDeliveryInfo(@PathVariable Long id) {
         DeliveryInfoResponseDTO response = deliveryInfoService.getDeliveryInfoById(id);
         String code = deliveryCodeService.getDeliveryCodeToName(response.getName());
