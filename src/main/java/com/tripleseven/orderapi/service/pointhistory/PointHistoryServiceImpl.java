@@ -10,6 +10,7 @@ import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.ordergrouppointhistory.QueryDslOrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     private final PointHistoryRepository pointHistoryRepository;
     private final PointPolicyRepository pointPolicyRepository;
     private final OrderGroupRepository orderGroupRepository;
+    private final QueryDslOrderGroupPointHistoryRepository queryDslOrderGroupPointHistoryRepository;
 
     @Override
     public Page<PointHistoryResponseDTO> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
@@ -92,8 +94,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 request.getTypes(),
                 pointPolicy.getAmount(),
                 pointPolicy.getName(),
-                memberId,
-                orderGroup
+                memberId
         );
 
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
@@ -130,14 +131,14 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public int getUsedPoint(Long orderId) {
-        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId, HistoryTypes.SPEND);
+    public int getUsedPoint(Long orderGroupId) {
+        Integer amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.SPEND);
         return Objects.isNull(amount) ? 0 : amount;
     }
 
     @Override
-    public int getEarnedPoint(Long orderId) {
-        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId, HistoryTypes.EARN);
+    public int getEarnedPoint(Long orderGroupId) {
+        Integer amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.EARN);
         return Objects.isNull(amount) ? 0 : amount;
     }
 

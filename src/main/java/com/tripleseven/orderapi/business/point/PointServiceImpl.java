@@ -118,8 +118,7 @@ public class PointServiceImpl implements PointService {
                 amount,
                 LocalDateTime.now(),
                 comment,
-                memberId,
-                optionalOrderGroup.get()
+                memberId
         );
     }
 }

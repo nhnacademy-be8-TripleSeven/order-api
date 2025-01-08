@@ -29,7 +29,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
     private EntityManager entityManager;
 
     @Override
-    public List<OrderViewDTO> findAllByPeriod(Long userId, LocalDate startTime, LocalDate endTime, OrderStatus orderStatus) {
+    public List<OrderViewDTO> findAllByPeriodAndUserId(Long userId, LocalDate startTime, LocalDate endTime, OrderStatus orderStatus) {
 
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
         QOrderDetail orderDetail = QOrderDetail.orderDetail;
@@ -37,7 +37,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
 
         // 주문 상태별 분기
         if (Objects.isNull(orderStatus)) {
-            orderStatuses = Arrays.asList(OrderStatus.ERROR, OrderStatus.PAYMENT_PENDING, OrderStatus.PAYMENT_COMPLETED, OrderStatus.SHIPPING, OrderStatus.DELIVERED);
+            orderStatuses = OrderStatus.mainOrderStatuses();
         } else {
             orderStatuses = List.of(orderStatus);
         }
@@ -58,7 +58,42 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
                                 .and(betweenDates(orderGroup.orderedAt, startTime, endTime))
                                 .and(orderDetail.orderStatus.in(orderStatuses))
                 )
-                .orderBy(orderDetail.id.asc())
+                .orderBy(orderGroup.orderedAt.desc())
+                .orderBy(orderDetail.id.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<OrderViewDTO> findAllByPeriod(LocalDate startTime, LocalDate endTime, OrderStatus orderStatus) {
+
+        QOrderGroup orderGroup = QOrderGroup.orderGroup;
+        QOrderDetail orderDetail = QOrderDetail.orderDetail;
+        List<OrderStatus> orderStatuses;
+
+        // 주문 상태별 분기
+        if (Objects.isNull(orderStatus)) {
+            orderStatuses = OrderStatus.mainOrderStatuses();
+        } else {
+            orderStatuses = List.of(orderStatus);
+        }
+
+        return new JPAQuery<>(entityManager).select(Projections.constructor(OrderViewDTO.class,
+                        orderGroup.id.as("orderId"),
+                        orderGroup.orderedAt.as("orderDate"),
+                        orderDetail.bookId.as("bookId"),
+                        orderDetail.discountPrice.as("price"),
+                        orderDetail.amount.as("amount"),
+                        orderDetail.orderStatus.as("status"),
+                        orderGroup.orderedName.as("ordererName"),
+                        orderGroup.recipientName.as("recipientName")))
+                .from(orderDetail)
+                .join(orderDetail.orderGroup, orderGroup)
+                .where(
+                        betweenDates(orderGroup.orderedAt, startTime, endTime)
+                                .and(orderDetail.orderStatus.in(orderStatuses))
+                )
+                .orderBy(orderGroup.orderedAt.desc())
+                .orderBy(orderDetail.id.desc())
                 .fetch();
     }
 
@@ -68,4 +103,6 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
             LocalDate endTime) {
         return dateTimeField.between(startTime, endTime);
     }
+
+
 }
