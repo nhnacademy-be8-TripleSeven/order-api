@@ -11,9 +11,10 @@ import java.util.List;
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     List<OrderDetail> findAllByOrderGroupId(Long orderGroupId);
     List<OrderDetail> findAllByOrderGroupIdAndOrderStatus(Long orderGroupId, OrderStatus orderStatus);
-    @Query("select case when count(od) > 0 then true else false end " +
+    @Query("select case when exists (" +
+            "select 1 " +
             "from OrderDetail od " +
             "join od.orderGroup og " +
-            "where og.userId = :userId and od.bookId = :bookId")
-    boolean existsByOrderGroupUserIdAndBookId(@Param("userId")Long userId, @Param("bookId") Long bookId);
+            "where og.userId = :userId and od.bookId = :bookId) then true else false end")
+    boolean existsByOrderGroupUserIdAndBookId(@Param("userId") Long userId, @Param("bookId") Long bookId);
 }
