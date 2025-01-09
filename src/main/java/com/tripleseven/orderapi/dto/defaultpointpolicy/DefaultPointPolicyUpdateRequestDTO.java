@@ -6,5 +6,5 @@ import lombok.Value;
 @Value
 public class DefaultPointPolicyUpdateRequestDTO {
     Long pointPolicyId;
-    PointPolicyType pointPolicyType;
+    PointPolicyType type;
 }

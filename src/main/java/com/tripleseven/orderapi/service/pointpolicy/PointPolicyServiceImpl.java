@@ -74,7 +74,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
         List<PointPolicy> pointPolicies = pointPolicyRepository.findAll();
 
         if (pointPolicies.isEmpty()) {
-            throw new PointPolicyNotFoundException("No point policies found");
+            return List.of();
         }
 
         return pointPolicies.stream()
