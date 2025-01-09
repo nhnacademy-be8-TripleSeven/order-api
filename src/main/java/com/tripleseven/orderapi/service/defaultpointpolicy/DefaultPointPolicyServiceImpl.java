@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -32,15 +33,16 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
     @Override
     public List<DefaultPointPolicyDTO> getDefaultPointPolicies() {
         List<DefaultPointPolicyDTO> defaultPointPolicies = queryDslDefaultPointPolicyRepository.findDefaultPointPolicies();
-
+        if (Objects.isNull(defaultPointPolicies)) {
+            return List.of();
+        }
         return defaultPointPolicies;
     }
 
 
-
     @Override
     public Long updateDefaultPoint(DefaultPointPolicyUpdateRequestDTO request) {
-        DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(request.getPointPolicyType());
+        DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(request.getType());
 
         Optional<PointPolicy> optionalPointPolicy = pointPolicyRepository.findById(request.getPointPolicyId());
 
@@ -50,9 +52,17 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
 
         PointPolicy pointPolicy = optionalPointPolicy.get();
 
-        defaultPointPolicy.ofUpdate(
-                pointPolicy
-        );
+        if (Objects.isNull(defaultPointPolicy)) {
+            defaultPointPolicy = new DefaultPointPolicy();
+            defaultPointPolicy.ofCreate(
+                    request.getType(),
+                    pointPolicy
+            );
+        } else {
+            defaultPointPolicy.ofUpdate(
+                    pointPolicy
+            );
+        }
 
         return defaultPointPolicy.getId();
     }

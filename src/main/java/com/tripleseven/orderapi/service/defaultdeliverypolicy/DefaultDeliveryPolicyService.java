@@ -4,8 +4,10 @@ import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyD
 import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 
+import java.util.List;
+
 public interface DefaultDeliveryPolicyService {
-    DefaultDeliveryPolicyDTO getDefaultDeliveryDTO(DeliveryPolicyType deliveryPolicyType);
+    List<DefaultDeliveryPolicyDTO> getDefaultDeliveryDTO();
 
     Long updateDefaultDelivery(DefaultDeliveryPolicyUpdateRequestDTO request);
 }

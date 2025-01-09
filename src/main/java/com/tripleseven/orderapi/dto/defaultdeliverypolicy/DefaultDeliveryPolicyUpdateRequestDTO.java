@@ -6,5 +6,5 @@ import lombok.Value;
 @Value
 public class DefaultDeliveryPolicyUpdateRequestDTO {
     Long deliveryPolicyId;
-    DeliveryPolicyType deliveryPolicyType;
+    DeliveryPolicyType type;
 }
