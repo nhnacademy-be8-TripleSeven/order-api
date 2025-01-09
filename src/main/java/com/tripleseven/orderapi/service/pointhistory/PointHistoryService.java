@@ -1,7 +1,9 @@
 package com.tripleseven.orderapi.service.pointhistory;
 
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
+import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,4 +32,6 @@ public interface PointHistoryService {
     int getUsedPoint(Long orderGroupId);
 
     int getEarnedPoint(Long orderId);
+
+    PointHistoryPageResponseDTO<UserPointHistoryDTO> getUserPointHistories(Long memberId, String startDate, String endDate, Pageable pageable);
 }

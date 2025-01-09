@@ -13,6 +13,8 @@ public interface OrderDetailService {
 
     List<OrderDetailResponseDTO> updateOrderDetailStatus(List<Long> ids, OrderStatus orderStatus);
 
+    List<OrderDetailResponseDTO> updateAdminOrderDetailStatus(List<Long> ids, OrderStatus orderStatus);
+
     void deleteOrderDetail(Long id);
 
     List<OrderDetailResponseDTO> getOrderDetailsToList(Long orderGroupId);

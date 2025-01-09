@@ -7,8 +7,9 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Getter
-public class OrderViewsRequestDTO {
+public class OrderViewsResponseDTO {
     private final Long orderId;
+
     private final LocalDate orderDate;
     @Setter
     private String orderContent;
@@ -18,11 +19,13 @@ public class OrderViewsRequestDTO {
     private int amount;
     @Setter
     private OrderStatus orderStatus;
+
     private final String ordererName;
+
     private final String recipientName;
 
-    public OrderViewsRequestDTO(Long orderId, LocalDate orderDate, String orderContent, int price, int amount,
-                                OrderStatus orderStatus, String ordererName, String recipientName) {
+    public OrderViewsResponseDTO(Long orderId, LocalDate orderDate, String orderContent, int price, int amount,
+                                 OrderStatus orderStatus, String ordererName, String recipientName) {
         this.orderId = orderId;
         this.orderDate = orderDate;
         this.orderContent = orderContent;

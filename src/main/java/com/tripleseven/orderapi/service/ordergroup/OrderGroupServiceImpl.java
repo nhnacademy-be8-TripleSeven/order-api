@@ -3,7 +3,7 @@ package com.tripleseven.orderapi.service.ordergroup;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
 import com.tripleseven.orderapi.dto.order.OrderViewDTO;
-import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewsResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO;
@@ -107,16 +107,33 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderViewsRequestDTO> getOrderGroupPeriodByUserId(Long userId, OrderManageRequestDTO manageRequestDTO, Pageable pageable) {
+    public Page<OrderViewsResponseDTO> getOrderGroupPeriodByUserId(Long userId, OrderManageRequestDTO manageRequestDTO, Pageable pageable) {
         LocalDate startDateTime = manageRequestDTO.getStartDate();
         LocalDate endDateTime = manageRequestDTO.getEndDate();
         OrderStatus orderStatus = manageRequestDTO.getOrderStatus();
 
         // 전체 데이터 가져오기
-        List<OrderViewDTO> orderViews = queryDslOrderDetailRepository.findAllByPeriod(userId, startDateTime, endDateTime, orderStatus);
+        List<OrderViewDTO> orderViews = queryDslOrderDetailRepository.findAllByPeriodAndUserId(userId, startDateTime, endDateTime, orderStatus);
 
+
+        return getOrderViews(orderViews, pageable);
+    }
+
+    @Override
+    public Page<OrderViewsResponseDTO> getOrderGroupPeriod(OrderManageRequestDTO manageRequestDTO, Pageable pageable) {
+        LocalDate startDateTime = manageRequestDTO.getStartDate();
+        LocalDate endDateTime = manageRequestDTO.getEndDate();
+        OrderStatus orderStatus = manageRequestDTO.getOrderStatus();
+        // 전체 데이터 가져오기
+        List<OrderViewDTO> orderViews = queryDslOrderDetailRepository.findAllByPeriod(startDateTime, endDateTime, orderStatus);
+
+        return getOrderViews(orderViews, pageable);
+    }
+
+    // 주문 그룹 View 로직
+    private Page<OrderViewsResponseDTO> getOrderViews(List<OrderViewDTO> orderViews, Pageable pageable) {
         // 그룹별로 데이터를 처리
-        Map<Long, OrderViewsRequestDTO> groupedData = new LinkedHashMap<>();
+        Map<Long, OrderViewsResponseDTO> groupedData = new LinkedHashMap<>();
 
         int count = 0;
         for (OrderViewDTO orderView : orderViews) {
@@ -124,10 +141,10 @@ public class OrderGroupServiceImpl implements OrderGroupService {
 
             // 그룹이 이미 존재하면 데이터 갱신
             if (groupedData.containsKey(groupId)) {
-                OrderViewsRequestDTO dto = groupedData.get(groupId);
+                OrderViewsResponseDTO dto = groupedData.get(groupId);
 
-                // 상태값 비교 (더 높은 상태값으로 갱신)
-                if (dto.getOrderStatus().ordinal() < orderView.getOrderStatus().ordinal()) {
+                // 상태값 비교 (더 우선순위 높은 상태값으로 갱신)
+                if (dto.getOrderStatus().ordinal() > orderView.getOrderStatus().ordinal()) {
                     dto.setOrderStatus(orderView.getOrderStatus());
                 }
 
@@ -139,7 +156,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 // 새로운 그룹 생성
                 count = 0;
                 String orderContent = bookCouponApiClient.getBookName(orderView.getBookId());
-                groupedData.put(groupId, new OrderViewsRequestDTO(
+                groupedData.put(groupId, new OrderViewsResponseDTO(
                         groupId,
                         orderView.getOrderDate(),
                         orderContent,
@@ -153,10 +170,10 @@ public class OrderGroupServiceImpl implements OrderGroupService {
         }
 
         // 정렬된 그룹 데이터를 페이징
-        List<OrderViewsRequestDTO> allData = new ArrayList<>(groupedData.values());
+        List<OrderViewsResponseDTO> allData = new ArrayList<>(groupedData.values());
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), allData.size());
-        List<OrderViewsRequestDTO> paginatedData = allData.subList(start, end);
+        List<OrderViewsResponseDTO> paginatedData = allData.subList(start, end);
 
         // Step 4: PageImpl로 반환
         return new PageImpl<>(paginatedData, pageable, allData.size());

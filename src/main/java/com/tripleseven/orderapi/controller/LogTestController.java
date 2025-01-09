@@ -68,8 +68,7 @@ public class LogTestController {
                 12345,
                 LocalDateTime.now(),
                 "test",
-                userId,
-                orderGroup
+                userId
         );
 
         pointHistoryRepository.save(pointHistory);

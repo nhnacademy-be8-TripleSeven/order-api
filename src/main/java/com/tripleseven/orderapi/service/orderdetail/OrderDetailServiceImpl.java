@@ -2,6 +2,7 @@ package com.tripleseven.orderapi.service.orderdetail;
 
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
+import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
@@ -12,6 +13,7 @@ import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderGroupRepository orderGroupRepository;
     private final DeliveryInfoRepository deliveryInfoRepository;
+    private final PointPolicyService pointPolicyService;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,6 +84,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 OrderDetail orderDetail = optionalOrderDetail.get();
 
+                // 결제 대기 중이나 결제 완료 일때만 취소 가능
                 if (orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) || orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
                     orderDetail.ofUpdateStatus(orderStatus);
                 }
@@ -97,6 +101,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 OrderDetail orderDetail = optionalOrderDetail.get();
 
+                // 배송 완료 될 시에만 로직 실행
                 if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
                     Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
 
@@ -116,6 +121,40 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
         }
+        return orderDetailResponses;
+    }
+
+    @Override
+    @Transactional
+    public List<OrderDetailResponseDTO> updateAdminOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
+        List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
+        for (Long id : ids) {
+            Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
+
+            if (optionalOrderDetail.isEmpty()) {
+                throw new OrderDetailNotFoundException(id);
+            }
+
+            OrderDetail orderDetail = optionalOrderDetail.get();
+            if (orderStatus.equals(OrderStatus.RETURNED)) {
+                // TODO 반품 요청 프로세스
+                Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderDetail.getId());
+
+                if (optionalOrderGroup.isEmpty()) {
+                    throw new OrderGroupNotFoundException(orderDetail.getId());
+                }
+
+                OrderGroup orderGroup = optionalOrderGroup.get();
+
+                PointPolicyResponseDTO pointPolicyResponse = pointPolicyService.findById(orderGroup.getId());
+
+//                orderDetail.
+            }
+            orderDetail.ofUpdateStatus(orderStatus);
+
+            orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
+        }
+
         return orderDetailResponses;
     }
 
