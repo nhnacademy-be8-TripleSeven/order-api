@@ -1,18 +1,14 @@
 package com.tripleseven.orderapi.entity.pointpolicy;
 
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequestDTO;
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.*;
+import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
+import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 public class PointPolicy {
 
@@ -26,20 +22,24 @@ public class PointPolicy {
 
     private BigDecimal rate;
 
+    @OneToMany(mappedBy = "pointPolicy", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<DefaultPointPolicy> pointPolicies = new ArrayList<>();
+
     // 엔티티 생성
-    public static PointPolicy ofCreate(PointPolicyCreateRequestDTO request) {
-        return new PointPolicy(
-                null,
-                request.getName(),
-                request.getAmount(),
-                request.getRate()
-        );
+    public void ofCreate(String name, int amount, BigDecimal rate) {
+        this.name = name;
+        this.amount = amount;
+        this.rate = rate;
     }
 
     // 엔티티 업데이트
-    public void ofUpdate(PointPolicyUpdateRequestDTO request) {
-        this.name = request.getName();
-        this.amount = request.getAmount();
-        this.rate = request.getRate();
+    public void ofUpdate(String name, int amount, BigDecimal rate) {
+        this.name = name;
+        this.amount = amount;
+        this.rate = rate;
+    }
+
+    public void addDefaultPointPolicy(DefaultPointPolicy defaultPointPolicy) {
+        this.pointPolicies.add(defaultPointPolicy);
     }
 }

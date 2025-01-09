@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.repository.ordergrouppointhistory;
+package com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl;
 
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 

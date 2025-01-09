@@ -1,11 +1,11 @@
 package com.tripleseven.orderapi.entity.deliverypolicy;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
+import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DefaultDeliveryPolicy;
+import jakarta.persistence.*;
 import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -14,11 +14,14 @@ public class DeliveryPolicy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(nullable = false)
     private String name;
 
-    @NotNull
+    @Column(nullable = false)
     private int price;
+
+    @OneToMany(mappedBy = "deliverPolicy", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<DefaultDeliveryPolicy> deliveryPolicies = new ArrayList<>();
 
     public void ofCreate(String name, int price) {
         this.name = name;
@@ -28,5 +31,9 @@ public class DeliveryPolicy {
     public void ofUpdate(String name, int price) {
         this.name = name;
         this.price = price;
+    }
+
+    public void addDefaultDeliveryPolicy(DefaultDeliveryPolicy policy) {
+        this.deliveryPolicies.add(policy);
     }
 }

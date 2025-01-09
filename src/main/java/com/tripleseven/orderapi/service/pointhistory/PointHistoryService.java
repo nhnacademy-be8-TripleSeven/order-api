@@ -27,7 +27,4 @@ public interface PointHistoryService {
 
     Page<PointHistoryResponseDTO> getPointHistoriesWithState(Long memberId, HistoryTypes state, Pageable pageable);
 
-    int getUsedPoint(Long orderGroupId);
-
-    int getEarnedPoint(Long orderId);
 }

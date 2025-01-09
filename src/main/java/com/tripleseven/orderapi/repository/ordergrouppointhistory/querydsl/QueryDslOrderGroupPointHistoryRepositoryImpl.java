@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.repository.ordergrouppointhistory;
+package com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.tripleseven.orderapi.entity.ordergroup.QOrderGroup;
