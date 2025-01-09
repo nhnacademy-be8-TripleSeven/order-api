@@ -6,8 +6,11 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.repository.deliveryinfo.querydsl.QueryDslDeliveryInfoRepository;
+import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
+import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
 import com.tripleseven.orderapi.service.pay.PayService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.wrapping.WrappingService;
@@ -24,8 +27,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailService orderDetailService;
     private final OrderGroupService orderGroupService;
     private final WrappingService wrappingService;
-    private final PointHistoryService pointHistoryService;
-    private final QueryDslDeliveryInfoRepository queryDslDeliveryInfoRepository;
+    private final OrderGroupPointHistoryService orderGroupPointHistoryService;
+    private final DeliveryInfoService deliveryInfoService;
     private final BookCouponApiClient bookCouponApiClient;
     private final PayService payService;
 
@@ -60,8 +63,8 @@ public class OrderServiceImpl implements OrderService {
 
         WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupResponseDTO.getWrappingId());
 
-        int usedPoint = pointHistoryService.getUsedPoint(orderGroupId);
-        int earnedPoint = pointHistoryService.getEarnedPoint(orderGroupId);
+        int usedPoint = orderGroupPointHistoryService.getUsedPoint(orderGroupId);
+        int earnedPoint = orderGroupPointHistoryService.getEarnedPoint(orderGroupId);
         // 판매가 총합
         int primeTotalPrice = 0;
         // 할인 금액
@@ -89,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public DeliveryInfoDTO getDeliveryInfo(Long orderGroupId) {
-        return queryDslDeliveryInfoRepository.getDeliveryInfo(orderGroupId);
+        return deliveryInfoService.getDeliveryInfoDTO(orderGroupId);
     }
 
     @Override

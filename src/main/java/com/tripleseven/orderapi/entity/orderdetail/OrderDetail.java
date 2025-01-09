@@ -46,4 +46,5 @@ public class OrderDetail {
     public void ofUpdateStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
     }
+
 }

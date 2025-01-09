@@ -1,4 +1,4 @@
-package com.tripleseven.orderapi.repository.ordergrouppointhistory;
+package com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;

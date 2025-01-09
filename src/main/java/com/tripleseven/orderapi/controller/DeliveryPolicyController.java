@@ -69,6 +69,6 @@ public class DeliveryPolicyController {
     @GetMapping("/admin/orders/delivery-policies")
     public ResponseEntity<List<DeliveryPolicyResponseDTO>> getAllDeliveryPolicies() {
         List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
-        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 }

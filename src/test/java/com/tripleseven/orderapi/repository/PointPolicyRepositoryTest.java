@@ -21,7 +21,8 @@ class PointPolicyRepositoryTest {
     @Test
     void savePointPolicy_success() {
         // given
-        PointPolicy pointPolicy = new PointPolicy(null, "Welcome Bonus", 500, BigDecimal.valueOf(0.05));
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.ofCreate("Welcome Bonus", 500, BigDecimal.valueOf(0.05));
 
         // when
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
@@ -36,7 +37,8 @@ class PointPolicyRepositoryTest {
     @Test
     void findPointPolicyById_success() {
         // given
-        PointPolicy pointPolicy = new PointPolicy(null, "Anniversary Bonus", 1000, BigDecimal.valueOf(0.1));
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.ofCreate("Anniversary Bonus", 1000, BigDecimal.valueOf(0.1));
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
 
         // when
@@ -50,11 +52,13 @@ class PointPolicyRepositoryTest {
     @Test
     void updatePointPolicy_success() {
         // given
-        PointPolicy pointPolicy = new PointPolicy(null, "Default Policy", 200, BigDecimal.valueOf(0.02));
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.ofCreate("Default Policy", 200, BigDecimal.valueOf(0.02));
+
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
 
         // when
-        savedPolicy.ofUpdate(new PointPolicyUpdateRequestDTO("Updated Policy", 300, BigDecimal.valueOf(0.03)));
+        savedPolicy.ofUpdate("Updated Policy", 300, BigDecimal.valueOf(0.03));
         PointPolicy updatedPolicy = pointPolicyRepository.save(savedPolicy);
 
         // then
@@ -66,7 +70,9 @@ class PointPolicyRepositoryTest {
     @Test
     void deletePointPolicy_success() {
         // given
-        PointPolicy pointPolicy = new PointPolicy(null, "Temporary Policy", 150, BigDecimal.valueOf(0.01));
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.ofCreate("Temporary Policy", 150, BigDecimal.valueOf(0.01));
+
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
 
         // when
