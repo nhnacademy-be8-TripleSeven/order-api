@@ -1,7 +1,9 @@
 package com.tripleseven.orderapi.controller;
 
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
+import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -145,4 +147,27 @@ public class PointHistoryController {
         Page<PointHistoryResponseDTO> histories = pointHistoryService.getPointHistoriesWithState(memberId, state, pageable);
         return ResponseEntity.ok(histories); // HTTP 200
     }
+
+
+
+    @GetMapping("/api/user/point-histories")
+    @Operation(summary = "사용자 포인트 이력 조회", description = "특정 사용자의 포인트 이력을 기간 조건으로 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "포인트 기록 없음")
+    })
+    public ResponseEntity<PointHistoryPageResponseDTO<UserPointHistoryDTO>> getUserPointHistories(
+            @RequestHeader("X-USER") Long memberId,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            Pageable pageable) {
+
+
+        PointHistoryPageResponseDTO<UserPointHistoryDTO> histories = pointHistoryService.getUserPointHistories(memberId, startDate, endDate, pageable);
+
+
+        return ResponseEntity.ok(histories);
+    }
+
+
 }

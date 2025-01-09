@@ -1,7 +1,9 @@
 package com.tripleseven.orderapi.service.pointhistory;
 
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
+import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
@@ -140,6 +142,31 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     public int getEarnedPoint(Long orderGroupId) {
         Integer amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.EARN);
         return Objects.isNull(amount) ? 0 : amount;
+    }
+
+
+    @Override
+    public PointHistoryPageResponseDTO<UserPointHistoryDTO> getUserPointHistories(Long memberId, String startDate, String endDate, Pageable pageable) {
+        // 날짜 변환
+        LocalDateTime start = (startDate != null && !startDate.trim().isEmpty())
+                ? LocalDate.parse(startDate).atStartOfDay()
+                : LocalDateTime.MIN;
+        LocalDateTime end = (endDate != null && !endDate.trim().isEmpty())
+                ? LocalDate.parse(endDate).plusDays(1).atStartOfDay()
+                : LocalDateTime.now();
+
+        // QueryDSL 메서드 호출
+        Page<UserPointHistoryDTO> page = queryDslOrderGroupPointHistoryRepository.findUserPointHistories(memberId, start, end, pageable);
+
+        // PageResponseDTO로 변환하여 반환
+        return new PointHistoryPageResponseDTO<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
 
 }
