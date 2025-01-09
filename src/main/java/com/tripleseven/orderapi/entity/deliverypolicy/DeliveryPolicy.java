@@ -20,7 +20,7 @@ public class DeliveryPolicy {
     @Column(nullable = false)
     private int price;
 
-    @OneToMany(mappedBy = "deliverPolicy", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deliveryPolicy", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<DefaultDeliveryPolicy> deliveryPolicies = new ArrayList<>();
 
     public void ofCreate(String name, int price) {
