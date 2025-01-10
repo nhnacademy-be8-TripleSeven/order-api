@@ -11,4 +11,5 @@ public interface OrderGroupRepository extends JpaRepository<OrderGroup, Long> {
     List<OrderGroup> findAllByUserIdOrderByIdAsc(Long userId, Pageable pageable);
 
     OrderGroup findOrderGroupById(Long id);
+    List<OrderGroup> findAllByRecipientPhone(String phone);
 }

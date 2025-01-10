@@ -178,4 +178,13 @@ public class OrderGroupServiceImpl implements OrderGroupService {
         // Step 4: PageImpl로 반환
         return new PageImpl<>(paginatedData, pageable, allData.size());
     }
+
+    @Override
+    public List<OrderGroupResponseDTO> getGuestOrderGroups(String phone) {
+        return orderGroupRepository.findAllByRecipientPhone(phone)
+                .stream()
+                .map(OrderGroupResponseDTO::fromEntity)
+                .toList();
+
+    }
 }
