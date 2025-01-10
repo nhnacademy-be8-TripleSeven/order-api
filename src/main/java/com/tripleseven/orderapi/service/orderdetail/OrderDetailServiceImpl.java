@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -113,7 +114,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 // 배송 완료 될 시에만 로직 실행
                 if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                    Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
+                    Long orderGroupId = orderDetail.getOrderGroup().getId();
+
+                    Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderGroupId);
+                    if (optionalOrderGroup.isEmpty()) {
+                        throw new OrderGroupNotFoundException(orderGroupId);
+                    }
+
+                    Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(orderGroupId);
 
                     if (optionalDeliveryInfo.isEmpty()) {
                         throw new DeliveryInfoNotFoundException(id);
@@ -163,17 +171,20 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
 
                 // 배송비 감면
-                Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
+                Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(orderGroupId);
 
                 if (optionalDeliveryInfo.isEmpty()) {
-                    throw new DeliveryInfoNotFoundException(id);
+                    throw new DeliveryInfoNotFoundException(orderGroupId);
                 }
 
                 DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
                 LocalDate today = LocalDate.now();
 
+                // 관리자는 무조건 바꿀 수 있도록
+                LocalDate shippingAt = Objects.nonNull(deliveryInfo.getShippingAt()) ? deliveryInfo.getShippingAt(): today;
+
                 // 출고일 기준 (10일 이후이면 배송비 환불 불가)
-                if (today.isAfter(deliveryInfo.getShippingAt().plusDays(10))) {
+                if (today.isAfter(shippingAt.plusDays(10))) {
                     refundPrice -= orderGroup.getDeliveryPrice();
                 }
                 PointHistory pointHistory = PointHistory.ofCreate(
