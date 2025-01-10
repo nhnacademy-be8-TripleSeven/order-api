@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -56,5 +58,16 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
             throw new DeliveryPolicyNotFoundException(id);
         }
         deliveryPolicyRepository.deleteById(id);
+    }
+
+    @Override
+    public List<DeliveryPolicyResponseDTO> getAllDeliveryPolicies(){
+        List<DeliveryPolicy> deliveryPolicies = deliveryPolicyRepository.findAll();
+
+        List<DeliveryPolicyResponseDTO> responses = new ArrayList<>();
+        for(DeliveryPolicy deliveryPolicy: deliveryPolicies){
+            responses.add(DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy));
+        }
+        return responses;
     }
 }

@@ -31,7 +31,14 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     // 새로운 정책 저장
     @Override
     public PointPolicyResponseDTO save(PointPolicyCreateRequestDTO request) {
-        PointPolicy pointPolicy = PointPolicy.ofCreate(request);
+        PointPolicy pointPolicy = new PointPolicy();
+
+        pointPolicy.ofCreate(
+                request.getName(),
+                request.getAmount(),
+                request.getRate()
+        );
+
         PointPolicy savedPolicy = pointPolicyRepository.save(pointPolicy);
         return PointPolicyResponseDTO.fromEntity(savedPolicy);
     }
@@ -42,7 +49,12 @@ public class PointPolicyServiceImpl implements PointPolicyService {
         PointPolicy pointPolicy = pointPolicyRepository.findById(id)
                 .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + id + " not found"));
 
-        pointPolicy.ofUpdate(request);
+        pointPolicy.ofUpdate(
+                request.getName(),
+                request.getAmount(),
+                request.getRate()
+        );
+
         PointPolicy updatedPolicy = pointPolicyRepository.save(pointPolicy);
         return PointPolicyResponseDTO.fromEntity(updatedPolicy);
     }
@@ -62,7 +74,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
         List<PointPolicy> pointPolicies = pointPolicyRepository.findAll();
 
         if (pointPolicies.isEmpty()) {
-            throw new PointPolicyNotFoundException("No point policies found");
+            return List.of();
         }
 
         return pointPolicies.stream()

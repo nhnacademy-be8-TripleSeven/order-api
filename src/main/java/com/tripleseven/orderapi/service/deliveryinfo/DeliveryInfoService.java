@@ -3,6 +3,7 @@ package com.tripleseven.orderapi.service.deliveryinfo;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
+import com.tripleseven.orderapi.dto.order.DeliveryInfoDTO;
 
 public interface DeliveryInfoService {
 
@@ -16,4 +17,6 @@ public interface DeliveryInfoService {
 
     void deleteDeliveryInfo(Long id);
 
+    // front 용
+    DeliveryInfoDTO getDeliveryInfoDTO(Long orderGroupId);
 }

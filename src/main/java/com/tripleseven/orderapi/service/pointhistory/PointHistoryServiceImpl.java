@@ -1,15 +1,17 @@
 package com.tripleseven.orderapi.service.pointhistory;
 
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
+import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl.QueryDslOrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 @Transactional
@@ -31,7 +32,8 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
     private final PointHistoryRepository pointHistoryRepository;
     private final PointPolicyRepository pointPolicyRepository;
-    private final OrderGroupRepository orderGroupRepository;
+    private final QueryDslOrderGroupPointHistoryRepository queryDslOrderGroupPointHistoryRepository;
+
 
     @Override
     public Page<PointHistoryResponseDTO> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
@@ -85,15 +87,12 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .orElseThrow(() -> new PointPolicyNotFoundException(
                         String.format("PointPolicy with id=%d not found", request.getPointPolicyId())
                 ));
-        OrderGroup orderGroup = orderGroupRepository.findById(request.getOrderGroupId())
-                .orElseThrow(() -> new OrderGroupNotFoundException(request.getOrderGroupId()));
 
         PointHistory pointHistory = PointHistory.ofCreate(
                 request.getTypes(),
                 pointPolicy.getAmount(),
                 pointPolicy.getName(),
-                memberId,
-                orderGroup
+                memberId
         );
 
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
@@ -130,15 +129,27 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public int getUsedPoint(Long orderId) {
-        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId, HistoryTypes.SPEND);
-        return Objects.isNull(amount) ? 0 : amount;
-    }
+    public PointHistoryPageResponseDTO<UserPointHistoryDTO> getUserPointHistories(Long memberId, String startDate, String endDate, Pageable pageable) {
+        // 날짜 변환
+        LocalDateTime start = (startDate != null && !startDate.trim().isEmpty())
+                ? LocalDate.parse(startDate).atStartOfDay()
+                : LocalDateTime.MIN;
+        LocalDateTime end = (endDate != null && !endDate.trim().isEmpty())
+                ? LocalDate.parse(endDate).plusDays(1).atStartOfDay()
+                : LocalDateTime.now();
 
-    @Override
-    public int getEarnedPoint(Long orderId) {
-        Integer amount = pointHistoryRepository.getAmountByOrderGroup_Id(orderId, HistoryTypes.EARN);
-        return Objects.isNull(amount) ? 0 : amount;
+        // QueryDSL 메서드 호출
+        Page<UserPointHistoryDTO> page = queryDslOrderGroupPointHistoryRepository.findUserPointHistories(memberId, start, end, pageable);
+
+        // PageResponseDTO로 변환하여 반환
+        return new PointHistoryPageResponseDTO<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
 
 }

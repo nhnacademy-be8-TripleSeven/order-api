@@ -3,11 +3,13 @@ package com.tripleseven.orderapi.service.deliveryinfo;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.order.DeliveryInfoDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
+import com.tripleseven.orderapi.repository.deliveryinfo.querydsl.QueryDslDeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import java.util.Optional;
 public class DeliveryInfoServiceImpl implements DeliveryInfoService {
     private final DeliveryInfoRepository deliveryInfoRepository;
     private final OrderGroupRepository orderGroupRepository;
+    private final QueryDslDeliveryInfoRepository queryDslDeliveryInfoRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -84,5 +88,12 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
             throw new DeliveryInfoNotFoundException(id);
         }
         deliveryInfoRepository.deleteById(id);
+    }
+
+    // front 용
+    @Override
+    @Transactional(readOnly = true)
+    public DeliveryInfoDTO getDeliveryInfoDTO(Long orderGroupId) {
+        return queryDslDeliveryInfoRepository.getDeliveryInfo(orderGroupId);
     }
 }

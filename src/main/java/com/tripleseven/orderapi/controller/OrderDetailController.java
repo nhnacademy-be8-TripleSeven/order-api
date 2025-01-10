@@ -47,7 +47,7 @@ public class OrderDetailController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 주문 상세 (OrderDetailResponse)
     }
 
-    // 3. 주문 상세 상태 업데이트
+//    // 3. 주문 상세 상태 업데이트
 //    @PutMapping("/order-details/{id}/status")
 //    @Operation(summary = "주문 상세 상태 업데이트", description = "특정 주문 상세의 상태를 업데이트합니다.")
 //    @ApiResponses(value = {
@@ -109,11 +109,18 @@ public class OrderDetailController {
         return ResponseEntity.ok(hasPurchased);
     }
 
-    @PostMapping("/api/orders/order-details/return")
+    @PostMapping("/api/orders/order-details/status")
     public ResponseEntity<Void> updateOrderDetails(
             @RequestHeader("X-USER") Long userId,
             @RequestBody OrderDetailUpdateRequestDTO orderDetailUpdateRequestDTO) {
         orderDetailService.updateOrderDetailStatus(orderDetailUpdateRequestDTO.getOrderIds(), orderDetailUpdateRequestDTO.getOrderStatus());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/admin/orders/order-details/status")
+    public ResponseEntity<Void> updateOrderDetails(
+            @RequestBody OrderDetailUpdateRequestDTO orderDetailUpdateRequestDTO) {
+        orderDetailService.updateAdminOrderDetailStatus(orderDetailUpdateRequestDTO.getOrderIds(), orderDetailUpdateRequestDTO.getOrderStatus());
         return ResponseEntity.ok().build();
     }
 

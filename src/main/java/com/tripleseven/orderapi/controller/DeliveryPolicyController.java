@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "DeliveryPolicy-Controller", description = "배송 정책 관리 컨트롤러")
 @RequiredArgsConstructor
 @RestController
@@ -20,7 +22,7 @@ public class DeliveryPolicyController {
 
     private final DeliveryPolicyService deliveryPolicyService;
 
-    @GetMapping("/admin/delivery-policies/{id}")
+    @GetMapping("/admin/orders/delivery-policies/{id}")
     @Operation(summary = "배송 정책 조회", description = "특정 ID의 배송 정책을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -30,7 +32,7 @@ public class DeliveryPolicyController {
         return ResponseEntity.ok(deliveryPolicyService.getDeliveryPolicy(id));
     }
 
-    @PostMapping("/admin/delivery-policies")
+    @PostMapping("/admin/orders/delivery-policies")
     @Operation(summary = "배송 정책 생성", description = "새로운 배송 정책을 생성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
@@ -41,7 +43,7 @@ public class DeliveryPolicyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/admin/delivery-policies/{id}")
+    @PutMapping("/admin/orders/delivery-policies/{id}")
     @Operation(summary = "배송 정책 수정", description = "특정 배송 정책을 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수정 성공"),
@@ -53,7 +55,7 @@ public class DeliveryPolicyController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/delivery-policies/{id}")
+    @DeleteMapping("/admin/orders/delivery-policies/{id}")
     @Operation(summary = "배송 정책 삭제", description = "특정 배송 정책을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
@@ -62,5 +64,11 @@ public class DeliveryPolicyController {
     public ResponseEntity<Void> deleteDeliveryPolicy(@PathVariable Long id) {
         deliveryPolicyService.deleteDeliveryPolicy(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/admin/orders/delivery-policies")
+    public ResponseEntity<List<DeliveryPolicyResponseDTO>> getAllDeliveryPolicies() {
+        List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 }

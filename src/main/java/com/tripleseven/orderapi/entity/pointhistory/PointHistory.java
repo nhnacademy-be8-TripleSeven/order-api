@@ -1,11 +1,14 @@
 package com.tripleseven.orderapi.entity.pointhistory;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -27,21 +30,19 @@ public class PointHistory {
 
     private Long memberId; // 회원 ID
 
-    @ManyToOne
-    @JoinColumn(name = "order_group_id")
-    private OrderGroup orderGroup;
+    @OneToMany(mappedBy = "pointHistory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<OrderGroupPointHistory> orderGroupPointHistories = new ArrayList<>();
 
-    public PointHistory(HistoryTypes types, int amount, LocalDateTime changedAt, String comment, Long memberId, OrderGroup orderGroup) {
+    public PointHistory(HistoryTypes types, int amount, LocalDateTime changedAt, String comment, Long memberId) {
         this.types = types;
         this.amount = amount;
         this.changedAt = changedAt;
         this.comment = comment;
         this.memberId = memberId;
-        this.orderGroup = orderGroup;
     }
 
-    public static PointHistory ofCreate(HistoryTypes types, int amount, String comment, Long memberId, OrderGroup orderGroup) {
-        return new PointHistory(types, amount, LocalDateTime.now(), comment, memberId, orderGroup);
+    public static PointHistory ofCreate(HistoryTypes types, int amount, String comment, Long memberId) {
+        return new PointHistory(types, amount, LocalDateTime.now(), comment, memberId);
     }
 
     public void ofUpdate(HistoryTypes types, int amount, String comment) {
@@ -49,5 +50,9 @@ public class PointHistory {
         this.amount = amount;
         this.comment = comment;
         this.changedAt = LocalDateTime.now();
+    }
+
+    public void addOrderGroupPointHistory(OrderGroupPointHistory history) {
+        this.orderGroupPointHistories.add(history);
     }
 }

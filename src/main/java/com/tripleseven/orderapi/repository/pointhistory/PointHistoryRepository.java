@@ -25,7 +25,5 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
 
     Page<PointHistory> findAllByMemberIdAndTypes(Long memberId, HistoryTypes types, Pageable pageable);
 
-    @Query("select ph.amount from PointHistory ph where ph.orderGroup.id = :orderGroupId and ph.types = :historyTypes")
-    Integer getAmountByOrderGroup_Id(Long orderGroupId, HistoryTypes historyTypes);
 }
 

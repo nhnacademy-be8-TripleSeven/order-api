@@ -4,6 +4,8 @@ import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDT
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 
+import java.util.List;
+
 public interface DeliveryPolicyService {
 
     DeliveryPolicyResponseDTO getDeliveryPolicy(Long id);
@@ -14,4 +16,6 @@ public interface DeliveryPolicyService {
 
     void deleteDeliveryPolicy(Long id);
 
+
+    List<DeliveryPolicyResponseDTO> getAllDeliveryPolicies();
 }

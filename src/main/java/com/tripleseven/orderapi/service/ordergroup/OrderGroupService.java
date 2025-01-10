@@ -1,6 +1,6 @@
 package com.tripleseven.orderapi.service.ordergroup;
 
-import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewsResponseDTO;
 import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
@@ -22,5 +22,9 @@ public interface OrderGroupService {
 
     void deleteOrderGroup(Long id);
 
-    Page<OrderViewsRequestDTO> getOrderGroupPeriodByUserId(Long userId, OrderManageRequestDTO orderManageRequestDTO, Pageable pageable);
+    Page<OrderViewsResponseDTO> getOrderGroupPeriodByUserId(Long userId, OrderManageRequestDTO orderManageRequestDTO, Pageable pageable);
+
+    Page<OrderViewsResponseDTO> getOrderGroupPeriod(OrderManageRequestDTO orderManageRequestDTO, Pageable pageable);
+
+    List<OrderGroupResponseDTO> getGuestOrderGroups(String phone);
 }

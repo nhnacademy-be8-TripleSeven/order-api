@@ -1,17 +1,27 @@
 package com.tripleseven.orderapi.service.orderdetail;
 
+import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
+import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistoryRequestDTO;
+import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
+import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
+import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.ordergrouppointhistory.OrderGroupPointHistoryRepository;
+import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
+import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
+import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +37,9 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderGroupRepository orderGroupRepository;
     private final DeliveryInfoRepository deliveryInfoRepository;
+    private final PointHistoryRepository pointHistoryRepository;
+    private final OrderGroupPointHistoryService orderGroupPointHistoryService;
+    private final BookCouponApiClient bookCouponApiClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,6 +94,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 OrderDetail orderDetail = optionalOrderDetail.get();
 
+                // 결제 대기 중이나 결제 완료 일때만 취소 가능
                 if (orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) || orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
                     orderDetail.ofUpdateStatus(orderStatus);
                 }
@@ -97,6 +111,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 OrderDetail orderDetail = optionalOrderDetail.get();
 
+                // 배송 완료 될 시에만 로직 실행
                 if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
                     Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
 
@@ -108,7 +123,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     LocalDate today = LocalDate.now();
 
                     // 출고일 기준
-                    if (deliveryInfo.getShippingAt().isBefore(today.minusDays(30L))) {
+                    if (deliveryInfo.getShippingAt().isBefore(today.minusDays(30))) {
                         orderDetail.ofUpdateStatus(orderStatus);
                     }
                 }
@@ -116,6 +131,70 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
         }
+        return orderDetailResponses;
+    }
+
+    @Override
+    @Transactional
+    public List<OrderDetailResponseDTO> updateAdminOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
+        List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
+        for (Long id : ids) {
+            Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
+
+            if (optionalOrderDetail.isEmpty()) {
+                throw new OrderDetailNotFoundException(id);
+            }
+
+            OrderDetail orderDetail = optionalOrderDetail.get();
+
+            // 반품 시 환불 로직
+            if (orderStatus.equals(OrderStatus.RETURNED)) {
+                Long orderGroupId = orderDetail.getOrderGroup().getId();
+                Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderGroupId);
+                if (optionalOrderDetail.isEmpty()) {
+                    throw new OrderGroupNotFoundException(orderGroupId);
+                }
+                OrderGroup orderGroup = optionalOrderGroup.get();
+                Long userId = orderGroup.getUserId();
+                // 환불 금액 (쿠폰은 재발급 x)
+                int refundPrice = orderDetail.getPrimePrice() - orderDetail.getDiscountPrice();
+
+                String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
+
+                // 배송비 감면
+                Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(id);
+
+                if (optionalDeliveryInfo.isEmpty()) {
+                    throw new DeliveryInfoNotFoundException(id);
+                }
+
+                DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
+                LocalDate today = LocalDate.now();
+
+                // 출고일 기준 (10일 이후이면 배송비 환불 불가)
+                if (deliveryInfo.getShippingAt().isAfter(today.minusDays(10))) {
+                    refundPrice -= orderGroup.getDeliveryPrice();
+                }
+                PointHistory pointHistory = PointHistory.ofCreate(
+                        HistoryTypes.EARN,
+                        refundPrice,
+                        String.format("환불: " + bookName),
+                        userId
+                );
+                PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
+
+
+                orderGroupPointHistoryService.createOrderGroupPointHistory(
+                        new OrderGroupPointHistoryRequestDTO(
+                                orderGroupId,
+                                savedPointHistory.getId()
+                        ));
+            }
+            orderDetail.ofUpdateStatus(orderStatus);
+
+            orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
+        }
+
         return orderDetailResponses;
     }
 

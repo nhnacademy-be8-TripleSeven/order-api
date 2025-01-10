@@ -3,7 +3,8 @@ package com.tripleseven.orderapi.controller;
 import com.tripleseven.orderapi.business.order.OrderService;
 import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
 import com.tripleseven.orderapi.dto.order.OrderPayDetailDTO;
-import com.tripleseven.orderapi.dto.order.OrderViewsRequestDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewsResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "OrderGroup-Controller", description = "주문 그룹 관리 컨트롤러")
 @RestController
@@ -84,21 +87,43 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
             @ApiResponse(responseCode = "404", description = "주문 그룹을 찾을 수 없음")
     })
-    public ResponseEntity<Page<OrderViewsRequestDTO>> getOrderGroupPeriod(
+    public ResponseEntity<Page<OrderViewsResponseDTO>> getOrderGroupPeriod(
             @RequestBody OrderManageRequestDTO manageRequestDTO,
             @RequestHeader("X-USER") Long userId,
             Pageable pageable) {
 
-        Page<OrderViewsRequestDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriodByUserId(userId, manageRequestDTO, pageable);
+        Page<OrderViewsResponseDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriodByUserId(userId, manageRequestDTO, pageable);
         return ResponseEntity.ok(orderViewsRequestDTOList);
     }
 
-    @GetMapping("/api/orders/order-groups/{orderId}")
+    @GetMapping("/api/orders/order-groups/{orderGroupId}")
     public ResponseEntity<OrderPayDetailDTO> getOrderGroupDetail(
             @RequestHeader("X-USER") Long userId,
-            @PathVariable("orderId") Long orderId
+            @PathVariable("orderGroupId") Long orderGroupId
     ){
-        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderId);
+        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderGroupId);
         return ResponseEntity.ok(orderPayDetailDTO);
+    }
+
+    @PostMapping("/admin/orders/order-groups/period")
+    public ResponseEntity<Page<OrderViewsResponseDTO>> getAdminOrderGroupPeriod(
+            @RequestBody OrderManageRequestDTO manageRequestDTO,
+            Pageable pageable) {
+
+        Page<OrderViewsResponseDTO> orderViewsRequestDTOList = orderGroupService.getOrderGroupPeriod(manageRequestDTO, pageable);
+        return ResponseEntity.ok(orderViewsRequestDTOList);
+    }
+
+    @GetMapping("/admin/orders/order-groups/{orderGroupId}")
+    public ResponseEntity<OrderPayDetailDTO> getAdminOrderGroupDetail(
+            @PathVariable("orderGroupId") Long orderGroupId
+    ){
+        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderGroupId);
+        return ResponseEntity.ok(orderPayDetailDTO);
+    }
+
+    @GetMapping("/orders/order-groups")
+    public List<OrderGroupResponseDTO> getGuestOrderGroups(@RequestParam String phone) {
+        return orderGroupService.getGuestOrderGroups(phone);
     }
 }
