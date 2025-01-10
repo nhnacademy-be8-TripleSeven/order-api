@@ -10,4 +10,6 @@ public interface DefaultDeliveryPolicyService {
     List<DefaultDeliveryPolicyDTO> getDefaultDeliveryDTO();
 
     Long updateDefaultDelivery(DefaultDeliveryPolicyUpdateRequestDTO request);
+
+    DefaultDeliveryPolicyDTO getDefaultDeliveryPolicy(DeliveryPolicyType type);
 }

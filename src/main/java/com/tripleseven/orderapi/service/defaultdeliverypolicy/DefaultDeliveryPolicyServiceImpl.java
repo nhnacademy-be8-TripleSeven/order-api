@@ -3,6 +3,7 @@ package com.tripleseven.orderapi.service.defaultdeliverypolicy;
 import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyDTO;
 import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DefaultDeliveryPolicy;
+import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
 import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
 import com.tripleseven.orderapi.repository.defaultdeliverypolicy.DefaultDeliveryPolicyRepository;
@@ -51,6 +52,18 @@ public class DefaultDeliveryPolicyServiceImpl implements DefaultDeliveryPolicySe
         }
 
         return defaultDeliveryPolicy.getId();
+    }
+
+    @Override
+    public DefaultDeliveryPolicyDTO getDefaultDeliveryPolicy(DeliveryPolicyType type) {
+        DefaultDeliveryPolicy defaultDeliveryPolicy = defaultDeliveryPolicyRepository.findDefaultDeliveryPolicyByDeliveryPolicyType(type);
+
+        return new DefaultDeliveryPolicyDTO(
+                defaultDeliveryPolicy.getId(),
+                defaultDeliveryPolicy.getDeliveryPolicy().getName(),
+                defaultDeliveryPolicy.getDeliveryPolicy().getPrice(),
+                defaultDeliveryPolicy.getDeliveryPolicyType()
+        );
     }
 
 }
