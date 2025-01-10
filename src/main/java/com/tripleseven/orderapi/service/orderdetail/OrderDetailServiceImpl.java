@@ -4,24 +4,21 @@ import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistoryRequestDTO;
-import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
+import com.tripleseven.orderapi.exception.ReturnedFailedException;
 import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
-import com.tripleseven.orderapi.repository.ordergrouppointhistory.OrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
-import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,9 +120,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     LocalDate today = LocalDate.now();
 
                     // 출고일 기준
-                    if (deliveryInfo.getShippingAt().isBefore(today.minusDays(30))) {
-                        orderDetail.ofUpdateStatus(orderStatus);
+                    if (today.isAfter(deliveryInfo.getShippingAt().plusMonths(30))) {
+                        throw new ReturnedFailedException("over day :" + deliveryInfo.getShippingAt());
                     }
+                    orderDetail.ofUpdateStatus(orderStatus);
                 }
 
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
@@ -172,7 +170,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 LocalDate today = LocalDate.now();
 
                 // 출고일 기준 (10일 이후이면 배송비 환불 불가)
-                if (deliveryInfo.getShippingAt().isAfter(today.minusDays(10))) {
+                if (today.isAfter(deliveryInfo.getShippingAt().plusDays(10))) {
                     refundPrice -= orderGroup.getDeliveryPrice();
                 }
                 PointHistory pointHistory = PointHistory.ofCreate(
