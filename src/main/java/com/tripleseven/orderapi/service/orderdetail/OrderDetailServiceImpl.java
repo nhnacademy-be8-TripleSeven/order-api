@@ -112,6 +112,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 OrderDetail orderDetail = optionalOrderDetail.get();
 
+                if (!orderDetail.getOrderStatus().equals(OrderStatus.SHIPPING) || !orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                    throw new RuntimeException();
+                }
+
                 // 배송 완료 될 시에만 로직 실행
                 if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
                     Long orderGroupId = orderDetail.getOrderGroup().getId();
@@ -181,7 +185,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 LocalDate today = LocalDate.now();
 
                 // 관리자는 무조건 바꿀 수 있도록
-                LocalDate shippingAt = Objects.nonNull(deliveryInfo.getShippingAt()) ? deliveryInfo.getShippingAt(): today;
+                LocalDate shippingAt = Objects.nonNull(deliveryInfo.getShippingAt()) ? deliveryInfo.getShippingAt() : today;
 
                 // 출고일 기준 (10일 이후이면 배송비 환불 불가)
                 if (today.isAfter(shippingAt.plusDays(10))) {
