@@ -77,7 +77,9 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional
     public List<OrderDetailResponseDTO> updateOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
-
+        if (ids.isEmpty()) {
+            throw new RuntimeException();
+        }
         List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
 
         if (orderStatus.equals(OrderStatus.ORDER_CANCELED)) {
@@ -92,9 +94,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 OrderDetail orderDetail = optionalOrderDetail.get();
 
                 // 결제 대기 중이나 결제 완료 일때만 취소 가능
-                if (orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) || orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
-                    orderDetail.ofUpdateStatus(orderStatus);
+                if (!orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) && !orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
+                    throw new RuntimeException();
                 }
+                orderDetail.ofUpdateStatus(orderStatus);
 
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
