@@ -3,6 +3,7 @@ package com.tripleseven.orderapi.controller;
 import com.tripleseven.orderapi.business.order.OrderService;
 import com.tripleseven.orderapi.dto.order.OrderManageRequestDTO;
 import com.tripleseven.orderapi.dto.order.OrderPayDetailDTO;
+import com.tripleseven.orderapi.dto.order.OrderViewDTO;
 import com.tripleseven.orderapi.dto.order.OrderViewsResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "OrderGroup-Controller", description = "주문 그룹 관리 컨트롤러")
 @RestController
@@ -117,5 +120,10 @@ public class OrderGroupController {
     ){
         OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderGroupId);
         return ResponseEntity.ok(orderPayDetailDTO);
+    }
+
+    @GetMapping("/orders/order-groups")
+    public List<OrderGroupResponseDTO> getGuestOrderGroups(@RequestParam String phone) {
+        return orderGroupService.getGuestOrderGroups(phone);
     }
 }

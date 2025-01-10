@@ -8,6 +8,8 @@ import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface OrderGroupService {
 
     OrderGroupResponseDTO getOrderGroupById(Long id);
@@ -24,4 +26,5 @@ public interface OrderGroupService {
 
     Page<OrderViewsResponseDTO> getOrderGroupPeriod(OrderManageRequestDTO orderManageRequestDTO, Pageable pageable);
 
+    List<OrderGroupResponseDTO> getGuestOrderGroups(String phone);
 }
