@@ -12,4 +12,6 @@ public interface DefaultPointPolicyService {
     List<DefaultPointPolicyDTO> getDefaultPointPolicies();
 
     Long updateDefaultPoint(DefaultPointPolicyUpdateRequestDTO request);
+
+    DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type);
 }
