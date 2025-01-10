@@ -120,6 +120,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderViewsResponseDTO> getOrderGroupPeriod(OrderManageRequestDTO manageRequestDTO, Pageable pageable) {
         LocalDate startDateTime = manageRequestDTO.getStartDate();
         LocalDate endDateTime = manageRequestDTO.getEndDate();
@@ -156,6 +157,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 // 새로운 그룹 생성
                 count = 0;
                 String orderContent = bookCouponApiClient.getBookName(orderView.getBookId());
+
                 groupedData.put(groupId, new OrderViewsResponseDTO(
                         groupId,
                         orderView.getOrderDate(),

@@ -4,28 +4,31 @@ import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
-import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
-import com.tripleseven.orderapi.exception.RedisNullPointException;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
 // 추후 이벤트 결제 (배송비 무료 등) 상황 일 때 확장성 생각
 public class NormalOrderProcessing implements OrderProcessingStrategy {
+    private static final String MEMBER_CART_KEY_PREFIX = "cart:member:";
+    private static final String GUEST_CART_KEY_PREFIX = "cart:guest:";
+
     private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
 
     private static final String ORDER_ROUTING_KEY = "order.routing.key";
@@ -51,16 +54,12 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
     @Override
     public void processMemberOrder(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         // Todo 회원 주문
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+
         Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
         CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
         // 계산 로직은 결제 누르기 전에 검증하면서 저장
         PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
 
-        // 장바구니 체크
-        if (Objects.isNull(cartItems)) {
-            throw new RedisNullPointException("CartItems is Null");
-        }
 
         CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
         pointMessageDTO.addObject("point", point);
@@ -80,32 +79,35 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
 
     }
 
-    public void orderProcessing(Long userId, OrderGroupCreateRequestDTO dto) {
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+    // 주문 저장 및 장바구니 초기화
+    private void orderProcessing(Long userId, OrderGroupCreateRequestDTO dto) {
 
-        redisTemplate.opsForHash().delete(userId.toString(), "CartItems");
+        String CART_KEY_PREFIX = userId != 0L ? MEMBER_CART_KEY_PREFIX : GUEST_CART_KEY_PREFIX;
 
-        WrappingCartItemDTO wrappingCartItemDTO = new WrappingCartItemDTO();
-        wrappingCartItemDTO.ofCreate(cartItems);
+        String cartKey = CART_KEY_PREFIX.concat(userId.toString());
+        HashOperations<String, String, CartItemDTO> hashOps = redisTemplate.opsForHash();
+        Map<String, CartItemDTO> cartItemMap = hashOps.entries(cartKey);
+        List<String> bookIds = (List<String>) hashOps.keys(cartKey);
+
+//        redisTemplate.opsForHash().delete(cartKey);
 
         CombinedMessageDTO orderMessageDTO = new CombinedMessageDTO();
-        orderMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);
+        orderMessageDTO.addObject("CartItemMap", cartItemMap);
         orderMessageDTO.addObject("UserId", userId);
         orderMessageDTO.addObject("OrderGroupCreateRequestDTO", dto);
         orderMessageDTO.addObject("PaymentInfo", "paymentInfo");
 
         CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
-        cartMessageDTO.addObject("WrappingCartItemDTO", wrappingCartItemDTO);
+        cartMessageDTO.addObject("BookIds", bookIds);
         cartMessageDTO.addObject("UserId", userId);
 
 
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY, orderMessageDTO);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
-
     }
 
-    // 결제 요청 하기 전 체크 할 사항들 (임시 위치)
-    public void checkValid(Long userId) {
+    // 결제 요청 하기 전 체크 할 사항들 (임시)
+    private void checkValid(Long userId) {
 
         List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
         Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");

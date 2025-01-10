@@ -20,8 +20,10 @@ public class DeliveryInfoResponseDTO {
 
     private final LocalDate arrivedAt;
 
+    private final LocalDate shippingAt;
+
     @Builder
-    private DeliveryInfoResponseDTO(Long id, String name, int invoiceNumber, LocalDate arrivedAt) {
+    private DeliveryInfoResponseDTO(Long id, String name, int invoiceNumber, LocalDate arrivedAt, LocalDate shippingAt) {
         if (Objects.isNull(id)) {
             log.error("DeliveryInfo id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
@@ -30,6 +32,7 @@ public class DeliveryInfoResponseDTO {
         this.name = name;
         this.invoiceNumber = invoiceNumber;
         this.arrivedAt = arrivedAt;
+        this.shippingAt = shippingAt;
     }
 
     public static DeliveryInfoResponseDTO fromEntity(DeliveryInfo deliveryInfo) {
@@ -38,6 +41,7 @@ public class DeliveryInfoResponseDTO {
                 .name(deliveryInfo.getName())
                 .invoiceNumber(deliveryInfo.getInvoiceNumber())
                 .arrivedAt(deliveryInfo.getArrivedAt())
+                .shippingAt(deliveryInfo.getShippingAt())
                 .build();
     }
 }

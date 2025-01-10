@@ -39,7 +39,7 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
 
         return new JPAQuery<>(entityManager)
-                .select(pointHistory.amount)
+                .select(pointHistory.amount.sum())
                 .from(pointHistory)
                 .join(pointHistory.orderGroupPointHistories, orderGroupPointHistory)
                 .join(orderGroupPointHistory.orderGroup, orderGroup)
