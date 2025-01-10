@@ -32,16 +32,7 @@
         </root>
     </springProfile>
 
-    <springProfile name="instance1">
-        <root level="ERROR">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="LOGNCRASH"/>
-        </root>
-    </springProfile>
-
-
-    <springProfile name="instance2">
-
+    <springProfile name="instance1, instance2">
         <root level="ERROR">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="LOGNCRASH"/>
