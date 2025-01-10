@@ -26,8 +26,8 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
     private final PointPolicyRepository pointPolicyRepository;
 
     @Override
-    public DefaultPointPolicyDTO getDefaultPointPolicyDTO(PointPolicyType pointPolicyType) {
-        return queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(pointPolicyType);
+    public DefaultPointPolicyDTO getDefaultPointPolicyDTO(PointPolicyType type) {
+        return queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(type);
     }
 
     @Override
@@ -67,5 +67,18 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
         return defaultPointPolicy.getId();
     }
 
+    @Override
+    public DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type){
+        DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(type);
+
+        return new DefaultPointPolicyDTO(
+                defaultPointPolicy.getId(),
+                defaultPointPolicy.getPointPolicyType(),
+                defaultPointPolicy.getPointPolicy().getId(),
+                defaultPointPolicy.getPointPolicy().getName(),
+                defaultPointPolicy.getPointPolicy().getAmount(),
+                defaultPointPolicy.getPointPolicy().getRate()
+        );
+    }
 
 }
