@@ -33,7 +33,8 @@ public class QueryDslDeliveryInfoRepositoryImpl extends QuerydslRepositorySuppor
                         orderGroup.orderedName.as("ordererName"),
                         orderGroup.recipientName.as("recipientName"),
                         orderGroup.recipientPhone.as("recipientPhone"),
-                        orderGroup.address.as("address")))
+                        orderGroup.address.as("address"),
+                        deliveryInfo.shippingAt.as("shippingAt")))
                 .from(deliveryInfo)
                 .join(deliveryInfo.orderGroup, orderGroup)
                 .where(orderGroup.id.eq(orderGroupId))

@@ -6,29 +6,25 @@ import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
-import com.tripleseven.orderapi.dto.cartitem.CartUpdateRequestDTO;
-import com.tripleseven.orderapi.dto.cartitem.WrappingCartItemDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
-import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
-import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.exception.RedisNullPointException;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pay.PayService;
 import lombok.RequiredArgsConstructor;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -54,38 +50,41 @@ public class PaymentListener {
         // Todo 주문 내역 저장
         try {
             log.info("Saving Order...");
-            WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) messageDTO.getObject("WrappingCartItemDTO");
-            List<CartItemDTO> cartItems = wrappingCartItemDTO.getCartItemList();
+            Map<String, CartItemDTO> cartItemMap = (Map<String, CartItemDTO>) messageDTO.getObject("CartItemMap");
+            List<CartItemDTO> cartItems = cartItemMap.values().stream().toList();
+
             if (cartItems.isEmpty()) {
-                throw new RuntimeException();
+                throw new RedisNullPointException("cartItem is empty");
             }
+
             OrderGroupCreateRequestDTO orderGroupCreateRequestDTO = (OrderGroupCreateRequestDTO) messageDTO.getObject("OrderGroupCreateRequestDTO");
 
             Long userId = (Long) messageDTO.getObject("UserId");
 
             // OrderGroup 생성
             OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(userId, orderGroupCreateRequestDTO);
-            Long id = orderGroupResponseDTO.getId();
+            Long orderGroupId = orderGroupResponseDTO.getId();
 
 
             // DeliveryInfo 생성
             deliveryInfoService.createDeliveryInfo(
-                    new DeliveryInfoCreateRequestDTO(id)
+                    new DeliveryInfoCreateRequestDTO(orderGroupId)
             );
 
-            //OrderDetail 저장
+            // TODO OrderDetail 저장 (할인가가 아닌 감면된 금액인걸 고려)
             for (CartItemDTO cartItem : cartItems) {
                 OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
                         = new OrderDetailCreateRequestDTO(
                         cartItem.getBookId(),
-                        cartItem.getAmount(),
-                        cartItem.getPrimePrice(),
-                        cartItem.getDiscountPrice(),
-                        id
+                        cartItem.getQuantity(),
+                        cartItem.getRegularPrice(),
+                        cartItem.getRegularPrice() - cartItem.getSalePrice(),
+                        orderGroupId
                 );
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
 
+            // TODO 결제 정보 저장
 //            JSONObject jsonObject = (JSONObject) messageDTO.getObject("PaymentInfo");
 //            payService.save(userId, jsonObject);
 
@@ -99,23 +98,18 @@ public class PaymentListener {
 
     @RabbitListener(queues = "nhn24.cart.queue")
     public void processClearCart(CombinedMessageDTO messageDTO, Channel channel, Message message) {
-        // Todo 장바구니 초기화
+        // Todo 장바구니 초기화 (구매한 상품 대상)
         try {
             log.info("Clearing Cart...");
 
-            WrappingCartItemDTO wrappingCartItemDTO = (WrappingCartItemDTO) messageDTO.getObject("WrappingCartItemDTO");
-            List<Long> bookIds = new ArrayList<>();
-            List<CartItemDTO> cartItems = wrappingCartItemDTO.getCartItemList();
-
+            List<String> bookIdsS = (List<String>) messageDTO.getObject("BookIds");
             Long userId = (Long) messageDTO.getObject("UserId");
 
-            for (CartItemDTO cartItem : cartItems) {
-                bookIds.add(cartItem.getBookId());
-            }
+            // 각 구매한
+            bookIdsS.stream()
+                    .map(Long::valueOf)
+                    .forEach(bookId -> memberApiClient.updateCart(userId, bookId));
 
-            CartUpdateRequestDTO cartUpdateRequestDTO = new CartUpdateRequestDTO(userId, bookIds);
-            memberApiClient.updateCart(cartUpdateRequestDTO);
-            // redis 주문서 데이터 초기화는 member-api 에서
             log.info("Completed Clearing Cart!!");
 
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -148,7 +142,7 @@ public class PaymentListener {
             Long orderId = (Long) messageDTO.getObject("orderId");
 
             // 포인트 사용 및 적립
-            if (pointDTO.getSpendPoint() > 0){
+            if (pointDTO.getSpendPoint() > 0) {
                 pointService.createPointHistoryForPaymentSpend(userId, pointDTO.getSpendPoint(), orderId);
             }
             pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getEarnPoint(), orderId);
