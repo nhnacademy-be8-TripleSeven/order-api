@@ -22,7 +22,7 @@
             </encoder>
             <!-- Filter logs with INFO level and above -->
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>INFO</level>
+                <level>ERROR</level>
             </filter>
         </appender>
 
@@ -33,15 +33,10 @@
     </springProfile>
 
     <springProfile name="instance1, instance2">
-        <!-- 모든 로그의 기본 레벨은 INFO -->
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-        </root>
-
-        <!-- LogNCrash 전용 로거 추가 -->
-        <logger name="logncrash" level="ERROR" additivity="false">
             <appender-ref ref="LOGNCRASH"/>
-        </logger>
+        </root>
     </springProfile>
 
     <!-- Common Logging Configuration -->
