@@ -108,7 +108,7 @@ public class PaymentListener {
             // 각 구매한
             bookIdsS.stream()
                     .map(Long::valueOf)
-                    .forEach(bookId -> memberApiClient.updateCart(userId, bookId));
+                    .forEach(bookId -> memberApiClient.deleteCart(userId, bookId));
 
             log.info("Completed Clearing Cart!!");
 

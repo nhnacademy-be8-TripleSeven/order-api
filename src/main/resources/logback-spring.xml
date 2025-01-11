@@ -33,10 +33,15 @@
     </springProfile>
 
     <springProfile name="instance1, instance2">
-        <root level="ERROR">
+        <!-- 모든 로그의 기본 레벨은 INFO -->
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="LOGNCRASH"/>
         </root>
+
+        <!-- LogNCrash 전용 로거 추가 -->
+        <logger name="logncrash" level="ERROR" additivity="false">
+            <appender-ref ref="LOGNCRASH"/>
+        </logger>
     </springProfile>
 
     <!-- Common Logging Configuration -->
