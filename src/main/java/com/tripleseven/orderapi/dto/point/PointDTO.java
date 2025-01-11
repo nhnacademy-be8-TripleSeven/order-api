@@ -10,7 +10,7 @@ public class PointDTO {
     int totalPoint;
 
     @NotNull
-    int earnPoint;
+    int spendMoney;
 
     @NotNull
     int spendPoint;
