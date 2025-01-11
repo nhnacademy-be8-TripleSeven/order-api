@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-public class DeliveryPolicyServiceTest {
+class DeliveryPolicyServiceTest {
     @Mock
     private DeliveryPolicyRepository deliveryPolicyRepository;
 
@@ -129,5 +130,24 @@ public class DeliveryPolicyServiceTest {
         assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
 
         verify(deliveryPolicyRepository, times(0)).deleteById(1L);
+    }
+
+    @Test
+    void testGetAllDeliveryPolicies_Success() {
+        // given: Mocking the repository to return a list of delivery policies
+        when(deliveryPolicyRepository.findAll()).thenReturn(List.of(deliveryPolicy, deliveryPolicy));
+
+        // when: Calling the service method
+        List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
+
+        // then: Verifying the results
+        assertEquals(2, responses.size());
+        assertEquals("Test DeliveryPolicy", responses.get(0).getName());
+        assertEquals(1000, responses.get(0).getPrice());
+        assertEquals("Test DeliveryPolicy", responses.get(1).getName());
+        assertEquals(1000, responses.get(1).getPrice());
+
+        // Verifying the repository interaction
+        verify(deliveryPolicyRepository, times(1)).findAll();
     }
 }

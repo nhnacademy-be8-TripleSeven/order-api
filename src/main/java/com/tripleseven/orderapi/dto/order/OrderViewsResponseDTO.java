@@ -8,21 +8,25 @@ import java.time.LocalDate;
 
 @Getter
 public class OrderViewsResponseDTO {
-    private final Long orderId;
+    private Long orderId;
 
-    private final LocalDate orderDate;
+    private LocalDate orderDate;
+
     @Setter
     private String orderContent;
+
     @Setter
     private int price;
+
     @Setter
     private int amount;
+
     @Setter
     private OrderStatus orderStatus;
 
-    private final String ordererName;
+    private String ordererName;
 
-    private final String recipientName;
+    private String recipientName;
 
     public OrderViewsResponseDTO(Long orderId, LocalDate orderDate, String orderContent, int price, int amount,
                                  OrderStatus orderStatus, String ordererName, String recipientName) {

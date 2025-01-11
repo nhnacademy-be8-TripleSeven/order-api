@@ -24,5 +24,6 @@ public class OrderController {
         else{
             orderProcessingStrategy.processNonMemberOrder(guestId, request);
         }
+        return ResponseEntity.ok().build();
     }
 }

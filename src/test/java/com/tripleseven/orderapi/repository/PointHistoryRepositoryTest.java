@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.repository;
 
-import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
@@ -38,10 +37,6 @@ class PointHistoryRepositoryTest {
         wrapping.ofCreate("Test Wrapping", 100);
         wrappingRepository.save(wrapping);
 
-        OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
-        OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
-
         pointHistory = PointHistory.ofCreate(
                 HistoryTypes.EARN,
                 1000,
@@ -59,8 +54,6 @@ class PointHistoryRepositoryTest {
 
     @Test
     void testSavePointHistory() {
-
-
         // when
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
 

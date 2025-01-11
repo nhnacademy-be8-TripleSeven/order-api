@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.entity.pointhistory;
 
-import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import jakarta.persistence.*;
 import lombok.Getter;

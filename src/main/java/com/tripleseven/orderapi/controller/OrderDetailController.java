@@ -84,23 +84,6 @@ public class OrderDetailController {
         return ResponseEntity.ok(responses); // 반환: 주문 상세 목록 (List<OrderDetailResponse>)
     }
 
-    @GetMapping("/order-details/{orderGroupId}/status/{orderStatus}")
-    @Operation(
-            summary = "주문 그룹과 상태별 주문 상세 목록 조회",
-            description = "특정 주문 그룹과 주문 상태에 해당하는 주문 상세 목록을 조회합니다."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "주문 그룹 또는 상태에 해당하는 주문 상세가 존재하지 않음")
-    })
-    public ResponseEntity<List<OrderDetailResponseDTO>> listOrderDetailsByStatus(
-            @PathVariable Long orderGroupId,
-            @PathVariable OrderStatus orderStatus) {
-        List<OrderDetailResponseDTO> responses = orderDetailService.getOrderDetailsForGroupWithStatus(orderGroupId, orderStatus);
-        return ResponseEntity.ok(responses);
-    }
-
-
     @GetMapping("/order-details/check-purchase")
     public ResponseEntity<Boolean> checkUserPurchase(
             @RequestParam Long userId,
@@ -110,6 +93,14 @@ public class OrderDetailController {
     }
 
     @PostMapping("/api/orders/order-details/status")
+    @Operation(
+            summary = "주문 그룹과 상태별 주문 상세 목록 조회",
+            description = "특정 주문 그룹과 주문 상태에 해당하는 주문 상세 목록을 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "주문 그룹 또는 상태에 해당하는 주문 상세가 존재하지 않음")
+    })
     public ResponseEntity<Void> updateOrderDetails(
             @RequestHeader("X-USER") Long userId,
             @RequestBody OrderDetailUpdateRequestDTO orderDetailUpdateRequestDTO) {
