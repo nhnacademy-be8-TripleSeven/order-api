@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl;
 
 import com.querydsl.core.QueryResults;
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.tripleseven.orderapi.dto.pointhistory.QUserPointHistoryDTO;
 import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
@@ -38,18 +37,16 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
         QOrderGroupPointHistory orderGroupPointHistory = QOrderGroupPointHistory.orderGroupPointHistory;
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
 
-        return new JPAQuery<>(entityManager)
+        JPAQuery<Integer> query = new JPAQuery<>(entityManager)
                 .select(pointHistory.amount.sum())
                 .from(pointHistory)
                 .join(pointHistory.orderGroupPointHistories, orderGroupPointHistory)
                 .join(orderGroupPointHistory.orderGroup, orderGroup)
                 .where(orderGroup.id.eq(orderGroupId)
-                        .and(pointHistory.types.eq(historyTypes)))
-                .fetchOne();
+                        .and(pointHistory.types.eq(historyTypes)));
+
+        return query.fetchOne();
     }
-
-
-
 
     @Override
     public Page<UserPointHistoryDTO> findUserPointHistories(Long memberId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
@@ -87,11 +84,7 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
         long total = results.getTotal();
         List<UserPointHistoryDTO> content = results.getResults();
 
-
         // 결과 반환
         return new PageImpl<>(content, pageable, total);
     }
-
-
-
 }

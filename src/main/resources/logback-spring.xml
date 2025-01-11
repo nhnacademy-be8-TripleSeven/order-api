@@ -22,7 +22,7 @@
             </encoder>
             <!-- Filter logs with INFO level and above -->
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>INFO</level>
+                <level>ERROR</level>
             </filter>
         </appender>
 
@@ -33,7 +33,7 @@
     </springProfile>
 
     <springProfile name="instance1, instance2">
-        <root level="ERROR">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="LOGNCRASH"/>
         </root>

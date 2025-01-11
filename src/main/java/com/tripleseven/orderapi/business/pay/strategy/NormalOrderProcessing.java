@@ -45,69 +45,70 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
     private final PointPolicyService pointPolicyService;
 
     @Override
-    public void processNonMemberOrder(OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
+    public void processNonMemberOrder(String guestId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         // Todo 비회원 주문
-        orderProcessing(0L, orderGroupCreateRequestDTO);
+        orderProcessing(Long.valueOf(guestId), orderGroupCreateRequestDTO, false);
 
     }
 
     @Override
     public void processMemberOrder(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         // Todo 회원 주문
-
-        Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
-        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
-        // 계산 로직은 결제 누르기 전에 검증하면서 저장
-        PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
-
-
-        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
-        pointMessageDTO.addObject("point", point);
-        pointMessageDTO.addObject("userId", userId);
-//        pointMessageDTO.addObject("orderId", );
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
-
-        CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
-        couponMessageDTO.addObject("coupon", coupon);
-        pointMessageDTO.addObject("userId", userId);
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
-
-
-        orderProcessing(userId, orderGroupCreateRequestDTO);
-
+        orderProcessing(userId, orderGroupCreateRequestDTO, true);
+        couponProcessing(userId);
     }
 
     // 주문 저장 및 장바구니 초기화
-    private void orderProcessing(Long userId, OrderGroupCreateRequestDTO dto) {
-
+    private void orderProcessing(Long userId, OrderGroupCreateRequestDTO dto, Boolean isMember) {
         String CART_KEY_PREFIX = userId != 0L ? MEMBER_CART_KEY_PREFIX : GUEST_CART_KEY_PREFIX;
 
         String cartKey = CART_KEY_PREFIX.concat(userId.toString());
         HashOperations<String, String, CartItemDTO> hashOps = redisTemplate.opsForHash();
         Map<String, CartItemDTO> cartItemMap = hashOps.entries(cartKey);
-        List<String> bookIds = (List<String>) hashOps.keys(cartKey);
 
-//        redisTemplate.opsForHash().delete(cartKey);
+
+        // TODO 주문 데이터에서 가져온 책만 지워야됨(비교 후 삭제)
+        List<String> bookIds = (List<String>) hashOps.keys(cartKey);
+        redisTemplate.opsForHash().delete(cartKey, "bookIds");
 
         CombinedMessageDTO orderMessageDTO = new CombinedMessageDTO();
         orderMessageDTO.addObject("CartItemMap", cartItemMap);
         orderMessageDTO.addObject("UserId", userId);
         orderMessageDTO.addObject("OrderGroupCreateRequestDTO", dto);
+        orderMessageDTO.addObject("isMember",isMember);
+
+        if (isMember) {
+            PointDTO point = (PointDTO) redisTemplate.opsForHash().get(userId.toString(), "point");
+            orderMessageDTO.addObject("point", point);
+        }
+        // TODO 결제 정보 저장
         orderMessageDTO.addObject("PaymentInfo", "paymentInfo");
+
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY, orderMessageDTO);
+
 
         CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
         cartMessageDTO.addObject("BookIds", bookIds);
         cartMessageDTO.addObject("UserId", userId);
 
 
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, ORDER_ROUTING_KEY, orderMessageDTO);
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
     }
 
+    // 쿠폰 사용
+    private void couponProcessing(Long userId) {
+        Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
+
+        CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
+        couponMessageDTO.addObject("couponId", couponId);
+        couponMessageDTO.addObject("userId", userId);
+
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
+    }
+
+
     // 결제 요청 하기 전 체크 할 사항들 (임시)
-    private void checkValid(Long userId) {
+    private boolean checkValid(Long userId) {
 
         List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
         Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");
@@ -146,9 +147,9 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
             // 적립량이 맞지 않는 경우
             BigDecimal earnPercent = pointPolicyService.findById(1L).getRate();
             int earnPoint = earnPercent.multiply(BigDecimal.valueOf(price)).intValue();
-            if (point.getEarnPoint() != earnPoint) {
-                throw new RuntimeException();
-            }
+//            if (point.getEarnPoint() != earnPoint) {
+//                throw new RuntimeException();
+//            }
 
 
             // 최종 가격보다 사용량이 더 큰 경우
@@ -172,6 +173,6 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
 
             rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
         }
-
+        return false;
     }
 }

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +44,12 @@ public class PaymentListener {
     private final BookCouponApiClient bookCouponApiClient;
 
     private final RetryStateService retryStateService;
+
+    private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
+
+    private static final String POINT_ROUTING_KEY = "point.routing.key";
+
+    private final RabbitTemplate rabbitTemplate;
 
 
     @RabbitListener(queues = "nhn24.order.queue")
@@ -84,12 +91,18 @@ public class PaymentListener {
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
 
+            Boolean isMember = (Boolean) messageDTO.getObject("isMember");
+
+            if (isMember) {
+                PointDTO point = (PointDTO) messageDTO.getObject("point");
+                pointProcessing(userId, orderGroupId, point);
+            }
+
             // TODO 결제 정보 저장
 //            JSONObject jsonObject = (JSONObject) messageDTO.getObject("PaymentInfo");
 //            payService.save(userId, jsonObject);
 
             log.info("Completed Saving Order!!");
-
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             retryQueue(e, channel, message);
@@ -108,7 +121,7 @@ public class PaymentListener {
             // 각 구매한
             bookIdsS.stream()
                     .map(Long::valueOf)
-                    .forEach(bookId -> memberApiClient.updateCart(userId, bookId));
+                    .forEach(bookId -> memberApiClient.deleteCart(userId, bookId));
 
             log.info("Completed Clearing Cart!!");
 
@@ -145,7 +158,7 @@ public class PaymentListener {
             if (pointDTO.getSpendPoint() > 0) {
                 pointService.createPointHistoryForPaymentSpend(userId, pointDTO.getSpendPoint(), orderId);
             }
-            pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getEarnPoint(), orderId);
+            pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getSpendMoney(), orderId);
 
             log.info("Completed Processing Point!!");
         } catch (Exception e) {
@@ -170,5 +183,15 @@ public class PaymentListener {
         } catch (Exception nackException) {
             log.error("Error sending message", nackException);
         }
+    }
+
+    // 포인트 사용 및 적립
+    private void pointProcessing(Long userId, Long orderId, PointDTO point) {
+        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
+        pointMessageDTO.addObject("point", point);
+        pointMessageDTO.addObject("userId", userId);
+        pointMessageDTO.addObject("orderId", orderId);
+
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
     }
 }

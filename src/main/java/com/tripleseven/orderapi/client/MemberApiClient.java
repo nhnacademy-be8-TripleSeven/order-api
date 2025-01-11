@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "member-api")
 public interface MemberApiClient {
     @PostMapping("/cart/book")
-    void updateCart(
+    void deleteCart(
             @RequestHeader("X-USER") Long userId,
             @RequestParam Long bookId);
 }

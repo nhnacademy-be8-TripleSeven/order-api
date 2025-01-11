@@ -47,14 +47,6 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<OrderGroupResponseDTO> getOrderGroupPagesByUserId(Long userId, Pageable pageable) {
-//        Page<OrderGroup> orderGroups = orderGroupRepository.findAllByUserId(userId, pageable);
-//        return orderGroups.map(OrderGroupResponseDTO::fromEntity);
-        return Page.empty();
-    }
-
-    @Override
     @Transactional
     public OrderGroupResponseDTO createOrderGroup(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();

@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.entity.deliveryinfo;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -36,7 +35,7 @@ public class DeliveryInfo {
         this.arrivedAt = arrivedAt;
     }
 
-    public void ofShippingUpdate(LocalDate shippingAt){
+    public void ofShippingUpdate(LocalDate shippingAt) {
         this.shippingAt = shippingAt;
     }
 }
