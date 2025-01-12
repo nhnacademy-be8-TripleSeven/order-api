@@ -9,14 +9,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
     Page<PointHistory> findAllByMemberId(Long memberId, Pageable pageable);
+
     void deleteAllByMemberId(Long memberId);
+
     @Query("select COALESCE(SUM(p.amount), 0) from PointHistory p where p.memberId = ?1")
     Integer sumAmount(Long memberId);
+
     @Query("SELECT ph FROM PointHistory ph WHERE ph.memberId = :memberId AND ph.changedAt >= :startDate AND ph.changedAt < :endDate")
     Page<PointHistory> findAllByChangedAtBetween(
             @Param("memberId") Long memberId,
@@ -27,7 +29,9 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
 
     Page<PointHistory> findAllByMemberIdAndTypes(Long memberId, HistoryTypes types, Pageable pageable);
 
-    @Query("SELECT p FROM PointHistory p WHERE p.comment = :comment")
-    Optional<PointHistory> findPointHistoryByComment(@Param("comment") String comment);
+    @Query("SELECT p FROM PointHistory p WHERE p.comment = :comment AND p.memberId = :userId")
+    Optional<PointHistory> findPointHistoryByComment(
+            @Param("userId") Long userId,
+            @Param("comment") String comment);
 }
 

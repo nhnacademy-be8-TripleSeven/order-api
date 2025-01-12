@@ -147,4 +147,32 @@ class DefaultPointPolicyServiceTest {
         verify(defaultPointPolicyRepository, times(1)).findDefaultPointPolicyByPointPolicyType(type);
         verify(pointPolicyRepository, times(1)).findById(3L);
     }
+
+    @Test
+    void testGetDefaultPointPolicy_Success() {
+        PointPolicyType type = PointPolicyType.DEFAULT_BUY;
+
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.ofCreate("Test Policy", 1000, BigDecimal.TEN);
+        ReflectionTestUtils.setField(pointPolicy, "id", 2L);
+
+        DefaultPointPolicy defaultPointPolicy = new DefaultPointPolicy();
+        defaultPointPolicy.ofCreate(type, pointPolicy);
+        ReflectionTestUtils.setField(defaultPointPolicy, "id", 1L);
+
+        when(defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(type))
+                .thenReturn(defaultPointPolicy);
+
+        DefaultPointPolicyDTO result = defaultPointPolicyService.getDefaultPointPolicy(type);
+
+        assertNotNull(result);
+        assertEquals(1L, (long) result.getId());
+        assertEquals(type, result.getType());
+        assertEquals(2L, (long) result.getPointPolicyId());
+        assertEquals("Test Policy", result.getName());
+        assertEquals(1000, result.getAmount());
+        assertEquals(0, BigDecimal.TEN.compareTo(result.getRate()));
+
+        verify(defaultPointPolicyRepository, times(1)).findDefaultPointPolicyByPointPolicyType(type);
+    }
 }
