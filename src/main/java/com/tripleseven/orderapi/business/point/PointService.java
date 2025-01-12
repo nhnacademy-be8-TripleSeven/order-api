@@ -6,4 +6,6 @@ public interface PointService {
     PointHistoryResponseDTO createPointHistoryForPaymentSpend(Long memberId, int usedPoint, Long orderGroupId);
 
     PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, int usedMoney, Long orderGroupId);
+
+    PointHistoryResponseDTO createRegisterPointHistory(Long memberId);
 }

@@ -60,12 +60,4 @@ public class DefaultPolicyController {
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/orders/default-policy/register")
-    public ResponseEntity<DefaultPointPolicyDTO> createRegisterPointHistory(
-            @RequestHeader("X-USER") Long userId
-    ) {
-        DefaultPointPolicyDTO dto = defaultPointPolicyService.createRegisterPointHistory(userId);
-        return ResponseEntity.ok(dto);
-    }
-
 }
