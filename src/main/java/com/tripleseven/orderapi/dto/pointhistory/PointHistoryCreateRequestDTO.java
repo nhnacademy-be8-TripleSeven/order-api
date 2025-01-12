@@ -14,5 +14,5 @@ public class PointHistoryCreateRequestDTO {
 
     private Long pointPolicyId;
 
-    private Long orderGroupId;
+    //private Long orderGroupId;
 }
