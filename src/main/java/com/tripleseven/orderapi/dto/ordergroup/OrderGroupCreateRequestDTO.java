@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.dto.ordergroup;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +8,7 @@ import lombok.Value;
 import org.hibernate.validator.constraints.Length;
 
 @Value
+@JsonTypeName("OrderGroupCreateRequestDTO")
 public class OrderGroupCreateRequestDTO {
     @NotNull
     Long wrappingId;

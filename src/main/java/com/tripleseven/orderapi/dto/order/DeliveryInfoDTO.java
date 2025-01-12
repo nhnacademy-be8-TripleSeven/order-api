@@ -13,7 +13,7 @@ public class DeliveryInfoDTO {
     LocalDate arrivedAt;
     Long orderId;
     LocalDate orderedAt;
-    String OrdererName;
+    String ordererName;
     String recipientName;
     String recipientPhone;
     String address;

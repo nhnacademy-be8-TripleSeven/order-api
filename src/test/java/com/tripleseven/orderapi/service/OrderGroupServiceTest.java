@@ -23,7 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -171,38 +171,97 @@ class OrderGroupServiceTest {
         verify(orderGroupRepository, times(0)).deleteById(anyLong());
     }
 
-//    @Test
-//    void testGetOrderGroupPeriodByUserId_Success() {
-//
-//        List<OrderViewDTO> orderViewList = List.of(
-//                new OrderViewDTO(1L, LocalDate.now(), 101L, 15000, 2, OrderStatus.PAYMENT_COMPLETED, "John Doe", "Jane Doe"),
-//                new OrderViewDTO(2L, LocalDate.now(), 102L, 20000, 1, OrderStatus.SHIPPING, "Alice", "Bob")
-//        );
-//
-//        OrderManageRequestDTO dto = new OrderManageRequestDTO(
-//                LocalDate.now(),
-//                LocalDate.now().plusDays(1),
-//                OrderStatus.PAYMENT_COMPLETED);
-//
-//        when(queryDslOrderDetailRepository.findAllByPeriodAndUserId(anyLong(), LocalDate.now(), LocalDate.now().plusDays(1), any(OrderStatus.class)))
-//                .thenReturn(orderViewList);
-//        when(bookCouponApiClient.getBookName(1L)).thenReturn("Book A");
-//
-//
-//        Page<OrderViewsResponseDTO> result = orderGroupService.getOrderGroupPeriodByUserId(1L, dto, Pageable.unpaged());
-//
-//        assertNotNull(result);
-//        assertEquals(2, result.getTotalElements());
-//
-//        OrderViewsResponseDTO firstResponse = result.getContent().get(0);
-//        assertEquals(1L, firstResponse.getOrderId());
-//        assertEquals("Book A 외 1종", firstResponse.getOrderContent());
-//        assertEquals(30000, firstResponse.getPrice());
-//        assertEquals(OrderStatus.PAYMENT_COMPLETED, firstResponse.getOrderStatus());
-//        assertEquals("Alice", firstResponse.getOrdererName());
-//        assertEquals("Bob", firstResponse.getRecipientName());
-//
-//        verify(orderGroupService, times(1)).getOrderGroupPeriodByUserId(anyLong(), any(), any());
-//    }
+    @Test
+    void testGetOrderGroupPeriodByUserId_Success() {
 
+        List<OrderViewDTO> orderViewList = List.of(
+                new OrderViewDTO(1L, LocalDate.now(), 101L, 15000, 2, OrderStatus.PAYMENT_COMPLETED, "John Doe", "Jane Doe"),
+                new OrderViewDTO(1L, LocalDate.now(), 102L, 20000, 1, OrderStatus.SHIPPING, "Alice", "Bob")
+        );
+
+        OrderManageRequestDTO dto = new OrderManageRequestDTO(
+                LocalDate.now(),
+                LocalDate.now().plusDays(1),
+                OrderStatus.PAYMENT_COMPLETED);
+
+        when(bookCouponApiClient.getBookName(anyLong())).thenReturn("Book A");
+        when(queryDslOrderDetailRepository.findAllByPeriodAndUserId(
+                any(Long.class),
+                any(LocalDate.class),
+                any(LocalDate.class),
+                eq(OrderStatus.PAYMENT_COMPLETED)))
+                .thenReturn(orderViewList);
+
+
+        Page<OrderViewsResponseDTO> result = orderGroupService.getOrderGroupPeriodByUserId(1L, dto, PageRequest.of(0,10));
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+
+        OrderViewsResponseDTO firstResponse = result.getContent().get(0);
+        assertEquals(1L, firstResponse.getOrderId());
+        assertEquals("Book A 외 1 종", firstResponse.getOrderContent());
+        assertEquals(50000, firstResponse.getPrice());
+        assertEquals(OrderStatus.PAYMENT_COMPLETED, firstResponse.getOrderStatus());
+        assertEquals("John Doe", firstResponse.getOrdererName());
+        assertEquals("Jane Doe", firstResponse.getRecipientName());
+    }
+    @Test
+    void testGetOrderGroupPeriod_Success() {
+        List<OrderViewDTO> orderViewList = List.of(
+                new OrderViewDTO(1L, LocalDate.now(), 101L, 15000, 2, OrderStatus.PAYMENT_COMPLETED, "John Doe", "Jane Doe"),
+                new OrderViewDTO(2L, LocalDate.now(), 102L, 20000, 1, OrderStatus.PAYMENT_COMPLETED, "Alice", "Bob")
+        );
+
+        OrderManageRequestDTO dto = new OrderManageRequestDTO(
+                LocalDate.now(),
+                LocalDate.now().plusDays(1),
+                OrderStatus.PAYMENT_COMPLETED
+        );
+
+        when(queryDslOrderDetailRepository.findAllByPeriod(
+                dto.getStartDate(),
+                dto.getEndDate(),
+                dto.getOrderStatus()
+        )).thenReturn(orderViewList);
+
+        // 메서드 호출
+        Page<OrderViewsResponseDTO> result = orderGroupService.getOrderGroupPeriod(dto, PageRequest.of(0, 10));
+
+        // 결과 검증
+        assertNotNull(result);
+        assertEquals(2, result.getTotalElements());
+
+        OrderViewsResponseDTO firstResponse = result.getContent().get(0);
+        assertEquals(1L, firstResponse.getOrderId());
+        assertEquals("John Doe", firstResponse.getOrdererName());
+        assertEquals("Jane Doe", firstResponse.getRecipientName());
+    }
+
+    @Test
+    void testGetGuestOrderGroups_Success() {
+        OrderGroup orderGroup2 = new OrderGroup();
+        ReflectionTestUtils.setField(orderGroup2, "id", 2L);
+        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
+
+        List<OrderGroup> orderGroups = List.of(
+                orderGroup,
+                orderGroup2
+        );
+
+        // Mock 설정
+        when(orderGroupRepository.findAllByRecipientPhone("01012345678"))
+                .thenReturn(orderGroups);
+
+        // 메서드 호출
+        List<OrderGroupResponseDTO> result = orderGroupService.getGuestOrderGroups("01012345678");
+
+        // 결과 검증
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        OrderGroupResponseDTO firstGroup = result.get(0);
+        assertEquals("Test Recipient", firstGroup.getRecipientName());
+        assertEquals("01012345678", firstGroup.getRecipientPhone());
+    }
 }
