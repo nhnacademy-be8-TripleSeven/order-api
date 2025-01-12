@@ -14,4 +14,6 @@ public interface DefaultPointPolicyService {
     Long updateDefaultPoint(DefaultPointPolicyUpdateRequestDTO request);
 
     DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type);
+
+    DefaultPointPolicyDTO createRegisterPointHistory(Long memberId);
 }

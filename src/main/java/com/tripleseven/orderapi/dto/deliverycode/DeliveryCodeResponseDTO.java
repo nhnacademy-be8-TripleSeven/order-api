@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DeliveryCodeResponseDTO {
     @JsonProperty("Company")
-    private List<DeliveryCodeDTO> Companies;
+    private List<DeliveryCodeDTO> companies;
 }

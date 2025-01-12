@@ -13,24 +13,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService {
     private final QueryDslDefaultPointPolicyRepository queryDslDefaultPointPolicyRepository;
     private final DefaultPointPolicyRepository defaultPointPolicyRepository;
     private final PointPolicyRepository pointPolicyRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public DefaultPointPolicyDTO getDefaultPointPolicyDTO(PointPolicyType type) {
         return queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(type);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DefaultPointPolicyDTO> getDefaultPointPolicies() {
         List<DefaultPointPolicyDTO> defaultPointPolicies = queryDslDefaultPointPolicyRepository.findDefaultPointPolicies();
         if (Objects.isNull(defaultPointPolicies)) {
@@ -41,6 +43,7 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
 
 
     @Override
+    @Transactional
     public Long updateDefaultPoint(DefaultPointPolicyUpdateRequestDTO request) {
         DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(request.getType());
 
@@ -58,6 +61,7 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
                     request.getType(),
                     pointPolicy
             );
+            defaultPointPolicy = defaultPointPolicyRepository.save(defaultPointPolicy);
         } else {
             defaultPointPolicy.ofUpdate(
                     pointPolicy
@@ -68,6 +72,7 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type){
         DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(type);
 
@@ -79,6 +84,31 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
                 defaultPointPolicy.getPointPolicy().getAmount(),
                 defaultPointPolicy.getPointPolicy().getRate()
         );
+    }
+
+    @Override
+    @Transactional
+    public DefaultPointPolicyDTO createRegisterPointHistory(Long memberId){
+        DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.REGISTER);
+
+        if(Objects.isNull(dto)){
+            PointPolicy pointPolicy = new PointPolicy();
+            pointPolicy.ofCreate("회원 가입 정책", 5000, BigDecimal.ZERO);
+
+            PointPolicy savedPointPolicy = pointPolicyRepository.save(pointPolicy);
+
+            DefaultPointPolicy defaultPointPolicy = new DefaultPointPolicy();
+            defaultPointPolicy.ofCreate(PointPolicyType.REGISTER, savedPointPolicy);
+
+            DefaultPointPolicy savedDefault = defaultPointPolicyRepository.save(defaultPointPolicy);
+            dto = new DefaultPointPolicyDTO(
+                    savedDefault.getId(),
+                    savedDefault.getPointPolicyType(),
+                    savedDefault.getPointPolicy()
+            );
+        }
+
+        return dto;
     }
 
 }

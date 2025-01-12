@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.repository.ordergroup;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

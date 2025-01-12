@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.dto.pointhistory;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

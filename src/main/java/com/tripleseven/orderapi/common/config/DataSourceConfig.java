@@ -2,8 +2,8 @@ package com.tripleseven.orderapi.common.config;
 
 import com.tripleseven.orderapi.dto.skm.DatabaseCredentials;
 import com.tripleseven.orderapi.service.skm.SecureKeyManagerService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -12,10 +12,10 @@ import javax.sql.DataSource;
 
 @Configuration
 @Profile({"instance1", "instance2"})
+@RequiredArgsConstructor
 public class DataSourceConfig {
 
-    @Autowired
-    private SecureKeyManagerService secureKeyManagerService;
+    private final SecureKeyManagerService secureKeyManagerService;
 
 
     @Bean
