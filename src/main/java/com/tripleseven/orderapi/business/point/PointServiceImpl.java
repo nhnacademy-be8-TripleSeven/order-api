@@ -78,6 +78,14 @@ public class PointServiceImpl implements PointService {
     @Override
     @Transactional
     public PointHistoryResponseDTO createRegisterPointHistory(Long memberId) {
+
+        String earnRegisterComment = "회원 가입 적립";
+        Optional<PointHistory> registerPointHistory = pointHistoryRepository.findPointHistoryByComment(memberId, earnRegisterComment);
+
+        if (registerPointHistory.isPresent()) {
+            throw new RuntimeException();
+        }
+
         DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.REGISTER);
 
         if (Objects.isNull(dto)) {
@@ -95,13 +103,6 @@ public class PointServiceImpl implements PointService {
                     savedDefault.getPointPolicyType(),
                     savedDefault.getPointPolicy()
             );
-        }
-
-        String earnRegisterComment = "회원 가입 적립";
-        Optional<PointHistory> registerPointHistory = pointHistoryRepository.findPointHistoryByComment(earnRegisterComment);
-
-        if (registerPointHistory.isPresent()) {
-            throw new RuntimeException();
         }
 
         PointHistory pointHistory = createPointHistory(
