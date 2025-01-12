@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WrappingServiceTest {
+class WrappingServiceTest {
 
     @Mock
     private WrappingRepository wrappingRepository;
@@ -80,9 +80,12 @@ public class WrappingServiceTest {
 
     @Test
     void testCreateWrapping_Fail() {
-        assertThrows(NullPointerException.class, () ->
-                wrappingService.createWrapping(
-                        new WrappingCreateRequestDTO(null, -1)));
+        WrappingCreateRequestDTO requestDTO = new WrappingCreateRequestDTO(null, -1);
+
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> wrappingService.createWrapping(requestDTO));
+
+        assertNotNull(exception.getMessage());
     }
 
     @Test

@@ -49,9 +49,9 @@ class DefaultPointPolicyServiceTest {
         DefaultPointPolicyDTO result = defaultPointPolicyService.getDefaultPointPolicyDTO(type);
 
         assertNotNull(result);
-        assertTrue(result.getId().equals(1L));
-        assertTrue(type.equals(result.getType()));
-        assertTrue(result.getPointPolicyId().equals(2L));
+        assertEquals(1L, (long) result.getId());
+        assertEquals(type, result.getType());
+        assertEquals(2L, (long) result.getPointPolicyId());
         assertEquals("Test Policy", result.getName());
         assertEquals(100, result.getAmount());
         assertEquals(0, BigDecimal.ZERO.compareTo(result.getRate()));

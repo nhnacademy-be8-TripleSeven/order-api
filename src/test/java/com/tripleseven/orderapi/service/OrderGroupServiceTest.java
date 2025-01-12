@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
@@ -114,17 +113,21 @@ class OrderGroupServiceTest {
 
     @Test
     void testCreateOrderGroup_Fail() {
-        assertThrows(WrappingNotFoundException.class, () -> orderGroupService.createOrderGroup(
-                orderGroup.getId(),
-                new OrderGroupCreateRequestDTO(
-                        wrapping.getId(),
-                        orderGroup.getOrderedName(),
-                        orderGroup.getRecipientName(),
-                        orderGroup.getRecipientPhone(),
-                        orderGroup.getRecipientHomePhone(),
-                        orderGroup.getDeliveryPrice(),
-                        orderGroup.getAddress())));
+        Long orderGroupId = orderGroup.getId();
+        OrderGroupCreateRequestDTO requestDTO = new OrderGroupCreateRequestDTO(
+                wrapping.getId(),
+                orderGroup.getOrderedName(),
+                orderGroup.getRecipientName(),
+                orderGroup.getRecipientPhone(),
+                orderGroup.getRecipientHomePhone(),
+                orderGroup.getDeliveryPrice(),
+                orderGroup.getAddress()
+        );
 
+        WrappingNotFoundException exception = assertThrows(WrappingNotFoundException.class,
+                () -> orderGroupService.createOrderGroup(orderGroupId, requestDTO));
+
+        assertNotNull(exception.getMessage());
         verify(orderGroupRepository, times(0)).save(any());
     }
 
@@ -147,12 +150,14 @@ class OrderGroupServiceTest {
 
     @Test
     void testUpdateAddressOrderGroup_Fail() {
-        when(orderGroupRepository.findById(anyLong())).thenReturn(null);
+        OrderGroupUpdateAddressRequestDTO requestDTO = new OrderGroupUpdateAddressRequestDTO(null);
 
-        assertThrows(NullPointerException.class, () -> orderGroupService.updateAddressOrderGroup(
-                1L,
-                new OrderGroupUpdateAddressRequestDTO(null)));
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
+        OrderGroupNotFoundException exception = assertThrows(OrderGroupNotFoundException.class,
+                () -> orderGroupService.updateAddressOrderGroup(1L, requestDTO));
+
+        assertNotNull(exception);
         verify(orderGroupRepository, times(1)).findById(anyLong());
     }
 
@@ -193,7 +198,7 @@ class OrderGroupServiceTest {
                 .thenReturn(orderViewList);
 
 
-        Page<OrderViewsResponseDTO> result = orderGroupService.getOrderGroupPeriodByUserId(1L, dto, PageRequest.of(0,10));
+        Page<OrderViewsResponseDTO> result = orderGroupService.getOrderGroupPeriodByUserId(1L, dto, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -206,6 +211,7 @@ class OrderGroupServiceTest {
         assertEquals("John Doe", firstResponse.getOrdererName());
         assertEquals("Jane Doe", firstResponse.getRecipientName());
     }
+
     @Test
     void testGetOrderGroupPeriod_Success() {
         List<OrderViewDTO> orderViewList = List.of(

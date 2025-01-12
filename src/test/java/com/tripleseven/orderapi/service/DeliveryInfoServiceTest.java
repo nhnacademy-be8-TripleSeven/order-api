@@ -107,8 +107,12 @@ class DeliveryInfoServiceTest {
 
     @Test
     void testCreateDeliveryInfo_Fail() {
-        assertThrows(OrderGroupNotFoundException.class, () ->
-                deliveryInfoService.createDeliveryInfo(new DeliveryInfoCreateRequestDTO(1L)));
+        DeliveryInfoCreateRequestDTO requestDTO = new DeliveryInfoCreateRequestDTO(1L);
+
+        OrderGroupNotFoundException exception = assertThrows(OrderGroupNotFoundException.class,
+                () -> deliveryInfoService.createDeliveryInfo(requestDTO));
+
+        assertNotNull(exception.getMessage());
     }
 
     @Test
