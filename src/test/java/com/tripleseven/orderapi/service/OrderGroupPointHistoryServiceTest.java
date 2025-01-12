@@ -46,55 +46,45 @@ class OrderGroupPointHistoryServiceTest {
 
     @Test
     void testGetUsedPoint_Success() {
-        // Mock 설정
         Long orderGroupId = 1L;
         HistoryTypes historyType = HistoryTypes.SPEND;
 
         when(queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, historyType))
                 .thenReturn(100);
 
-        // 메서드 호출
         int usedPoint = service.getUsedPoint(orderGroupId);
 
-        // 검증
         assertEquals(100, usedPoint);
     }
 
     @Test
     void testGetUsedPoint_NoPoints() {
-        // Mock 설정
         Long orderGroupId = 1L;
         HistoryTypes historyType = HistoryTypes.SPEND;
 
         when(queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, historyType))
                 .thenReturn(null);
 
-        // 메서드 호출
         int usedPoint = service.getUsedPoint(orderGroupId);
 
-        // 검증
         assertEquals(0, usedPoint);
     }
 
     @Test
     void testGetEarnedPoint_Success() {
-        // Mock 설정
         Long orderGroupId = 1L;
         HistoryTypes historyType = HistoryTypes.EARN;
 
         when(queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, historyType))
                 .thenReturn(200);
 
-        // 메서드 호출
         int earnedPoint = service.getEarnedPoint(orderGroupId);
 
-        // 검증
         assertEquals(200, earnedPoint);
     }
 
     @Test
     void testCreateOrderGroupPointHistory_Success() {
-        // Mock 데이터 준비
         Long orderGroupId = 1L;
         Long pointHistoryId = 2L;
 
@@ -113,10 +103,8 @@ class OrderGroupPointHistoryServiceTest {
         when(pointHistoryRepository.findById(pointHistoryId)).thenReturn(Optional.of(pointHistory));
         when(orderGroupPointHistoryRepository.save(any(OrderGroupPointHistory.class))).thenReturn(savedOrderGroupPointHistory);
 
-        // 메서드 호출
         OrderGroupPointHistoryResponseDTO response = service.createOrderGroupPointHistory(request);
 
-        // 검증
         assertNotNull(response);
         verify(orderGroupRepository, times(1)).findById(orderGroupId);
         verify(pointHistoryRepository, times(1)).findById(pointHistoryId);
@@ -125,7 +113,6 @@ class OrderGroupPointHistoryServiceTest {
 
     @Test
     void testCreateOrderGroupPointHistory_OrderGroupNotFound() {
-        // Mock 데이터 준비
         Long orderGroupId = 1L;
         Long pointHistoryId = 2L;
 
@@ -133,7 +120,6 @@ class OrderGroupPointHistoryServiceTest {
 
         when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.empty());
 
-        // 예외 검증
         assertThrows(OrderGroupNotFoundException.class, () -> service.createOrderGroupPointHistory(request));
         verify(orderGroupRepository, times(1)).findById(orderGroupId);
         verify(pointHistoryRepository, never()).findById(anyLong());
@@ -142,7 +128,6 @@ class OrderGroupPointHistoryServiceTest {
 
     @Test
     void testCreateOrderGroupPointHistory_PointHistoryNotFound() {
-        // Mock 데이터 준비
         Long orderGroupId = 1L;
         Long pointHistoryId = 2L;
 
