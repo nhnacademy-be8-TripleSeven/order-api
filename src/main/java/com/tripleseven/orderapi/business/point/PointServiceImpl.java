@@ -78,7 +78,7 @@ public class PointServiceImpl implements PointService {
         );
     }
 
-    private void saveOrderGroupHistory(Long id, PointHistory pointHistory){
+    private void saveOrderGroupHistory(Long id, PointHistory pointHistory) {
         Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
         if (optionalOrderGroup.isEmpty()) {
             throw new OrderGroupNotFoundException(id);

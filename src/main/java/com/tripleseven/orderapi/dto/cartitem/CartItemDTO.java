@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.dto.cartitem;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

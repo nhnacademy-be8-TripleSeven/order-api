@@ -2,9 +2,9 @@ package com.tripleseven.orderapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
+import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
-import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.service.pay.PayService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
-@Profile({"instance1", "instance2","dev"})
+@Profile({"instance1", "instance2", "dev"})
 @Tag(name = "Payment API", description = "결제 관련 API를 제공합니다.")
 public class PayApiController {
 
@@ -47,17 +47,17 @@ public class PayApiController {
 
     @Operation(summary = "결제 페이지 정보 요청", description = "결제 페이지 요청에 필요한 정보를 요청합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "성공"),
-            @ApiResponse(responseCode = "400",description = "실패")
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "실패")
     })
     @PostMapping("/payments/order")
     public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
-            @RequestHeader(value = "X-USER",required = false) Long userId,
-            @CookieValue(value = "GUEST-ID",required = false) Long guestId,
+            @RequestHeader(value = "X-USER", required = false) Long userId,
+            @CookieValue(value = "GUEST-ID", required = false) Long guestId,
             @RequestBody PayInfoRequestDTO request) throws Exception {
         PayInfoResponseDTO response = null;
-        if(Objects.isNull(userId)){
-            response = payService.getOrderInfo(guestId,request);
+        if (Objects.isNull(userId)) {
+            response = payService.getOrderInfo(guestId, request);
         }
         response = payService.getOrderInfo(userId, request);
         return ResponseEntity.ok(response);
@@ -70,8 +70,8 @@ public class PayApiController {
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
     public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
-                                                     @RequestHeader(value = "X-USER",required = false) Long userId,
-                                                     @CookieValue(value = "GUIEST-ID",required = false)Long guesetId,
+                                                     @RequestHeader(value = "X-USER", required = false) Long userId,
+                                                     @CookieValue(value = "GUIEST-ID", required = false) Long guesetId,
                                                      @RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");

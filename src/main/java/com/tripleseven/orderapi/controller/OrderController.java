@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.controller;
 
 import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +16,10 @@ public class OrderController {
             @RequestHeader(value = "X-USER", required = false) Long userId,
             @CookieValue("GUEST-ID") String guestId,
             @RequestBody OrderGroupCreateRequestDTO request
-    ){
-        if(userId != null){
+    ) {
+        if (userId != null) {
             orderProcessingStrategy.processMemberOrder(userId, request);
-        }
-        else{
+        } else {
             orderProcessingStrategy.processNonMemberOrder(guestId, request);
         }
         return ResponseEntity.ok().build();
