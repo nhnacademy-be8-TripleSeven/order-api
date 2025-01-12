@@ -86,10 +86,12 @@ class DeliveryPolicyServiceTest {
 
     @Test
     void testCreateDeliveryPolicy_Fail() {
-        assertThrows(NullPointerException.class, () -> deliveryPolicyService.createDeliveryPolicy(
-                new DeliveryPolicyCreateRequestDTO(
-                        null,
-                        -1)));
+        DeliveryPolicyCreateRequestDTO requestDTO = new DeliveryPolicyCreateRequestDTO(null, -1);
+
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> deliveryPolicyService.createDeliveryPolicy(requestDTO));
+
+        assertNotNull(exception.getMessage());
     }
 
     @Test

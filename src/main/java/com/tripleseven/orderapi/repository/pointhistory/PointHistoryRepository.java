@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
     Page<PointHistory> findAllByMemberId(Long memberId, Pageable pageable);
@@ -25,5 +26,6 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
 
     Page<PointHistory> findAllByMemberIdAndTypes(Long memberId, HistoryTypes types, Pageable pageable);
 
+    PointHistory findPointHistoryByComment(String comment);
 }
 

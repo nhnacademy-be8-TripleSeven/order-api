@@ -45,6 +45,7 @@ public class DefaultDeliveryPolicyServiceImpl implements DefaultDeliveryPolicySe
                     request.getType(),
                     deliveryPolicy
             );
+            defaultDeliveryPolicy = defaultDeliveryPolicyRepository.save(defaultDeliveryPolicy);
         } else {
             defaultDeliveryPolicy.ofUpdate(
                     deliveryPolicy

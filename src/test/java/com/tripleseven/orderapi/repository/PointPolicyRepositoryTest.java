@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.repository;
 
-import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import org.junit.jupiter.api.Test;

@@ -14,7 +14,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class OrderGroupRepositoryTest {
+class OrderGroupRepositoryTest {
 
     @Autowired
     private OrderGroupRepository orderGroupRepository;
@@ -83,7 +83,12 @@ public class OrderGroupRepositoryTest {
 
     @Test
     void testDeleteOrderGroup_Fail() {
-        assertThrows(RuntimeException.class, () -> orderGroupRepository.deleteById(orderGroup.getId()));
+        Long orderGroupId = orderGroup.getId();
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> orderGroupRepository.deleteById(orderGroupId));
+
+        assertNotNull(exception.getMessage());
     }
 
     @Test

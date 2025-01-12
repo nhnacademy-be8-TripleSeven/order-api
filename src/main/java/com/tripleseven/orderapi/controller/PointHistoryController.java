@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
@@ -147,7 +147,6 @@ public class PointHistoryController {
         Page<PointHistoryResponseDTO> histories = pointHistoryService.getPointHistoriesWithState(memberId, state, pageable);
         return ResponseEntity.ok(histories); // HTTP 200
     }
-
 
 
     @GetMapping("/api/user/point-histories")

@@ -3,12 +3,10 @@ package com.tripleseven.orderapi.service;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
-import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
-import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
@@ -21,7 +19,6 @@ import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailServiceImpl;
 import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
 import org.junit.jupiter.api.BeforeEach;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderDetailServiceTest {
+class OrderDetailServiceTest {
     @Mock
     private OrderDetailRepository orderDetailRepository;
 
@@ -129,14 +126,15 @@ public class OrderDetailServiceTest {
 
     @Test
     void testCreateOrderDetail_Fail() {
+        OrderDetailCreateRequestDTO requestDTO = new OrderDetailCreateRequestDTO(2L, 100, 100, 100, 1L);
+
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(OrderGroupNotFoundException.class, () -> orderDetailService.createOrderDetail(
-                new OrderDetailCreateRequestDTO(
-                        2L,
-                        100,
-                        100,
-                        100,
-                        1L)));
+
+        OrderGroupNotFoundException exception = assertThrows(OrderGroupNotFoundException.class,
+                () -> orderDetailService.createOrderDetail(requestDTO));
+
+        assertNotNull(exception.getMessage());
+        verify(orderGroupRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -167,10 +165,16 @@ public class OrderDetailServiceTest {
 
     @Test
     void testUpdateOrderDetailStatus_Fail() {
+        List<Long> orderIds = List.of(1L);
+        OrderStatus status = OrderStatus.PAYMENT_COMPLETED;
+
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.updateOrderDetailStatus(
-                List.of(1L),
-                OrderStatus.PAYMENT_COMPLETED));
+
+        OrderDetailNotFoundException exception = assertThrows(OrderDetailNotFoundException.class,
+                () -> orderDetailService.updateOrderDetailStatus(orderIds, status));
+
+        assertNotNull(exception.getMessage());
+        verify(orderDetailRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -242,12 +246,15 @@ public class OrderDetailServiceTest {
 
     @Test
     void testUpdateAdminOrderDetailStatus_Fail() {
+        List<Long> orderIds = List.of(1L);
+        OrderStatus newStatus = OrderStatus.RETURNED;
+
         when(orderDetailRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(OrderDetailNotFoundException.class, () ->
-                orderDetailService.updateAdminOrderDetailStatus(
-                        List.of(1L),
-                        OrderStatus.RETURNED));
+        OrderDetailNotFoundException exception = assertThrows(OrderDetailNotFoundException.class,
+                () -> orderDetailService.updateAdminOrderDetailStatus(orderIds, newStatus));
+
+        assertNotNull(exception.getMessage());
         verify(orderDetailRepository, times(1)).findById(1L);
     }
 

@@ -8,12 +8,12 @@ import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
 import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
+import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,6 +24,7 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
     private final QueryDslDefaultPointPolicyRepository queryDslDefaultPointPolicyRepository;
     private final DefaultPointPolicyRepository defaultPointPolicyRepository;
     private final PointPolicyRepository pointPolicyRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -73,7 +74,7 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
 
     @Override
     @Transactional(readOnly = true)
-    public DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type){
+    public DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type) {
         DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(type);
 
         return new DefaultPointPolicyDTO(
@@ -86,29 +87,5 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
         );
     }
 
-    @Override
-    @Transactional
-    public DefaultPointPolicyDTO createRegisterPointHistory(Long memberId){
-        DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.REGISTER);
-
-        if(Objects.isNull(dto)){
-            PointPolicy pointPolicy = new PointPolicy();
-            pointPolicy.ofCreate("회원 가입 정책", 5000, BigDecimal.ZERO);
-
-            PointPolicy savedPointPolicy = pointPolicyRepository.save(pointPolicy);
-
-            DefaultPointPolicy defaultPointPolicy = new DefaultPointPolicy();
-            defaultPointPolicy.ofCreate(PointPolicyType.REGISTER, savedPointPolicy);
-
-            DefaultPointPolicy savedDefault = defaultPointPolicyRepository.save(defaultPointPolicy);
-            dto = new DefaultPointPolicyDTO(
-                    savedDefault.getId(),
-                    savedDefault.getPointPolicyType(),
-                    savedDefault.getPointPolicy()
-            );
-        }
-
-        return dto;
-    }
 
 }

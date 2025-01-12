@@ -17,7 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class OrderDetailRepositoryTest {
+class OrderDetailRepositoryTest {
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
@@ -98,7 +98,11 @@ public class OrderDetailRepositoryTest {
 
     @Test
     void testDeleteOrderDetail_Fail() {
-        assertThrows(RuntimeException.class, () -> orderDetailRepository.deleteById(orderDetail.getId()));
+        Long orderDetailId = orderDetail.getId();
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> orderDetailRepository.deleteById(orderDetailId));
+
+        assertNotNull(runtimeException.getMessage());
     }
 
     @Test

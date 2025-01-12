@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Transactional
 @DataJpaTest
 @Import(QueryDslOrderGroupPointHistoryRepositoryImpl.class)
-public class QueryDslOrderGroupPointHistoryTest {
+class QueryDslOrderGroupPointHistoryTest {
 
     @Autowired
     private QueryDslOrderGroupPointHistoryRepository queryDslOrderGroupPointHistoryRepository;
