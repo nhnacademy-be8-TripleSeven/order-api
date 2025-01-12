@@ -98,9 +98,9 @@ public class PointServiceImpl implements PointService {
         }
 
         String earnRegisterComment = "회원 가입 적립";
-        PointHistory registerPointHistory = pointHistoryRepository.findPointHistoryByComment(earnRegisterComment);
+        Optional<PointHistory> registerPointHistory = pointHistoryRepository.findPointHistoryByComment(earnRegisterComment);
 
-        if (Objects.nonNull(registerPointHistory)) {
+        if (registerPointHistory.isPresent()) {
             throw new RuntimeException();
         }
 
