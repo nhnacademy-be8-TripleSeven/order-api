@@ -53,13 +53,17 @@ public class PayApiController {
     @PostMapping("/payments/order")
     public ResponseEntity<PayInfoResponseDTO> responseOrderInfo(
             @RequestHeader(value = "X-USER", required = false) Long userId,
-            @CookieValue(value = "GUEST-ID", required = false) Long guestId,
-            @RequestBody PayInfoRequestDTO request) throws Exception {
-        PayInfoResponseDTO response = null;
+            @CookieValue(value = "GUEST-ID") Long guestId,
+            @RequestBody PayInfoRequestDTO request) {
+
+        PayInfoResponseDTO response;
+
         if (Objects.isNull(userId)) {
-            response = payService.getOrderInfo(guestId, request);
+            response = payService.getPayInfo(guestId, request);
+        } else {
+            response = payService.getPayInfo(userId, request);
         }
-        response = payService.getOrderInfo(userId, request);
+
         return ResponseEntity.ok(response);
     }
 
@@ -71,7 +75,7 @@ public class PayApiController {
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
     public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
                                                      @RequestHeader(value = "X-USER", required = false) Long userId,
-                                                     @CookieValue(value = "GUIEST-ID", required = false) Long guesetId,
+                                                     @CookieValue(value = "GUEST-ID", required = false) Long guestId,
                                                      @RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
