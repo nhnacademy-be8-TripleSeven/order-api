@@ -1,18 +1,12 @@
 package com.tripleseven.orderapi.dto.pointhistory;
 
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-
-//주문 외의 포인트 적립 이력 생성
-@AllArgsConstructor
-@Getter
+// 주문 외의 포인트 적립 이력 생성
+@Value
 public class PointHistoryCreateRequestDTO {
+    HistoryTypes types;
 
-    private HistoryTypes types;
-
-    private Long pointPolicyId;
-
-    //private Long orderGroupId;
+    Long pointPolicyId;
 }
