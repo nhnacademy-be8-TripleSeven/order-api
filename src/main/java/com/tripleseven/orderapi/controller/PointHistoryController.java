@@ -51,18 +51,6 @@ public class PointHistoryController {
         return ResponseEntity.ok(history); // HTTP 200
     }
 
-    // 특정 포인트 기록 조회
-    @GetMapping("/point-histories/{pointHistoryId}")
-    @Operation(summary = "포인트 기록 단건 조회", description = "특정 포인트 기록을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "해당하는 포인트 기록 없음")
-    })
-    public ResponseEntity<PointHistoryResponseDTO> findById(@PathVariable Long pointHistoryId) {
-        PointHistoryResponseDTO response = pointHistoryService.getPointHistory(pointHistoryId);
-        return ResponseEntity.ok(response);
-    }
-
     // 특정 회원의 포인트 내역 삭제
     @DeleteMapping("/admin/point-histories")
     @Operation(summary = "포인트 기록 삭제", description = "특정 회원의 포인트 기록을 전부 삭제합니다.")

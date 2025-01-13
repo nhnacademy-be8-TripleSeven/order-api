@@ -72,16 +72,6 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
-    public PointHistoryResponseDTO getPointHistory(Long pointHistoryId) {
-        PointHistory history = pointHistoryRepository.findById(pointHistoryId)
-                .orElseThrow(() -> new PointHistoryNotFoundException(
-                        String.format("PointHistory with id=%d not found", pointHistoryId)
-                ));
-
-        return PointHistoryResponseDTO.fromEntity(history);
-    }
-
-    @Override
     public PointHistoryResponseDTO createPointHistory(Long memberId, PointHistoryCreateRequestDTO request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(request.getPointPolicyId())
                 .orElseThrow(() -> new PointPolicyNotFoundException(
