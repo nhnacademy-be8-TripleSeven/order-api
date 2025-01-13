@@ -19,8 +19,6 @@ public interface PointHistoryService {
 
     void removePointHistoriesByMemberId(Long memberId);
 
-    PointHistoryResponseDTO getPointHistory(Long pointHistoryId);
-
     PointHistoryResponseDTO createPointHistory(Long memberId, PointHistoryCreateRequestDTO request);
 
     Integer getTotalPointByMemberId(Long memberId);

@@ -1,20 +1,19 @@
 package com.tripleseven.orderapi.service.pointhistory;
 
-import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryCreateRequestDTO;
+import com.tripleseven.orderapi.dto.pointhistory.PointHistoryPageResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
-import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
 import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
 import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
-import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl.QueryDslOrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -51,7 +51,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         Page<PointHistory> histories = pointHistoryRepository.findAll(pageable);
 
         if (histories.getContent().isEmpty()) {
-            throw new PointHistoryNotFoundException("No point histories found.");
+            return Page.empty(pageable);
         }
 
         return histories.map(PointHistoryResponseDTO::fromEntity);
@@ -69,16 +69,6 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     @Override
     public void removePointHistoriesByMemberId(Long memberId) {
         pointHistoryRepository.deleteAllByMemberId(memberId);
-    }
-
-    @Override
-    public PointHistoryResponseDTO getPointHistory(Long pointHistoryId) {
-        PointHistory history = pointHistoryRepository.findById(pointHistoryId)
-                .orElseThrow(() -> new PointHistoryNotFoundException(
-                        String.format("PointHistory with id=%d not found", pointHistoryId)
-                ));
-
-        return PointHistoryResponseDTO.fromEntity(history);
     }
 
     @Override
@@ -113,7 +103,8 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
         Page<PointHistory> histories = pointHistoryRepository.findAllByChangedAtBetween(memberId, startDateTime, endDateTime, sortedPageable);
         if (histories.isEmpty()) {
-            throw new PointHistoryNotFoundException("No point histories found.");
+            log.info("No point histories found.");
+            return Page.empty(pageable);
         }
 
         return histories.map(PointHistoryResponseDTO::fromEntity);
