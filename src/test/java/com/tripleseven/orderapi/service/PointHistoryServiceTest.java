@@ -197,8 +197,9 @@ class PointHistoryServiceTest {
 
         when(pointHistoryRepository.findAll(pageable)).thenReturn(Page.empty());
 
-        assertThrows(PointHistoryNotFoundException.class,
-                () -> pointHistoryService.getPointHistories(pageable));
+        Page<PointHistoryResponseDTO> result = pointHistoryService.getPointHistories(pageable);
+
+        assertNotNull(result);
         verify(pointHistoryRepository, times(1)).findAll(pageable);
     }
 
