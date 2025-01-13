@@ -129,7 +129,7 @@ class PointHistoryServiceTest {
     @Test
     void testCreatePointHistory_Success() {
         Long memberId = 1L;
-        PointHistoryCreateRequestDTO request = new PointHistoryCreateRequestDTO(HistoryTypes.EARN, 1L, 1L);
+        PointHistoryCreateRequestDTO request = new PointHistoryCreateRequestDTO(HistoryTypes.EARN, 1L);
         PointPolicy pointPolicy = new PointPolicy();
         pointPolicy.ofCreate("Earn Policy", 100, BigDecimal.ONE);
         ReflectionTestUtils.setField(pointPolicy, "id", 1L);
@@ -153,7 +153,7 @@ class PointHistoryServiceTest {
     @Test
     void testCreatePointHistory_PointPolicyNotFound() {
         Long memberId = 1L;
-        PointHistoryCreateRequestDTO request = new PointHistoryCreateRequestDTO(HistoryTypes.EARN, 1L, 1L);
+        PointHistoryCreateRequestDTO request = new PointHistoryCreateRequestDTO(HistoryTypes.EARN, 1L);
 
         when(pointPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
