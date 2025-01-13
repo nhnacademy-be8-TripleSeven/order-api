@@ -1,5 +1,9 @@
 package com.tripleseven.orderapi.service.pay;
 
+import com.tripleseven.orderapi.client.BookCouponApiClient;
+import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.coupon.CouponDTO;
+import com.tripleseven.orderapi.dto.coupon.CouponStatus;
 import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
@@ -7,6 +11,8 @@ import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
 import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
+import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
@@ -14,16 +20,23 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Transactional
-@Service
-@RequiredArgsConstructor
 @Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
 public class PayServiceImpl implements PayService {
     private final PayRepository payRepository;
     private final OrderGroupService orderGroupService;
+    private final PointHistoryService pointHistoryService;
+    private final PointPolicyService pointPolicyService;
+
+    private final BookCouponApiClient bookCouponApiClient;
+
     private final RedisTemplate<String, Object> redisTemplate;
 
     // TODO save 해서 반환받아야할 경우가 있는지 확인
@@ -49,16 +62,16 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PayInfoResponseDTO getOrderInfo(Long userId, PayInfoRequestDTO requestDTO) {
+    public PayInfoResponseDTO getPayInfo(Long userId, PayInfoRequestDTO request) {
         long orderId = UUID.randomUUID().getMostSignificantBits();
         PayInfoDTO payInfoDTO = new PayInfoDTO();
-        payInfoDTO.ofCreate(orderId, requestDTO);
-        // TODO 검증 필요 (ex payCheckService)
+        payInfoDTO.ofCreate(orderId, request);
 
+        checkValid(userId, payInfoDTO);
 
         // TODO 검증 후 저장
         redisTemplate.opsForHash().put(userId.toString(), "OrderInfo", payInfoDTO);
-        return new PayInfoResponseDTO(orderId, requestDTO.getTotalAmount());
+        return new PayInfoResponseDTO(orderId, request.getTotalAmount());
     }
 
     public OrderPayInfoDTO getOrderPayInfo(Long orderId) {
@@ -66,4 +79,80 @@ public class PayServiceImpl implements PayService {
         return payRepository.getDTOByOrderGroupId(orderId);
     }
 
+    private void checkValid(Long userId, PayInfoDTO payInfo) {
+        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+        Long couponId = payInfo.getCouponId();
+        Long usePoint = payInfo.getPoint();
+        Long totalAmount = payInfo.getTotalAmount();
+
+        List<Long> bookIds = new ArrayList<>();
+
+        for (CartItemDTO cartItem : cartItems) {
+            bookIds.add(cartItem.getBookId());
+        }
+
+        // 재고 검증
+        checkAmount(bookIds);
+
+        // 쿠폰 검증
+        checkCoupon(couponId, totalAmount, 0L);
+
+        // 포인트 검증
+        checkPoint(userId, totalAmount, usePoint);
+    }
+
+    private void checkAmount(List<Long> bookIds) {
+        // 재고 확인
+        List<CartItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
+
+        for (CartItemDTO cartItem : realItems) {
+            // 재고 비교
+            cartItem.getQuantity();
+        }
+
+    }
+
+    private void checkCoupon(Long couponId, Long totalAmount, Long discountAmount) {
+        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
+        Long discount = bookCouponApiClient.applyCoupon(couponId, totalAmount);
+
+        // 쿠폰 존재 검증
+        if (Objects.isNull(coupon)) {
+            throw new RuntimeException();
+        }
+
+        // 사용 가능한 쿠폰 확인
+        if (!coupon.getCouponStatus().equals(CouponStatus.NOTUSED)) {
+            throw new RuntimeException();
+        }
+
+        if (totalAmount < coupon.getCouponMinAmount()) {
+            throw new RuntimeException();
+        }
+
+        if(!discountAmount.equals(discount)) {
+            throw new RuntimeException();
+        }
+
+    }
+
+    private Long checkPoint(Long userId, Long totalPrice, Long point) {
+        int userPoint = pointHistoryService.getTotalPointByMemberId(userId);
+
+        // 보유 포인트보다 사용량이 더 큰 경우
+        if (userPoint < point) {
+            throw new RuntimeException();
+        }
+
+        // 최종 가격보다 사용량이 더 큰 경우
+        if (point > totalPrice) {
+            point = point - totalPrice;
+        }
+
+        return point;
+    }
 }
+
+
+
+
