@@ -54,8 +54,6 @@ class WrappingControllerTest {
 
     @Test
     void testGetAllWrappings_Success() throws Exception {
-
-
         List<WrappingResponseDTO> wrappingList = List.of(
                 WrappingResponseDTO.fromEntity(wrapping1),
                 WrappingResponseDTO.fromEntity(wrapping2)
