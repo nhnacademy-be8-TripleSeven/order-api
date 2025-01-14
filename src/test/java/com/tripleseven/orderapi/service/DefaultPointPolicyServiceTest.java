@@ -5,7 +5,7 @@ import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyUpdateR
 import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
 import com.tripleseven.orderapi.entity.defaultpointpolicy.PointPolicyType;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
@@ -143,7 +143,7 @@ class DefaultPointPolicyServiceTest {
         when(pointPolicyRepository.findById(3L)).thenReturn(Optional.empty());
 
         // 예외 검증
-        assertThrows(PointHistoryNotFoundException.class, () -> defaultPointPolicyService.updateDefaultPoint(request));
+        assertThrows(CustomException.class, () -> defaultPointPolicyService.updateDefaultPoint(request));
         verify(defaultPointPolicyRepository, times(1)).findDefaultPointPolicyByPointPolicyType(type);
         verify(pointPolicyRepository, times(1)).findById(3L);
     }

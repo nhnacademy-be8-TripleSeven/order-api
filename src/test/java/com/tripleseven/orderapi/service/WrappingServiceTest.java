@@ -4,7 +4,7 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ class WrappingServiceTest {
     void testGetWrappingById_Fail() {
         when(wrappingRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(WrappingNotFoundException.class, () -> wrappingService.getWrappingById(1L));
+        assertThrows(CustomException.class, () -> wrappingService.getWrappingById(1L));
     }
 
     @Test
@@ -105,7 +105,7 @@ class WrappingServiceTest {
         WrappingUpdateRequestDTO updateRequest = new WrappingUpdateRequestDTO("Updated Wrapping", 150);
         when(wrappingRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(WrappingNotFoundException.class, () -> wrappingService.updateWrapping(1L, updateRequest));
+        assertThrows(CustomException.class, () -> wrappingService.updateWrapping(1L, updateRequest));
     }
 
     @Test
@@ -122,7 +122,7 @@ class WrappingServiceTest {
     void testDeleteWrapping_Fail() {
         when(wrappingRepository.existsById(1L)).thenReturn(false);
 
-        assertThrows(WrappingNotFoundException.class, () -> wrappingService.deleteWrapping(1L));
+        assertThrows(CustomException.class, () -> wrappingService.deleteWrapping(1L));
     }
 
     @Test

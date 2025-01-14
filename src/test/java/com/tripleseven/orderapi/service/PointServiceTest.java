@@ -8,7 +8,7 @@ import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
@@ -147,7 +147,7 @@ class PointServiceTest {
 
         when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.empty());
 
-        assertThrows(OrderGroupNotFoundException.class, () -> ReflectionTestUtils.invokeMethod(
+        assertThrows(CustomException.class, () -> ReflectionTestUtils.invokeMethod(
                 pointService,
                 "saveOrderGroupHistory",
                 orderGroupId,

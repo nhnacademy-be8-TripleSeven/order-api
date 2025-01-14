@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.dto.deliverycode.DeliveryCodeDTO;
 import com.tripleseven.orderapi.dto.deliverycode.DeliveryCodeResponseDTO;
 import com.tripleseven.orderapi.entity.deliverycode.DeliveryCode;
-import com.tripleseven.orderapi.exception.DeliveryCodeSaveException;
-import com.tripleseven.orderapi.exception.notfound.DeliveryCodeNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.deliverycode.DeliveryCodeRepository;
 import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,7 +84,7 @@ class DeliveryCodeServiceTest {
 
     @Test
     void saveDeliveryCode_failure_fetchError() {
-        assertThrows(DeliveryCodeSaveException.class, () -> deliveryCodeService.saveDeliveryCode(mockUrl));
+        assertThrows(CustomException.class, () -> deliveryCodeService.saveDeliveryCode(mockUrl));
 
         verify(deliveryCodeRepository, never()).save(any());
     }
@@ -109,7 +108,7 @@ class DeliveryCodeServiceTest {
         when(deliveryCodeRepository.findDeliveryCodeByName("Unknown Delivery"))
                 .thenReturn(Optional.empty());
 
-        assertThrows(DeliveryCodeNotFoundException.class, () -> deliveryCodeService.getDeliveryCodeToName("Unknown Delivery"));
+        assertThrows(CustomException.class, () -> deliveryCodeService.getDeliveryCodeToName("Unknown Delivery"));
 
         verify(deliveryCodeRepository, times(1)).findDeliveryCodeByName("Unknown Delivery");
     }

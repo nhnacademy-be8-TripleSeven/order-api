@@ -4,7 +4,7 @@ import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import com.tripleseven.orderapi.service.pointpolicy.PointPolicyServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ class PointPolicyServiceTest {
         Long id = 1L;
         when(pointPolicyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(PointPolicyNotFoundException.class, () -> pointPolicyService.findById(id));
+        assertThrows(CustomException.class, () -> pointPolicyService.findById(id));
 
         verify(pointPolicyRepository, times(1)).findById(id);
     }
@@ -106,7 +106,7 @@ class PointPolicyServiceTest {
 
         when(pointPolicyRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(PointPolicyNotFoundException.class, () -> pointPolicyService.update(id, request));
+        assertThrows(CustomException.class, () -> pointPolicyService.update(id, request));
 
         verify(pointPolicyRepository, times(1)).findById(id);
     }
@@ -129,7 +129,7 @@ class PointPolicyServiceTest {
 
         when(pointPolicyRepository.existsById(id)).thenReturn(false);
 
-        assertThrows(PointPolicyNotFoundException.class, () -> pointPolicyService.delete(id));
+        assertThrows(CustomException.class, () -> pointPolicyService.delete(id));
 
         verify(pointPolicyRepository, times(1)).existsById(id);
         verify(pointPolicyRepository, never()).deleteById(id);

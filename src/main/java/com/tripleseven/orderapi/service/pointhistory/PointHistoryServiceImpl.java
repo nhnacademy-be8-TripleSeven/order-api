@@ -7,8 +7,8 @@ import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl.QueryDslOrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
@@ -39,8 +39,8 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     public Page<PointHistoryResponseDTO> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAllByMemberId(memberId, pageable);
 
-        if (histories.isEmpty()) {
-            throw new PointHistoryNotFoundException(String.format("No point histories found for memberId=%d", memberId));
+        if(histories.isEmpty()){
+            emptyPage(pageable);
         }
 
         return histories.map(PointHistoryResponseDTO::fromEntity);
@@ -50,8 +50,8 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     public Page<PointHistoryResponseDTO> getPointHistories(Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAll(pageable);
 
-        if (histories.getContent().isEmpty()) {
-            return Page.empty(pageable);
+        if (histories.isEmpty()) {
+            emptyPage(pageable);
         }
 
         return histories.map(PointHistoryResponseDTO::fromEntity);
@@ -60,7 +60,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     @Override
     public void removePointHistoryById(Long pointHistoryId) {
         if (!pointHistoryRepository.existsById(pointHistoryId)) {
-            throw new PointHistoryNotFoundException(String.format("PointHistory with id=%d not found", pointHistoryId));
+            throw new CustomException(ErrorCode.ID_NOT_FOUND);
         }
 
         pointHistoryRepository.deleteById(pointHistoryId);
@@ -74,9 +74,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     @Override
     public PointHistoryResponseDTO createPointHistory(Long memberId, PointHistoryCreateRequestDTO request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(request.getPointPolicyId())
-                .orElseThrow(() -> new PointPolicyNotFoundException(
-                        String.format("PointPolicy with id=%d not found", request.getPointPolicyId())
-                ));
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         PointHistory pointHistory = PointHistory.ofCreate(
                 request.getTypes(),
@@ -103,8 +101,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
 
         Page<PointHistory> histories = pointHistoryRepository.findAllByChangedAtBetween(memberId, startDateTime, endDateTime, sortedPageable);
         if (histories.isEmpty()) {
-            log.info("No point histories found.");
-            return Page.empty(pageable);
+            emptyPage(pageable);
         }
 
         return histories.map(PointHistoryResponseDTO::fromEntity);
@@ -113,9 +110,11 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     @Override
     public Page<PointHistoryResponseDTO> getPointHistoriesWithState(Long memberId, HistoryTypes state, Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAllByMemberIdAndTypes(memberId, state, pageable);
-        if (histories.isEmpty()) {
-            throw new PointHistoryNotFoundException("No point histories found.");
+
+        if(histories.isEmpty()){
+            emptyPage(pageable);
         }
+
         return histories.map(PointHistoryResponseDTO::fromEntity);
     }
 
@@ -141,6 +140,11 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 page.getTotalPages(),
                 page.isLast()
         );
+    }
+
+    private Page<?> emptyPage(Pageable pageable) {
+        log.info("No point histories found.");
+        return Page.empty(pageable);
     }
 
 }

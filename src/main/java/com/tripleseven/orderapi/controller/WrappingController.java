@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,8 @@ public class WrappingController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ResponseEntity<WrappingResponseDTO> createWrapping(@RequestBody WrappingCreateRequestDTO request) {
+    public ResponseEntity<WrappingResponseDTO> createWrapping(
+            @Valid @RequestBody WrappingCreateRequestDTO request) {
         WrappingResponseDTO response = wrappingService.createWrapping(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

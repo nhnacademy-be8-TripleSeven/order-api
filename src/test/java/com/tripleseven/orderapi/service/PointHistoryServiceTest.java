@@ -7,8 +7,7 @@ import com.tripleseven.orderapi.dto.pointhistory.UserPointHistoryDTO;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl.QueryDslOrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
@@ -74,8 +73,8 @@ class PointHistoryServiceTest {
         when(pointHistoryRepository.findAllByMemberId(memberId, pageable))
                 .thenReturn(Page.empty());
 
-        assertThrows(PointHistoryNotFoundException.class,
-                () -> pointHistoryService.getPointHistoriesByMemberId(memberId, pageable));
+        assertEquals(Page.empty(), pointHistoryService.getPointHistoriesByMemberId(memberId, pageable));
+
         verify(pointHistoryRepository, times(1)).findAllByMemberId(memberId, pageable);
     }
 
@@ -120,7 +119,7 @@ class PointHistoryServiceTest {
 
         when(pointHistoryRepository.existsById(pointHistoryId)).thenReturn(false);
 
-        assertThrows(PointHistoryNotFoundException.class,
+        assertThrows(CustomException.class,
                 () -> pointHistoryService.removePointHistoryById(pointHistoryId));
         verify(pointHistoryRepository, times(1)).existsById(pointHistoryId);
         verify(pointHistoryRepository, never()).deleteById(anyLong());
@@ -157,7 +156,7 @@ class PointHistoryServiceTest {
 
         when(pointPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(PointPolicyNotFoundException.class,
+        assertThrows(CustomException.class,
                 () -> pointHistoryService.createPointHistory(memberId, request));
         verify(pointPolicyRepository, times(1)).findById(1L);
     }
@@ -244,8 +243,8 @@ class PointHistoryServiceTest {
         when(pointHistoryRepository.findAllByMemberIdAndTypes(memberId, state, pageable))
                 .thenReturn(Page.empty());
 
-        assertThrows(PointHistoryNotFoundException.class,
-                () -> pointHistoryService.getPointHistoriesWithState(memberId, state, pageable));
+        assertEquals(Page.empty(), pointHistoryService.getPointHistoriesWithState(memberId, state, pageable));
+
         verify(pointHistoryRepository, times(1)).findAllByMemberIdAndTypes(memberId, state, pageable);
     }
 

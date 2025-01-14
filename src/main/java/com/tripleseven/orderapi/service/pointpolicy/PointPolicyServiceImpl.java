@@ -4,7 +4,8 @@ import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyCreateRequestDTO;
 import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.pointpolicy.PointPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     @Override
     public PointPolicyResponseDTO findById(Long id) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(id)
-                .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + id + " not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
         return PointPolicyResponseDTO.fromEntity(pointPolicy);
     }
 
@@ -47,7 +48,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     @Override
     public PointPolicyResponseDTO update(Long id, PointPolicyUpdateRequestDTO request) {
         PointPolicy pointPolicy = pointPolicyRepository.findById(id)
-                .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + id + " not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         pointPolicy.ofUpdate(
                 request.getName(),
@@ -63,7 +64,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     @Override
     public void delete(Long id) {
         if (!pointPolicyRepository.existsById(id)) {
-            throw new PointPolicyNotFoundException("PointPolicyId=" + id + " not found");
+            throw new CustomException(ErrorCode.ID_NOT_FOUND);
         }
         pointPolicyRepository.deleteById(id);
     }

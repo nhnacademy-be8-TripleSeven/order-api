@@ -4,14 +4,14 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,13 +22,11 @@ public class WrappingServiceImpl implements WrappingService {
     @Override
     @Transactional(readOnly = true)
     public WrappingResponseDTO getWrappingById(Long id) {
-        Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
+        Wrapping wrapping = wrappingRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        if (optionalWrapping.isEmpty()) {
-            throw new WrappingNotFoundException(id);
-        }
 
-        return WrappingResponseDTO.fromEntity(optionalWrapping.get());
+        return WrappingResponseDTO.fromEntity(wrapping);
     }
 
     @Override
@@ -56,11 +54,9 @@ public class WrappingServiceImpl implements WrappingService {
     @Override
     @Transactional
     public WrappingResponseDTO updateWrapping(Long id, WrappingUpdateRequestDTO wrappingUpdateRequestDTO) {
-        Optional<Wrapping> optionalWrapping = wrappingRepository.findById(id);
-        if (optionalWrapping.isEmpty()) {
-            throw new WrappingNotFoundException(id);
-        }
-        Wrapping wrapping = optionalWrapping.get();
+        Wrapping wrapping = wrappingRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
         wrapping.ofUpdate(wrappingUpdateRequestDTO.getName(), wrappingUpdateRequestDTO.getPrice());
 
         return WrappingResponseDTO.fromEntity(wrapping);
@@ -70,7 +66,7 @@ public class WrappingServiceImpl implements WrappingService {
     @Transactional
     public void deleteWrapping(Long id) {
         if (!wrappingRepository.existsById(id)) {
-            throw new WrappingNotFoundException(id);
+            throw new CustomException(ErrorCode.ID_NOT_FOUND);
         }
         wrappingRepository.deleteById(id);
     }
