@@ -10,7 +10,6 @@ import java.time.LocalDate;
 
 @Value
 public class DeliveryInfoUpdateRequestDTO {
-
     @NotNull
     @NotBlank
     String name;

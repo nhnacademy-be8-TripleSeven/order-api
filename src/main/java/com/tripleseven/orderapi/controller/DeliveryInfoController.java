@@ -1,8 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,19 +33,7 @@ public class DeliveryInfoController {
         return ResponseEntity.ok(response); // 반환: 배송 정보 (DeliveryInfoResponse)
     }
 
-    // 2. 배송 정보 생성
-    @PostMapping("/admin/orders/delivery-info")
-    @Operation(summary = "배송 정보 생성", description = "새로운 배송 정보를 생성합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
-    })
-    public ResponseEntity<DeliveryInfoResponseDTO> createDeliveryInfo(@RequestBody DeliveryInfoCreateRequestDTO request) {
-        DeliveryInfoResponseDTO response = deliveryInfoService.createDeliveryInfo(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response); // 반환: 생성된 배송 정보 (DeliveryInfoResponse)
-    }
-
-    // 3. 배송 도착 시간 업데이트
+    // 2. 배송 정보 업데이트
     @PutMapping("/orders/delivery-info/{id}/arrived-at")
     @Operation(summary = "배송 도착 시간 업데이트", description = "배송의 도착 시간을 업데이트합니다.")
     @ApiResponses(value = {
@@ -59,7 +46,7 @@ public class DeliveryInfoController {
         return ResponseEntity.ok(response); // 반환: 업데이트된 배송 정보 (DeliveryInfoResponse)
     }
 
-    // 4. 배송 정보 삭제
+    // 3. 배송 정보 삭제
     @DeleteMapping("/admin/orders/delivery-info/{id}")
     @Operation(summary = "배송 정보 삭제", description = "특정 배송 정보를 삭제합니다.")
     @ApiResponses(value = {
