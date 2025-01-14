@@ -22,7 +22,7 @@ public class WrappingController {
     private final WrappingService wrappingService;
 
     // 1. 포장지 전부 조회
-    @GetMapping("/wrappings")
+    @GetMapping("/orders/wrappings")
     @Operation(summary = "포장지 전부 조회", description = "포장지를 전부 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),

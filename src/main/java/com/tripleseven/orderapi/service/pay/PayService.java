@@ -11,7 +11,7 @@ public interface PayService {
 
     void payCancel(JSONObject response);
 
-    PayInfoResponseDTO getPayInfo(Long userId, PayInfoRequestDTO requestDTO);
+    PayInfoResponseDTO getPayInfo(Long userId,String guestId, PayInfoRequestDTO requestDTO);
 
     OrderPayInfoDTO getOrderPayInfo(Long orderId);
 }

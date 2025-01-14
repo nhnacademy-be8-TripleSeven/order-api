@@ -62,15 +62,21 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PayInfoResponseDTO getPayInfo(Long userId, PayInfoRequestDTO request) {
+    public PayInfoResponseDTO getPayInfo(Long userId, String guestId, PayInfoRequestDTO request) {
         long orderId = UUID.randomUUID().getMostSignificantBits();
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
-        checkValid(userId, payInfoDTO);
+//        checkValid(userId, payInfoDTO);
 
         // TODO 검증 후 저장
-        redisTemplate.opsForHash().put(userId.toString(), "OrderInfo", payInfoDTO);
+        if(Objects.nonNull(userId)){
+            redisTemplate.opsForHash().put(userId.toString(), "OrderInfo", payInfoDTO);
+
+        }
+        else{
+            redisTemplate.opsForHash().put(guestId, "OrderInfo", payInfoDTO);
+        }
         return new PayInfoResponseDTO(orderId, request.getTotalAmount());
     }
 
