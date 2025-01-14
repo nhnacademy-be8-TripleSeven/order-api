@@ -62,6 +62,9 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
         List<DeliveryPolicyResponseDTO> responses = new ArrayList<>();
 
+        if (responses.isEmpty()) {
+            return List.of();
+        }
         for (DeliveryPolicy deliveryPolicy : deliveryPolicies) {
             responses.add(DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy));
         }
