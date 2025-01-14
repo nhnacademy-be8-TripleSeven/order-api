@@ -136,13 +136,10 @@ class DeliveryPolicyServiceTest {
 
     @Test
     void testGetAllDeliveryPolicies_Success() {
-        // given: Mocking the repository to return a list of delivery policies
         when(deliveryPolicyRepository.findAll()).thenReturn(List.of(deliveryPolicy, deliveryPolicy));
 
-        // when: Calling the service method
         List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
 
-        // then: Verifying the results
         assertEquals(2, responses.size());
         assertEquals("Test DeliveryPolicy", responses.get(0).getName());
         assertEquals(1000, responses.get(0).getPrice());

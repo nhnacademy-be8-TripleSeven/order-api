@@ -60,11 +60,12 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     public List<DeliveryPolicyResponseDTO> getAllDeliveryPolicies() {
         List<DeliveryPolicy> deliveryPolicies = deliveryPolicyRepository.findAll();
 
-        List<DeliveryPolicyResponseDTO> responses = new ArrayList<>();
-
-        if (responses.isEmpty()) {
+        if (deliveryPolicies.isEmpty()) {
             return List.of();
         }
+
+        List<DeliveryPolicyResponseDTO> responses = new ArrayList<>();
+
         for (DeliveryPolicy deliveryPolicy : deliveryPolicies) {
             responses.add(DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy));
         }
