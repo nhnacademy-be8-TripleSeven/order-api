@@ -35,7 +35,7 @@ public class WrappingController {
     }
 
     // 2. 포장지 생성
-    @PostMapping("/admin/wrappings")
+    @PostMapping("/admin/orders/wrappings")
     @Operation(summary = "포장지 생성", description = "포장지를 생성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
@@ -48,7 +48,7 @@ public class WrappingController {
     }
 
     // 3. 포장지 삭제
-    @DeleteMapping("/admin/wrappings/{id}")
+    @DeleteMapping("/admin/orders/wrappings/{id}")
     @Operation(summary = "포장지 삭제", description = "포장지를 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
