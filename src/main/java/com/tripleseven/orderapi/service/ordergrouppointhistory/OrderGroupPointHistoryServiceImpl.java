@@ -6,8 +6,8 @@ import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.OrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl.QueryDslOrderGroupPointHistoryRepository;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,21 +40,15 @@ public class OrderGroupPointHistoryServiceImpl implements OrderGroupPointHistory
 
     @Override
     public OrderGroupPointHistoryResponseDTO createOrderGroupPointHistory(OrderGroupPointHistoryRequestDTO request) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(request.getOrderGroupId());
-        if (optionalOrderGroup.isEmpty()) {
-            throw new OrderGroupNotFoundException(request.getOrderGroupId());
-        }
+        OrderGroup orderGroup = orderGroupRepository.findById(request.getOrderGroupId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        Optional<PointHistory> optionalPointHistory = pointHistoryRepository.findById(request.getPointHistoryId());
-        if (optionalPointHistory.isEmpty()) {
-            throw new PointHistoryNotFoundException("not fount id: " + request.getPointHistoryId());
-        }
-
-        OrderGroup orderGroup = optionalOrderGroup.get();
-        PointHistory pointHistory = optionalPointHistory.get();
+        PointHistory pointHistory = pointHistoryRepository.findById(request.getPointHistoryId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
         orderGroupPointHistory.ofCreate(pointHistory, orderGroup);
+
         OrderGroupPointHistory savedOrderGroupPointHistory = orderGroupPointHistoryRepository.save(orderGroupPointHistory);
 
         return OrderGroupPointHistoryResponseDTO.fromEntity(savedOrderGroupPointHistory);

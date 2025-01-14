@@ -6,8 +6,7 @@ import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.OrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.querydsl.QueryDslOrderGroupPointHistoryRepository;
@@ -120,7 +119,7 @@ class OrderGroupPointHistoryServiceTest {
 
         when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.empty());
 
-        assertThrows(OrderGroupNotFoundException.class, () -> service.createOrderGroupPointHistory(request));
+        assertThrows(CustomException.class, () -> service.createOrderGroupPointHistory(request));
         verify(orderGroupRepository, times(1)).findById(orderGroupId);
         verify(pointHistoryRepository, never()).findById(anyLong());
         verify(orderGroupPointHistoryRepository, never()).save(any(OrderGroupPointHistory.class));
@@ -138,7 +137,7 @@ class OrderGroupPointHistoryServiceTest {
         when(pointHistoryRepository.findById(pointHistoryId)).thenReturn(Optional.empty());
 
         // 예외 검증
-        assertThrows(PointHistoryNotFoundException.class, () -> service.createOrderGroupPointHistory(request));
+        assertThrows(CustomException.class, () -> service.createOrderGroupPointHistory(request));
         verify(orderGroupRepository, times(1)).findById(orderGroupId);
         verify(pointHistoryRepository, times(1)).findById(pointHistoryId);
         verify(orderGroupPointHistoryRepository, never()).save(any(OrderGroupPointHistory.class));

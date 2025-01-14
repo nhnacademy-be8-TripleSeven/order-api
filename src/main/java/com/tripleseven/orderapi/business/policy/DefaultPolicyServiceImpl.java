@@ -23,9 +23,6 @@ public class DefaultPolicyServiceImpl implements DefaultPolicyService {
         List<DefaultDeliveryPolicyDTO> defaultDelivery = defaultDeliveryPolicyService.getDefaultDeliveryDTO();
         List<DefaultPointPolicyDTO> defaultPointPolicies = defaultPointPolicyService.getDefaultPointPolicies();
 
-        return new DefaultPolicyDTO(
-                defaultPointPolicies,
-                defaultDelivery
-        );
+        return new DefaultPolicyDTO(defaultPointPolicies, defaultDelivery);
     }
 }

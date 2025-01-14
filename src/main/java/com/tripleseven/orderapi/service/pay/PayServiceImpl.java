@@ -9,6 +9,8 @@ import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
 import com.tripleseven.orderapi.entity.pay.Pay;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
@@ -54,11 +56,12 @@ public class PayServiceImpl implements PayService {
     @Override
     public void payCancel(JSONObject response) {
         Pay pay = payRepository.findByPaymentKey(response.get("paymentKey").toString());
+
         if (Objects.isNull(pay)) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.PAY_NOT_FOUND);
         }
+
         pay.ofUpdate(response);
-        payRepository.save(pay);
     }
 
     @Override
@@ -118,20 +121,22 @@ public class PayServiceImpl implements PayService {
 
         // 쿠폰 존재 검증
         if (Objects.isNull(coupon)) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.COUPON_NOT_FOUND);
         }
 
         // 사용 가능한 쿠폰 확인
         if (!coupon.getCouponStatus().equals(CouponStatus.NOTUSED)) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
         }
 
+        // 최소 사용 금액보다 적음
         if (totalAmount < coupon.getCouponMinAmount()) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
         }
 
+        // 계산된 할인 금액과 맞지 않음
         if(!discountAmount.equals(discount)) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
         }
 
     }
@@ -139,9 +144,9 @@ public class PayServiceImpl implements PayService {
     private Long checkPoint(Long userId, Long totalPrice, Long point) {
         int userPoint = pointHistoryService.getTotalPointByMemberId(userId);
 
-        // 보유 포인트보다 사용량이 더 큰 경우
+        // 보유 포인트보다 포인트 사용량이 더 큰 경우
         if (userPoint < point) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.POINT_UNPROCESSABLE_ENTITY);
         }
 
         // 최종 가격보다 사용량이 더 큰 경우

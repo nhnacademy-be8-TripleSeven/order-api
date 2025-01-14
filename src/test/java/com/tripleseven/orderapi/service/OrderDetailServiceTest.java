@@ -10,8 +10,7 @@ import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
@@ -97,7 +96,7 @@ class OrderDetailServiceTest {
     void testGetOrderDetailById_Fail() {
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.getOrderDetailService(1L));
+        assertThrows(CustomException.class, () -> orderDetailService.getOrderDetailService(1L));
         verify(orderDetailRepository, times(1)).findById(1L);
     }
 
@@ -130,10 +129,10 @@ class OrderDetailServiceTest {
 
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        OrderGroupNotFoundException exception = assertThrows(OrderGroupNotFoundException.class,
+        CustomException exception = assertThrows(CustomException.class,
                 () -> orderDetailService.createOrderDetail(requestDTO));
 
-        assertNotNull(exception.getMessage());
+        assertNotNull(exception);
         verify(orderGroupRepository, times(1)).findById(1L);
     }
 
@@ -170,10 +169,10 @@ class OrderDetailServiceTest {
 
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        OrderDetailNotFoundException exception = assertThrows(OrderDetailNotFoundException.class,
+        CustomException exception = assertThrows(CustomException.class,
                 () -> orderDetailService.updateOrderDetailStatus(orderIds, status));
 
-        assertNotNull(exception.getMessage());
+        assertNotNull(exception);
         verify(orderDetailRepository, times(1)).findById(1L);
     }
 
@@ -189,7 +188,7 @@ class OrderDetailServiceTest {
     @Test
     void testDeleteOrderDetail_Fail() {
         when(orderDetailRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.deleteOrderDetail(1L));
+        assertThrows(CustomException.class, () -> orderDetailService.deleteOrderDetail(1L));
         verify(orderDetailRepository, times(0)).deleteById(anyLong());
     }
 
@@ -251,10 +250,10 @@ class OrderDetailServiceTest {
 
         when(orderDetailRepository.findById(1L)).thenReturn(Optional.empty());
 
-        OrderDetailNotFoundException exception = assertThrows(OrderDetailNotFoundException.class,
+        CustomException exception = assertThrows(CustomException.class,
                 () -> orderDetailService.updateAdminOrderDetailStatus(orderIds, newStatus));
 
-        assertNotNull(exception.getMessage());
+        assertNotNull(exception);
         verify(orderDetailRepository, times(1)).findById(1L);
     }
 

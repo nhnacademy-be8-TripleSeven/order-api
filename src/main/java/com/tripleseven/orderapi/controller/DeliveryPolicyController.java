@@ -67,6 +67,11 @@ public class DeliveryPolicyController {
     }
 
     @GetMapping("/admin/orders/delivery-policies")
+    @Operation(summary = "전체 배송 정책 조회", description = "모든 배송 정책을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
+    })
     public ResponseEntity<List<DeliveryPolicyResponseDTO>> getAllDeliveryPolicies() {
         List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
         return ResponseEntity.status(HttpStatus.OK).body(responses);

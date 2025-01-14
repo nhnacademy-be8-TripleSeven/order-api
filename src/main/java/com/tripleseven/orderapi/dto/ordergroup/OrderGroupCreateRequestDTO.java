@@ -10,7 +10,6 @@ import org.hibernate.validator.constraints.Length;
 @Value
 @JsonTypeName("OrderGroupCreateRequestDTO")
 public class OrderGroupCreateRequestDTO {
-    @NotNull
     Long wrappingId;
 
     @NotNull

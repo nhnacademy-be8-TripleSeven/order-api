@@ -10,8 +10,8 @@ import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.orderdetail.querydsl.QueryDslOrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
@@ -23,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -37,13 +40,10 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     @Override
     @Transactional(readOnly = true)
     public OrderGroupResponseDTO getOrderGroupById(Long id) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
+        OrderGroup orderGroup = orderGroupRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        if (optionalOrderGroup.isEmpty()) {
-            throw new OrderGroupNotFoundException(id);
-        }
-
-        return OrderGroupResponseDTO.fromEntity(optionalOrderGroup.get());
+        return OrderGroupResponseDTO.fromEntity(orderGroup);
     }
 
     @Override
@@ -51,11 +51,8 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     public OrderGroupResponseDTO createOrderGroup(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();
 
-        Optional<Wrapping> optionalWrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId());
-
-        if (optionalWrapping.isEmpty()) {
-            throw new WrappingNotFoundException(orderGroupCreateRequestDTO.getWrappingId());
-        }
+        Wrapping wrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         orderGroup.ofCreate(
                 userId,
@@ -65,7 +62,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
                 orderGroupCreateRequestDTO.getRecipientHomePhone(),
                 orderGroupCreateRequestDTO.getDeliveryPrice(),
                 orderGroupCreateRequestDTO.getAddress(),
-                optionalWrapping.get());
+                wrapping);
 
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
 
@@ -75,13 +72,9 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     @Override
     @Transactional
     public OrderGroupResponseDTO updateAddressOrderGroup(Long id, OrderGroupUpdateAddressRequestDTO orderGroupUpdateAddressRequestDTO) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
+        OrderGroup orderGroup = orderGroupRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        if (optionalOrderGroup.isEmpty()) {
-            throw new OrderGroupNotFoundException(id);
-        }
-
-        OrderGroup orderGroup = optionalOrderGroup.get();
         orderGroup.ofUpdate(orderGroupUpdateAddressRequestDTO.getAddress());
 
         return OrderGroupResponseDTO.fromEntity(orderGroup);
@@ -92,7 +85,7 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     @Transactional
     public void deleteOrderGroup(Long id) {
         if (!orderGroupRepository.existsById(id)) {
-            throw new OrderGroupNotFoundException(id);
+            throw new CustomException(ErrorCode.ID_NOT_FOUND);
         }
         orderGroupRepository.deleteById(id);
     }

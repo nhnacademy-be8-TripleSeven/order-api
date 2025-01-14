@@ -10,8 +10,7 @@ import com.tripleseven.orderapi.dto.ordergroup.OrderGroupUpdateAddressRequestDTO
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.orderdetail.querydsl.QueryDslOrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
@@ -82,7 +81,7 @@ class OrderGroupServiceTest {
     void testGetOrderGroupById_Fail() {
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(OrderGroupNotFoundException.class, () -> orderGroupService.getOrderGroupById(1L));
+        assertThrows(CustomException.class, () -> orderGroupService.getOrderGroupById(1L));
         verify(orderGroupRepository, times(1)).findById(1L);
     }
 
@@ -124,10 +123,10 @@ class OrderGroupServiceTest {
                 orderGroup.getAddress()
         );
 
-        WrappingNotFoundException exception = assertThrows(WrappingNotFoundException.class,
+        CustomException exception = assertThrows(CustomException.class,
                 () -> orderGroupService.createOrderGroup(orderGroupId, requestDTO));
 
-        assertNotNull(exception.getMessage());
+        assertNotNull(exception);
         verify(orderGroupRepository, times(0)).save(any());
     }
 
@@ -154,7 +153,7 @@ class OrderGroupServiceTest {
 
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        OrderGroupNotFoundException exception = assertThrows(OrderGroupNotFoundException.class,
+        CustomException exception = assertThrows(CustomException.class,
                 () -> orderGroupService.updateAddressOrderGroup(1L, requestDTO));
 
         assertNotNull(exception);
@@ -172,7 +171,7 @@ class OrderGroupServiceTest {
     @Test
     void testDeleteOrderGroup_Fail() {
         when(orderGroupRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(OrderGroupNotFoundException.class, () -> orderGroupService.deleteOrderGroup(1L));
+        assertThrows(CustomException.class, () -> orderGroupService.deleteOrderGroup(1L));
         verify(orderGroupRepository, times(0)).deleteById(anyLong());
     }
 

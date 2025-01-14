@@ -9,7 +9,8 @@ import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHis
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
@@ -80,11 +81,10 @@ public class PointServiceImpl implements PointService {
     public PointHistoryResponseDTO createRegisterPointHistory(Long memberId) {
 
         String earnRegisterComment = "회원 가입 적립";
-        Optional<PointHistory> registerPointHistory = pointHistoryRepository.findPointHistoryByComment(memberId, earnRegisterComment);
 
-        if (registerPointHistory.isPresent()) {
-            throw new RuntimeException();
-        }
+        // 회원가입 적립 내력에 있나 체크
+        pointHistoryRepository.findPointHistoryByComment(memberId, earnRegisterComment)
+                .ifPresent(history -> {throw new CustomException(ErrorCode.ALREADY_EXIST_CONFLICT);});
 
         DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.REGISTER);
 
@@ -129,11 +129,9 @@ public class PointServiceImpl implements PointService {
     }
 
     private void saveOrderGroupHistory(Long id, PointHistory pointHistory) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(id);
-        if (optionalOrderGroup.isEmpty()) {
-            throw new OrderGroupNotFoundException(id);
-        }
-        OrderGroup orderGroup = optionalOrderGroup.get();
+        OrderGroup orderGroup = orderGroupRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
         OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
         orderGroupPointHistory.ofCreate(
                 pointHistory,

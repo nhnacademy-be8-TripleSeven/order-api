@@ -5,7 +5,8 @@ import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyUpdateR
 import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
 import com.tripleseven.orderapi.entity.defaultpointpolicy.PointPolicyType;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,13 +48,8 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
     public Long updateDefaultPoint(DefaultPointPolicyUpdateRequestDTO request) {
         DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(request.getType());
 
-        Optional<PointPolicy> optionalPointPolicy = pointPolicyRepository.findById(request.getPointPolicyId());
-
-        if (optionalPointPolicy.isEmpty()) {
-            throw new PointHistoryNotFoundException("not found id: " + request.getPointPolicyId());
-        }
-
-        PointPolicy pointPolicy = optionalPointPolicy.get();
+        PointPolicy pointPolicy = pointPolicyRepository.findById(request.getPointPolicyId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         if (Objects.isNull(defaultPointPolicy)) {
             defaultPointPolicy = new DefaultPointPolicy();

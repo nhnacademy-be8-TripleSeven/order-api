@@ -5,7 +5,7 @@ import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyU
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DefaultDeliveryPolicy;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
-import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.defaultdeliverypolicy.DefaultDeliveryPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultdeliverypolicy.querydsl.QueryDslDefaultDeliveryPolicyRepository;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
@@ -118,7 +118,7 @@ class DefaultDeliveryPolicyServiceTest {
         when(defaultDeliveryPolicyRepository.findDefaultDeliveryPolicyByDeliveryPolicyType(type)).thenReturn(null);
         when(deliveryPolicyRepository.findById(4L)).thenReturn(Optional.empty());
 
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> defaultDeliveryPolicyService.updateDefaultDelivery(request));
+        assertThrows(CustomException.class, () -> defaultDeliveryPolicyService.updateDefaultDelivery(request));
 
         verify(defaultDeliveryPolicyRepository, times(1)).findDefaultDeliveryPolicyByDeliveryPolicyType(type);
         verify(deliveryPolicyRepository, times(1)).findById(4L);

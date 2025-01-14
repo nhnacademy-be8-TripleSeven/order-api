@@ -11,7 +11,8 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
-import com.tripleseven.orderapi.exception.RedisNullPointException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -58,11 +59,13 @@ public class PaymentListener {
         try {
             log.info("Saving Order...");
             Map<String, CartItemDTO> cartItemMap = (Map<String, CartItemDTO>) messageDTO.getObject("CartItemMap");
+
+            if (cartItemMap.isEmpty()) {
+                throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
+            }
+
             List<CartItemDTO> cartItems = cartItemMap.values().stream().toList();
 
-            if (cartItems.isEmpty()) {
-                throw new RedisNullPointException("cartItem is empty");
-            }
 
             OrderGroupCreateRequestDTO orderGroupCreateRequestDTO = (OrderGroupCreateRequestDTO) messageDTO.getObject("OrderGroupCreateRequestDTO");
 

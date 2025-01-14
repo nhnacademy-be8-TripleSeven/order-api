@@ -1,7 +1,6 @@
 package com.tripleseven.orderapi.service.skm;
 
 
-
 import com.tripleseven.orderapi.dto.secure.KeyResponseDTO;
 import com.tripleseven.orderapi.exception.KeyManagerException;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -23,15 +22,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.List;
 
-import java.io.InputStream;
-
-@Profile({"instance1","instance2"})
+@Profile({"instance1", "instance2"})
 @Service
 public class SecureKeyManagerService {
 

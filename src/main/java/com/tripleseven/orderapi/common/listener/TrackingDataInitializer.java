@@ -30,7 +30,5 @@ public class TrackingDataInitializer implements ApplicationListener<ApplicationR
             deliveryCodeService.saveDeliveryCode(apiUrl);
             log.info("Tracking Data fetched and saved during server startup.");
         }
-
     }
-
 }

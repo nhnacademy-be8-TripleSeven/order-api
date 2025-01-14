@@ -4,7 +4,7 @@ import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDT
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
-import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import com.tripleseven.orderapi.service.deliverypolicy.DeliveryPolicyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ class DeliveryPolicyServiceTest {
     void testFindById_Fail() {
         when(deliveryPolicyRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.getDeliveryPolicy(1L));
+        assertThrows(CustomException.class, () -> deliveryPolicyService.getDeliveryPolicy(1L));
         verify(deliveryPolicyRepository, times(1)).findById(1L);
     }
 
@@ -112,7 +112,7 @@ class DeliveryPolicyServiceTest {
         DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));
+        assertThrows(CustomException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));
         verify(deliveryPolicyRepository, times(1)).findById(1L);
     }
 
@@ -129,7 +129,7 @@ class DeliveryPolicyServiceTest {
     @Test
     void testDeleteDeliveryPolicy_Fail() {
         when(deliveryPolicyRepository.existsById(1L)).thenReturn(false);
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
+        assertThrows(CustomException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
 
         verify(deliveryPolicyRepository, times(0)).deleteById(1L);
     }

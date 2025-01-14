@@ -46,7 +46,7 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
 
     // 주문 저장 및 장바구니 초기화
     private void orderProcessing(Long userId, OrderGroupCreateRequestDTO dto, Boolean isMember) {
-        String cartKeyPrefix = userId != 0L ? MEMBER_CART_KEY_PREFIX : GUEST_CART_KEY_PREFIX;
+        String cartKeyPrefix = isMember ? MEMBER_CART_KEY_PREFIX : GUEST_CART_KEY_PREFIX;
 
         String cartKey = cartKeyPrefix.concat(userId.toString());
         HashOperations<String, String, CartItemDTO> hashOps = redisTemplate.opsForHash();
