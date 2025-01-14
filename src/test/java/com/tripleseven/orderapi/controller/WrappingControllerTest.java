@@ -90,7 +90,7 @@ class WrappingControllerTest {
 
         Mockito.when(wrappingService.createWrapping(any(WrappingCreateRequestDTO.class))).thenReturn(responseDTO);
 
-        mockMvc.perform(post("/admin/wrappings")
+        mockMvc.perform(post("/admin/orders/wrappings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isCreated())
@@ -103,7 +103,7 @@ class WrappingControllerTest {
     void testCreateWrapping_BadRequest() throws Exception {
         WrappingCreateRequestDTO invalidRequest = new WrappingCreateRequestDTO(null, -500);
 
-        mockMvc.perform(post("/admin/wrappings")
+        mockMvc.perform(post("/admin/orders/wrappings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -115,7 +115,7 @@ class WrappingControllerTest {
 
         Mockito.doNothing().when(wrappingService).deleteWrapping(eq(wrappingId));
 
-        mockMvc.perform(delete("/admin/wrappings/{id}", wrappingId))
+        mockMvc.perform(delete("/admin/orders/wrappings/{id}", wrappingId))
                 .andExpect(status().isNoContent());
     }
 
@@ -125,7 +125,7 @@ class WrappingControllerTest {
 
         Mockito.doThrow(new CustomException(ErrorCode.ID_NOT_FOUND)).when(wrappingService).deleteWrapping(eq(wrappingId));
 
-        mockMvc.perform(delete("/admin/wrappings/{id}", wrappingId))
+        mockMvc.perform(delete("/admin/orders/wrappings/{id}", wrappingId))
                 .andExpect(status().isNotFound());
     }
 }
