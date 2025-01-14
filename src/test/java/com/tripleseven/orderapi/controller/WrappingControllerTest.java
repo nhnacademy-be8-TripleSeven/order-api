@@ -63,7 +63,7 @@ class WrappingControllerTest {
 
         Mockito.when(wrappingService.getWrappingsToList()).thenReturn(wrappingList);
 
-        mockMvc.perform(get("/wrappings"))
+        mockMvc.perform(get("/orders/wrappings"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].id").value(1L))
@@ -78,7 +78,7 @@ class WrappingControllerTest {
     void testGetAllWrappings_NotFound() throws Exception {
         Mockito.when(wrappingService.getWrappingsToList()).thenReturn(List.of());
 
-        mockMvc.perform(get("/wrappings"))
+        mockMvc.perform(get("/orders/wrappings"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(0));
     }
