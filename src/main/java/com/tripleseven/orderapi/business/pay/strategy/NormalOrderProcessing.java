@@ -81,6 +81,11 @@ public class NormalOrderProcessing implements OrderProcessingStrategy {
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
     }
 
+    // 포인트 사용
+    private void pointProcessing(Long userId) {
+
+    }
+
     // 쿠폰 사용
     private void couponProcessing(Long userId) {
         Long couponId = (Long) redisTemplate.opsForHash().get(userId.toString(), "order");

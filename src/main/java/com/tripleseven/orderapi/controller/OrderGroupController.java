@@ -74,7 +74,7 @@ public class OrderGroupController {
             @RequestHeader("X-USER") Long userId,
             @PathVariable("orderGroupId") Long orderGroupId
     ) {
-        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderGroupId);
+        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(userId, orderGroupId);
         return ResponseEntity.ok(orderPayDetailDTO);
     }
 
@@ -91,7 +91,7 @@ public class OrderGroupController {
     public ResponseEntity<OrderPayDetailDTO> getAdminOrderGroupDetail(
             @PathVariable("orderGroupId") Long orderGroupId
     ) {
-        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetail(orderGroupId);
+        OrderPayDetailDTO orderPayDetailDTO = orderService.getOrderPayDetailAdmin(orderGroupId);
         return ResponseEntity.ok(orderPayDetailDTO);
     }
 

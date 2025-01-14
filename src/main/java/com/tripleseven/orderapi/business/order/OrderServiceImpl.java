@@ -5,6 +5,8 @@ import com.tripleseven.orderapi.dto.order.*;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -31,7 +33,24 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderPayDetailDTO getOrderPayDetail(Long orderGroupId) {
+    public OrderPayDetailDTO getOrderPayDetail(Long userId, Long orderGroupId) {
+        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(orderGroupId);
+
+        if (response.getUserId() != userId) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return new OrderPayDetailDTO(
+                this.getOrderInfos(orderGroupId),
+                this.getOrderGroupInfo(orderGroupId),
+                this.getDeliveryInfo(orderGroupId),
+                this.getOrderPayInfo(orderGroupId)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderPayDetailDTO getOrderPayDetailAdmin(Long orderGroupId) {
         return new OrderPayDetailDTO(
                 this.getOrderInfos(orderGroupId),
                 this.getOrderGroupInfo(orderGroupId),

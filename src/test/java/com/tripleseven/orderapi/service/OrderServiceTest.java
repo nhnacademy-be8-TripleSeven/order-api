@@ -83,8 +83,10 @@ class OrderServiceTest {
     @Test
     void testGetOrderPayDetail_Success() {
         Long orderGroupId = 1L;
+        Long userId = 1L;
+
         OrderGroup orderGroup2 = new OrderGroup();
-        orderGroup2.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
+        orderGroup2.ofCreate(userId, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", wrapping);
         ReflectionTestUtils.setField(orderGroup2, "id", 1L);
 
         OrderDetail orderDetail2 = new OrderDetail();
@@ -125,7 +127,7 @@ class OrderServiceTest {
 
         OrderPayInfoDTO payInfo = new OrderPayInfoDTO(30000, "T1234", "Toss", LocalDate.now());
         when(payService.getOrderPayInfo(orderGroupId)).thenReturn(payInfo);
-        OrderPayDetailDTO result = orderService.getOrderPayDetail(orderGroupId);
+        OrderPayDetailDTO result = orderService.getOrderPayDetail(userId, orderGroupId);
 
         assertNotNull(result);
         assertEquals(2, result.getOrderInfos().size());
@@ -147,10 +149,11 @@ class OrderServiceTest {
     @Test
     void testGetOrderPayDetail_EmptyOrderDetails() {
         Long orderGroupId = 1L;
+        Long userId = 1L;
 
         when(orderDetailService.getOrderDetailsToList(orderGroupId)).thenReturn(List.of());
 
-        assertThrows(RuntimeException.class, () -> orderService.getOrderPayDetail(orderGroupId));
+        assertThrows(RuntimeException.class, () -> orderService.getOrderPayDetail(userId, orderGroupId));
 
         verify(orderDetailService, times(2)).getOrderDetailsToList(orderGroupId);
         verify(orderGroupService, times(1)).getOrderGroupById(anyLong());
