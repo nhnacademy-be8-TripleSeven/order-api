@@ -6,6 +6,7 @@ import com.tripleseven.orderapi.dto.order.RecipientInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 public class PayInfoRequestDTO {
 
     private List<OrderBookInfoDTO> bookOrderDetails;
@@ -22,6 +24,8 @@ public class PayInfoRequestDTO {
     private AddressInfoDTO addressInfo;
 
     private LocalDate deliveryDate;//배송 날짜
+
+    private String ordererName;
 
     private long wrapperId; //포장지 아이디
     private long couponId; //쿠폰 아이디
