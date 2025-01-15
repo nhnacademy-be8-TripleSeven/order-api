@@ -18,18 +18,23 @@ public class DeliveryPolicy {
     private String name;
 
     @Column(nullable = false)
+    private int minPrice;
+
+    @Column(nullable = false)
     private int price;
 
     @OneToMany(mappedBy = "deliveryPolicy", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<DefaultDeliveryPolicy> deliveryPolicies = new ArrayList<>();
 
-    public void ofCreate(String name, int price) {
+    public void ofCreate(String name, int minPrice, int price) {
         this.name = name;
+        this.minPrice = minPrice;
         this.price = price;
     }
 
-    public void ofUpdate(String name, int price) {
+    public void ofUpdate(String name, int minPrice, int price) {
         this.name = name;
+        this.minPrice = minPrice;
         this.price = price;
     }
 

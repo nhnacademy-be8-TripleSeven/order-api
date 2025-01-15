@@ -13,5 +13,9 @@ public class DeliveryPolicyUpdateRequestDTO {
 
     @NotNull
     @Min(100)
+    int minPrice;
+
+    @NotNull
+    @Min(100)
     int price;
 }

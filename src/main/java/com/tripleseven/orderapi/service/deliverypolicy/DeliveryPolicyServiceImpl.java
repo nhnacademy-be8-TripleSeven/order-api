@@ -32,7 +32,9 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
     @Override
     public DeliveryPolicyResponseDTO createDeliveryPolicy(DeliveryPolicyCreateRequestDTO deliveryPolicyCreateRequestDTO) {
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate(deliveryPolicyCreateRequestDTO.getName(), deliveryPolicyCreateRequestDTO.getPrice());
+        deliveryPolicy.ofCreate(deliveryPolicyCreateRequestDTO.getName(),
+                deliveryPolicyCreateRequestDTO.getMinPrice(),
+                deliveryPolicyCreateRequestDTO.getPrice());
         DeliveryPolicy createDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
 
         return DeliveryPolicyResponseDTO.fromEntity(createDeliveryPolicy);
@@ -43,7 +45,9 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
         DeliveryPolicy deliveryPolicy = deliveryPolicyRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequestDTO.getName(), deliveryPolicyUpdateRequestDTO.getPrice());
+        deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequestDTO.getName(),
+                deliveryPolicyUpdateRequestDTO.getMinPrice(),
+                deliveryPolicyUpdateRequestDTO.getPrice());
 
         return DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy);
     }
