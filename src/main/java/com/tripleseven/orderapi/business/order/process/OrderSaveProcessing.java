@@ -94,6 +94,7 @@ public class OrderSaveProcessing implements OrderProcessing {
 
         Long orderGroupId = orderProcessing(memberId, payInfo);
 
+
         cartProcessing(memberId.toString(), bookInfos);
 
         // TODO 결제 정보 저장
@@ -134,6 +135,7 @@ public class OrderSaveProcessing implements OrderProcessing {
         // OrderGroup 생성
         OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(userId, request);
         Long orderGroupId = orderGroupResponseDTO.getId();
+
 
 
         // DeliveryInfo 생성
