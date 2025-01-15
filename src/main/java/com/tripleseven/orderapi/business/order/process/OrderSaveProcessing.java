@@ -123,7 +123,7 @@ public class OrderSaveProcessing implements OrderProcessing {
 
         OrderGroupCreateRequestDTO request = new OrderGroupCreateRequestDTO(
                 payInfo.getWrapperId(),
-                "주문자 이름 나중에 추가",
+                payInfo.getOrdererName(),
                 recipientInfo.getRecipientName(),
                 recipientInfo.getRecipientPhone(),
                 recipientInfo.getRecipientLandline(),

@@ -27,6 +27,8 @@ public class PayInfoRequestDTO {
 
     private String ordererName;
 
+    private String payType;
+
     private long wrapperId; //포장지 아이디
     private long couponId; //쿠폰 아이디
 
