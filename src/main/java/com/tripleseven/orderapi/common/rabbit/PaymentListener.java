@@ -6,13 +6,19 @@ import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
+import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
+import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
 import com.tripleseven.orderapi.dto.point.PointDTO;
+import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
+import com.tripleseven.orderapi.service.defaultdeliverypolicy.DefaultDeliveryPolicyService;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -31,97 +37,23 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class PaymentListener {
-    // Todo 결제 성공 후 비동기적 상황 구현
     private static final Logger log = LoggerFactory.getLogger(PaymentListener.class);
-
-    private final OrderGroupService orderGroupService;
-    private final OrderDetailService orderDetailService;
-    private final DeliveryInfoService deliveryInfoService;
-
-    private final PointService pointService;
-    private final PayService payService;
 
     private final MemberApiClient memberApiClient;
     private final BookCouponApiClient bookCouponApiClient;
 
     private final RetryStateService retryStateService;
 
-    private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
-
-    private static final String POINT_ROUTING_KEY = "point.routing.key";
-
-    private final RabbitTemplate rabbitTemplate;
-
-
-    @RabbitListener(queues = "nhn24.order.queue")
-    public void processSaveOrder(CombinedMessageDTO messageDTO, Channel channel, Message message) {
-        // Todo 주문 내역 저장
-        try {
-            log.info("Saving Order...");
-            Map<String, CartItemDTO> cartItemMap = (Map<String, CartItemDTO>) messageDTO.getObject("CartItemMap");
-
-            if (cartItemMap.isEmpty()) {
-                throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
-            }
-
-            List<CartItemDTO> cartItems = cartItemMap.values().stream().toList();
-
-
-            OrderGroupCreateRequestDTO orderGroupCreateRequestDTO = (OrderGroupCreateRequestDTO) messageDTO.getObject("OrderGroupCreateRequestDTO");
-
-            Long userId = (Long) messageDTO.getObject("UserId");
-
-            // OrderGroup 생성
-            OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(userId, orderGroupCreateRequestDTO);
-            Long orderGroupId = orderGroupResponseDTO.getId();
-
-
-            // DeliveryInfo 생성
-            deliveryInfoService.createDeliveryInfo(
-                    new DeliveryInfoCreateRequestDTO(orderGroupId)
-            );
-
-            // TODO OrderDetail 저장 (할인가가 아닌 감면된 금액인걸 고려)
-            for (CartItemDTO cartItem : cartItems) {
-                OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
-                        = new OrderDetailCreateRequestDTO(
-                        cartItem.getBookId(),
-                        cartItem.getQuantity(),
-                        cartItem.getRegularPrice(),
-                        cartItem.getRegularPrice() - cartItem.getSalePrice(),
-                        orderGroupId
-                );
-                orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
-            }
-
-            Boolean isMember = (Boolean) messageDTO.getObject("isMember");
-
-            if (isMember) {
-                PointDTO point = (PointDTO) messageDTO.getObject("point");
-                pointProcessing(userId, orderGroupId, point);
-            }
-
-            // TODO 결제 정보 저장
-//            JSONObject jsonObject = (JSONObject) messageDTO.getObject("PaymentInfo");
-//            payService.save(userId, jsonObject);
-
-            log.info("Completed Saving Order!!");
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        } catch (Exception e) {
-            retryQueue(e, channel, message);
-        }
-    }
-
     @RabbitListener(queues = "nhn24.cart.queue")
     public void processClearCart(CombinedMessageDTO messageDTO, Channel channel, Message message) {
-        // Todo 장바구니 초기화 (구매한 상품 대상)
+        // 장바구니 초기화 (구매한 상품 대상)
         try {
             log.info("Clearing Cart...");
 
             List<String> bookIdsS = (List<String>) messageDTO.getObject("BookIds");
             Long userId = (Long) messageDTO.getObject("UserId");
 
-            // 각 구매한
+            // 여러번 호출
             bookIdsS.stream()
                     .map(Long::valueOf)
                     .forEach(bookId -> memberApiClient.deleteCart(userId, bookId));
@@ -148,28 +80,6 @@ public class PaymentListener {
         }
     }
 
-    @RabbitListener(queues = "nhn24.point.queue")
-    public void processPoint(CombinedMessageDTO messageDTO, Channel channel, Message message) {
-        // Todo 구매 후 포인트 적립 및 사용
-        try {
-            log.info("Processing Point...");
-            PointDTO pointDTO = (PointDTO) messageDTO.getObject("point");
-            Long userId = (Long) messageDTO.getObject("userId");
-            Long orderId = (Long) messageDTO.getObject("orderId");
-
-            // 포인트 사용 및 적립
-            if (pointDTO.getSpendPoint() > 0) {
-                pointService.createPointHistoryForPaymentSpend(userId, pointDTO.getSpendPoint(), orderId);
-            }
-            pointService.createPointHistoryForPaymentEarn(userId, pointDTO.getSpendMoney(), orderId);
-
-            log.info("Completed Processing Point!!");
-        } catch (Exception e) {
-            retryQueue(e, channel, message);
-        }
-    }
-
-
     // DLQ 보내기 전에 큐 요청 재시도
     private void retryQueue(Exception e, Channel channel, Message message) {
         int count = retryStateService.getRetryCount(message.getMessageProperties().getReceivedRoutingKey()).incrementAndGet();
@@ -186,15 +96,5 @@ public class PaymentListener {
         } catch (Exception nackException) {
             log.error("Error sending message", nackException);
         }
-    }
-
-    // 포인트 사용 및 적립
-    private void pointProcessing(Long userId, Long orderId, PointDTO point) {
-        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
-        pointMessageDTO.addObject("point", point);
-        pointMessageDTO.addObject("userId", userId);
-        pointMessageDTO.addObject("orderId", orderId);
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
     }
 }

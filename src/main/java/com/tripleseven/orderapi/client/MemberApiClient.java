@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface MemberApiClient {
     @PostMapping("/cart/book")
     void deleteCart(
-            @RequestHeader("X-USER") Long userId,
+            @RequestHeader(value = "X-USER") Long userId,
             @RequestParam Long bookId);
 }

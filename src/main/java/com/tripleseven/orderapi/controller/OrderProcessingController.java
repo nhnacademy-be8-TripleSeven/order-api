@@ -1,8 +1,6 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
-import jakarta.validation.Valid;
+import com.tripleseven.orderapi.business.order.process.OrderProcessing;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,16 +8,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 public class OrderProcessingController {
-    private final OrderProcessingStrategy orderProcessingStrategy;
+    private final OrderProcessing orderProcessing;
 
     @PostMapping("/orders/pay-complete")
     public ResponseEntity<Void> orderSingleProcessing(@RequestHeader(value = "X-User", required = false) Long userId,
-                                                      @CookieValue(value = "X-GUEST") String guestId,
-                                                      @Valid @RequestBody OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
+                                                      @CookieValue(value = "X-GUEST") String guestId) {
         if (userId != null) {
-            orderProcessingStrategy.processMemberOrder(userId, orderGroupCreateRequestDTO);
+            orderProcessing.processMemberOrder(userId);
         } else {
-            orderProcessingStrategy.processNonMemberOrder(guestId, orderGroupCreateRequestDTO);
+            orderProcessing.processNonMemberOrder(guestId);
         }
 
         return ResponseEntity.ok().build();

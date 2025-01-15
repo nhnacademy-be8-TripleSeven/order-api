@@ -11,6 +11,7 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -138,7 +139,7 @@ class OrderServiceTest {
         assertEquals("Toss", result.getOrderPayInfoDTO().getPaymentName());
 
         verify(orderDetailService, times(2)).getOrderDetailsToList(orderGroupId);
-        verify(orderGroupService, times(1)).getOrderGroupById(orderGroupId);
+        verify(orderGroupService, times(2)).getOrderGroupById(orderGroupId);
         verify(wrappingService, times(1)).getWrappingById(1L);
         verify(orderGroupPointHistoryService, times(1)).getUsedPoint(orderGroupId);
         verify(orderGroupPointHistoryService, times(1)).getEarnedPoint(orderGroupId);
@@ -147,16 +148,16 @@ class OrderServiceTest {
     }
 
     @Test
-    void testGetOrderPayDetail_EmptyOrderDetails() {
+    void testGetOrderPayDetail_Failed() {
         Long orderGroupId = 1L;
-        Long userId = 1L;
+        Long userId = 999L;
 
-        when(orderDetailService.getOrderDetailsToList(orderGroupId)).thenReturn(List.of());
+        when(orderGroupService.getOrderGroupById(orderGroupId)).thenReturn(OrderGroupResponseDTO.fromEntity(orderGroup));
 
-        assertThrows(RuntimeException.class, () -> orderService.getOrderPayDetail(userId, orderGroupId));
+        assertThrows(CustomException.class, () -> orderService.getOrderPayDetail(userId, orderGroupId));
 
-        verify(orderDetailService, times(2)).getOrderDetailsToList(orderGroupId);
         verify(orderGroupService, times(1)).getOrderGroupById(anyLong());
+        verify(orderDetailService, never()).getOrderDetailsToList(anyLong());
         verify(wrappingService, never()).getWrappingById(anyLong());
         verify(orderGroupPointHistoryService, never()).getUsedPoint(anyLong());
         verify(orderGroupPointHistoryService, never()).getEarnedPoint(anyLong());

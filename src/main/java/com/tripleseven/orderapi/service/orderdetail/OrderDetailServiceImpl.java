@@ -108,7 +108,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     LocalDate today = LocalDate.now();
 
                     // 출고일 기준
-                    if (today.isAfter(deliveryInfo.getShippingAt().plusMonths(30))) {
+                    if (today.isAfter(deliveryInfo.getShippingAt().plusDays(30))) {
                         throw new CustomException(ErrorCode.RETURN_EXPIRED_UNPROCESSABLE_ENTITY);
                     }
                     orderDetail.ofUpdateStatus(orderStatus);

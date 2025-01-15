@@ -1,7 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripleseven.orderapi.business.pay.OrderProcessingStrategy;
+import com.tripleseven.orderapi.business.order.process.OrderProcessing;
 import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
@@ -43,7 +42,7 @@ public class PayApiController {
     private final Map<String, String> billingKeyMap = new HashMap<>();
     private final PayService payService;
     private final PointHistoryService pointHistoryService;
-    private final OrderProcessingStrategy orderProcessingStrategy;
+    private final OrderProcessing orderProcessing;
 
     @Operation(summary = "결제 페이지 정보 요청", description = "결제 페이지 요청에 필요한 정보를 요청합니다.")
     @ApiResponses(value = {
@@ -56,8 +55,7 @@ public class PayApiController {
             @CookieValue(value = "GUEST-ID") String guestId,
             @RequestBody PayInfoRequestDTO request) {
 
-        PayInfoResponseDTO response = payService.getPayInfo(userId, guestId, request);
-
+        PayInfoResponseDTO response = payService.createPayInfo(userId, guestId, request);
 
 
         return ResponseEntity.ok(response);
@@ -71,21 +69,26 @@ public class PayApiController {
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
     public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
                                                      @RequestHeader(value = "X-USER", required = false) Long userId,
-                                                     @CookieValue(value = "GUEST-ID", required = false) String guestId,
+                                                     @CookieValue(value = "GUEST-ID") String guestId,
                                                      @RequestBody String jsonBody) throws Exception {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
-        int statusCode = response.containsKey("error") ? 400 : 200;
+        // TODO API 키 서비스에서 관리해서 DTO 만들어서
+        //  서비스 로직으로 DTO 생성하여 후
+        //  OrderProcessing 보내서 서비스 호출
 
-
-        if (statusCode == 200) {
-            // TODO rabbitMQ 쪽 구현
-//            orderProcessingStrategy.processMemberOrder(userId, jsonBody);
-
-
+        if (response.containsKey("error")) {
+            return ResponseEntity.badRequest().body(response);
         }
-        return ResponseEntity.status(statusCode).body(response);
+
+        if (userId != null) {
+            orderProcessing.processMemberOrder(userId);
+        } else {
+            orderProcessing.processNonMemberOrder(guestId);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     //결제 취소 기능, 배송 이전엔 사용자가 주문 취소 가능, 배송 이후엔 반품 신청 등을 해야 주문 취소
@@ -99,7 +102,7 @@ public class PayApiController {
         JSONObject requestData = convertToJSONObject(request);
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
         JSONObject response = sendRequest(requestData, API_SECRET_KEY, url);
-        payService.payCancel(response);
+        payService.cancelPay(response);
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 
@@ -122,9 +125,10 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 조회 실패")
     })
     @GetMapping("/payments/orders/{orderId}")
-    public ResponseEntity<JSONObject> getOrder(@PathVariable("orderId") String orderId) throws Exception {
+    public ResponseEntity<?> getOrder(@PathVariable("orderId") String orderId) throws Exception {
         String url = "https://api.tosspayments.com/v1/orders/" + orderId;
         JSONObject response = sendRequest(new JSONObject(), API_SECRET_KEY, url);
+
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 

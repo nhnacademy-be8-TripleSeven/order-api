@@ -44,7 +44,7 @@ public class PayServiceImpl implements PayService {
     // TODO save 해서 반환받아야할 경우가 있는지 확인
     //  저장되는 값 더 추가해야됨
     @Override
-    public void save(Long userId, JSONObject jsonObject) {
+    public void createPay(Long userId, JSONObject jsonObject) {
         Pay pay = new Pay();
         PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "OrderInfo");
         //infoDTO를 각 db에 저장해야함
@@ -54,7 +54,7 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public void payCancel(JSONObject response) {
+    public void cancelPay(JSONObject response) {
         Pay pay = payRepository.findByPaymentKey(response.get("paymentKey").toString());
 
         if (Objects.isNull(pay)) {
@@ -65,20 +65,19 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PayInfoResponseDTO getPayInfo(Long userId, String guestId, PayInfoRequestDTO request) {
+    public PayInfoResponseDTO createPayInfo(Long userId, String guestId, PayInfoRequestDTO request) {
         long orderId = UUID.randomUUID().getMostSignificantBits();
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
 //        checkValid(userId, payInfoDTO);
 
-        // TODO 검증 후 저장
+        // TODO 검증 후 저장 (수정 해야됨)
         if(Objects.nonNull(userId)){
-            redisTemplate.opsForHash().put(userId.toString(), "OrderInfo", payInfoDTO);
-
+            redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
         }
         else{
-            redisTemplate.opsForHash().put(guestId, "OrderInfo", payInfoDTO);
+            redisTemplate.opsForHash().put(guestId, "PayInfo", payInfoDTO);
         }
         return new PayInfoResponseDTO(orderId, request.getTotalAmount());
     }
