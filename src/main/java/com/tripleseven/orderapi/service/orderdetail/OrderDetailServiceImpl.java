@@ -90,7 +90,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 OrderDetail orderDetail = orderDetailRepository.findById(id)
                         .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-                if (!orderDetail.getOrderStatus().equals(OrderStatus.SHIPPING) || !orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+                if (!orderDetail.getOrderStatus().equals(OrderStatus.SHIPPING) && !orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
                     throw new CustomException(ErrorCode.REFUND_BAD_REQUEST);
                 }
 
