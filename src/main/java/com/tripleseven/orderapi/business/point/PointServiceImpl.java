@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 @Transactional
 @Service
@@ -84,7 +83,9 @@ public class PointServiceImpl implements PointService {
 
         // 회원가입 적립 내력에 있나 체크
         pointHistoryRepository.findPointHistoryByComment(memberId, earnRegisterComment)
-                .ifPresent(history -> {throw new CustomException(ErrorCode.ALREADY_EXIST_CONFLICT);});
+                .ifPresent(history -> {
+                    throw new CustomException(ErrorCode.ALREADY_EXIST_CONFLICT);
+                });
 
         DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.REGISTER);
 

@@ -95,7 +95,8 @@ class DeliveryInfoServiceTest {
 
         DeliveryInfoResponseDTO response = deliveryInfoService.createDeliveryInfo(
                 new DeliveryInfoCreateRequestDTO(
-                        1L
+                        1L,
+                        arrivedAt
                 ));
 
         assertNotNull(response);
@@ -106,7 +107,7 @@ class DeliveryInfoServiceTest {
 
     @Test
     void testCreateDeliveryInfo_Fail() {
-        DeliveryInfoCreateRequestDTO requestDTO = new DeliveryInfoCreateRequestDTO(1L);
+        DeliveryInfoCreateRequestDTO requestDTO = new DeliveryInfoCreateRequestDTO(1L, arrivedAt);
 
         CustomException exception = assertThrows(CustomException.class,
                 () -> deliveryInfoService.createDeliveryInfo(requestDTO));

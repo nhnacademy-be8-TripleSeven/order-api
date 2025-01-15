@@ -50,9 +50,12 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     @Transactional
     public OrderGroupResponseDTO createOrderGroup(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();
+        Wrapping wrapping = null;
 
-        Wrapping wrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+        if (orderGroupCreateRequestDTO.getWrappingId() != null) {
+            wrapping = wrappingRepository.findById(orderGroupCreateRequestDTO.getWrappingId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+        }
 
         orderGroup.ofCreate(
                 userId,
