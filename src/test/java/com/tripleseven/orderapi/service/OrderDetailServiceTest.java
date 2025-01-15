@@ -84,7 +84,7 @@ class OrderDetailServiceTest {
 
         assertNotNull(response);
         assertEquals(1L, response.getBookId());
-        assertEquals(3, response.getAmount());
+        assertEquals(3, response.getQuantity());
         assertEquals(10000, response.getPrimePrice());
         assertEquals(9000, response.getDiscountPrice());
 
@@ -115,7 +115,7 @@ class OrderDetailServiceTest {
 
         assertNotNull(response);
         assertEquals(1L, response.getBookId());
-        assertEquals(3, response.getAmount());
+        assertEquals(3, response.getQuantity());
         assertEquals(10000, response.getPrimePrice());
         assertEquals(9000, response.getDiscountPrice());
 
@@ -204,7 +204,7 @@ class OrderDetailServiceTest {
         assertNotNull(response);
         assertEquals(2, response.size());
         assertEquals(1L, response.getFirst().getBookId());
-        assertEquals(3, response.getFirst().getAmount());
+        assertEquals(3, response.getFirst().getQuantity());
         assertEquals(10000, response.getFirst().getPrimePrice());
         assertEquals(9000, response.getFirst().getDiscountPrice());
 

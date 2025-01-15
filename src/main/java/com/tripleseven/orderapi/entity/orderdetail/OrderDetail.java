@@ -24,17 +24,17 @@ public class OrderDetail {
     private OrderStatus orderStatus;
 
     @NotNull
-    private int primePrice;
+    private long primePrice;
 
     @NotNull
-    private int discountPrice;
+    private long discountPrice;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_group_id")
     private OrderGroup orderGroup;
 
-    public void ofCreate(Long bookId, int amount, int primePrice, int discountPrice, OrderGroup orderGroup) {
+    public void ofCreate(Long bookId, int amount, long primePrice, long discountPrice, OrderGroup orderGroup) {
         this.bookId = bookId;
         this.amount = amount;
         this.primePrice = primePrice;

@@ -39,11 +39,11 @@ class QueryDslDefaultDeliveryPolicyTest {
     @Test
     void findDefaultDeliveryPolicy_shouldReturnCorrectPolicies() {
         DeliveryPolicy deliveryPolicy1 = new DeliveryPolicy();
-        deliveryPolicy1.ofCreate("Standard Shipping", 3000);
+        deliveryPolicy1.ofCreate("Standard Shipping", 30000, 3000);
         DeliveryPolicy savedPolicy1 = deliveryPolicyRepository.save(deliveryPolicy1);
 
         DeliveryPolicy deliveryPolicy2 = new DeliveryPolicy();
-        deliveryPolicy2.ofCreate("Express Shipping", 5000);
+        deliveryPolicy2.ofCreate("Express Shipping", 20000, 5000);
         DeliveryPolicy savedPolicy2 = deliveryPolicyRepository.save(deliveryPolicy2);
 
         DefaultDeliveryPolicy defaultPolicy1 = new DefaultDeliveryPolicy();

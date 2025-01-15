@@ -116,7 +116,7 @@ public class PayApiController {
     @GetMapping("/payments/{paymentKey}")
     public ResponseEntity<JSONObject> getPayment(@PathVariable("paymentKey") String paymentKey) throws Exception {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
-        JSONObject response = sendRequest(new JSONObject(), apiProperties.getAPI_SECRET_KEY(), url);
+        JSONObject response = sendRequest(new JSONObject(), apiProperties.getSecretApiKey(), url);
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 
@@ -129,7 +129,7 @@ public class PayApiController {
     @GetMapping("/payments/orders/{orderId}")
     public ResponseEntity<?> getOrder(@PathVariable("orderId") String orderId) throws Exception {
         String url = "https://api.tosspayments.com/v1/orders/" + orderId;
-        JSONObject response = sendRequest(new JSONObject(), apiProperties.getAPI_SECRET_KEY(), url);
+        JSONObject response = sendRequest(new JSONObject(), apiProperties.getSecretApiKey(), url);
 
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }

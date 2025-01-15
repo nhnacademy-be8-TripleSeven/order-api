@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile({"instance1", "instance2"})
 public class TrackingDataInitializer implements ApplicationListener<ApplicationReadyEvent> {
 
     private final DeliveryCodeService deliveryCodeService;

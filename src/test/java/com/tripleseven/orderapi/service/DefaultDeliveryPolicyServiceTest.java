@@ -40,8 +40,8 @@ class DefaultDeliveryPolicyServiceTest {
 
     @Test
     void testGetDefaultDeliveryDTO_Success() {
-        DefaultDeliveryPolicyDTO policy1 = new DefaultDeliveryPolicyDTO(1L, "Policy 1", 1000, DeliveryPolicyType.DEFAULT);
-        DefaultDeliveryPolicyDTO policy2 = new DefaultDeliveryPolicyDTO(2L, "Policy 2", 2000, DeliveryPolicyType.EVENT);
+        DefaultDeliveryPolicyDTO policy1 = new DefaultDeliveryPolicyDTO(1L, "Policy 1", 10000, 1000, DeliveryPolicyType.DEFAULT);
+        DefaultDeliveryPolicyDTO policy2 = new DefaultDeliveryPolicyDTO(2L, "Policy 2", 20000, 2000, DeliveryPolicyType.EVENT);
         List<DefaultDeliveryPolicyDTO> policies = List.of(policy1, policy2);
 
         when(queryDslDeliveryPolicyRepository.findDefaultDeliveryPolicy()).thenReturn(policies);
@@ -62,7 +62,7 @@ class DefaultDeliveryPolicyServiceTest {
         DefaultDeliveryPolicyUpdateRequestDTO request = new DefaultDeliveryPolicyUpdateRequestDTO(2L, type);
 
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate("Standard Delivery", 1000);
+        deliveryPolicy.ofCreate("Standard Delivery", 10000, 1000);
         ReflectionTestUtils.setField(deliveryPolicy, "id", 2L);
 
         DefaultDeliveryPolicy defaultDeliveryPolicy = new DefaultDeliveryPolicy();
@@ -91,7 +91,7 @@ class DefaultDeliveryPolicyServiceTest {
         DefaultDeliveryPolicyUpdateRequestDTO request = new DefaultDeliveryPolicyUpdateRequestDTO(3L, type);
 
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate("Updated Delivery", 2000);
+        deliveryPolicy.ofCreate("Updated Delivery", 20000, 2000);
         ReflectionTestUtils.setField(deliveryPolicy, "id", 3L);
 
         DefaultDeliveryPolicy defaultDeliveryPolicy = new DefaultDeliveryPolicy();
@@ -129,7 +129,7 @@ class DefaultDeliveryPolicyServiceTest {
     void testGetDefaultDeliveryPolicy_Success() {
         DeliveryPolicyType type = DeliveryPolicyType.EVENT;
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate("Express Delivery", 3000);
+        deliveryPolicy.ofCreate("Express Delivery", 30000, 3000);
         ReflectionTestUtils.setField(deliveryPolicy, "id", 2L);
 
         DefaultDeliveryPolicy defaultDeliveryPolicy = new DefaultDeliveryPolicy();

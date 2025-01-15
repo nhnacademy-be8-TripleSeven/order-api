@@ -15,25 +15,25 @@ public class OrderDetailResponseDTO {
 
     private final Long bookId;
 
-    private final int amount;
+    private final int quantity;
 
     private final OrderStatus orderStatus;
 
-    private final int primePrice;
+    private final long primePrice;
 
-    private final int discountPrice;
+    private final long discountPrice;
 
     private final Long orderGroupId;
 
     @Builder
-    private OrderDetailResponseDTO(Long id, Long bookId, int amount, OrderStatus orderStatus, int primePrice, int discountPrice, Long orderGroupId) {
+    private OrderDetailResponseDTO(Long id, Long bookId, int quantity, OrderStatus orderStatus, long primePrice, long discountPrice, Long orderGroupId) {
         if (Objects.isNull(id)) {
             log.error("OrderDetail id cannot be null");
             throw new IllegalArgumentException("id or bookId cannot be null");
         }
         this.id = id;
         this.bookId = bookId;
-        this.amount = amount;
+        this.quantity = quantity;
         this.orderStatus = orderStatus;
         this.primePrice = primePrice;
         this.discountPrice = discountPrice;
@@ -44,7 +44,7 @@ public class OrderDetailResponseDTO {
         return OrderDetailResponseDTO.builder()
                 .id(orderDetail.getId())
                 .bookId(orderDetail.getBookId())
-                .amount(orderDetail.getAmount())
+                .quantity(orderDetail.getAmount())
                 .orderStatus(orderDetail.getOrderStatus())
                 .primePrice(orderDetail.getPrimePrice())
                 .discountPrice(orderDetail.getDiscountPrice())

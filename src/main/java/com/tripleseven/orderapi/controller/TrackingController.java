@@ -5,7 +5,6 @@ import com.tripleseven.orderapi.dto.properties.ApiProperties;
 import com.tripleseven.orderapi.service.deliverycode.DeliveryCodeService;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +12,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @RequiredArgsConstructor
 @RestController
-@Profile({"instance1", "instance2"})
 public class TrackingController {
     private final DeliveryInfoService deliveryInfoService;
     private final DeliveryCodeService deliveryCodeService;

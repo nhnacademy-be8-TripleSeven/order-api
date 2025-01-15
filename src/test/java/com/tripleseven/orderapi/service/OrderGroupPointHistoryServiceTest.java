@@ -49,11 +49,11 @@ class OrderGroupPointHistoryServiceTest {
         HistoryTypes historyType = HistoryTypes.SPEND;
 
         when(queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, historyType))
-                .thenReturn(100);
+                .thenReturn(100L);
 
-        int usedPoint = service.getUsedPoint(orderGroupId);
+        long usedPoint = service.getUsedPoint(orderGroupId);
 
-        assertEquals(100, usedPoint);
+        assertEquals(100L, usedPoint);
     }
 
     @Test
@@ -64,7 +64,7 @@ class OrderGroupPointHistoryServiceTest {
         when(queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, historyType))
                 .thenReturn(null);
 
-        int usedPoint = service.getUsedPoint(orderGroupId);
+        long usedPoint = service.getUsedPoint(orderGroupId);
 
         assertEquals(0, usedPoint);
     }
@@ -75,11 +75,11 @@ class OrderGroupPointHistoryServiceTest {
         HistoryTypes historyType = HistoryTypes.EARN;
 
         when(queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, historyType))
-                .thenReturn(200);
+                .thenReturn(200L);
 
-        int earnedPoint = service.getEarnedPoint(orderGroupId);
+        long earnedPoint = service.getEarnedPoint(orderGroupId);
 
-        assertEquals(200, earnedPoint);
+        assertEquals(200L, earnedPoint);
     }
 
     @Test

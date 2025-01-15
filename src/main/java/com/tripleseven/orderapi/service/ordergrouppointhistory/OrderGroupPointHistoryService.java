@@ -4,9 +4,9 @@ import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistor
 import com.tripleseven.orderapi.dto.ordergrouppointhistory.OrderGroupPointHistoryResponseDTO;
 
 public interface OrderGroupPointHistoryService {
-    int getUsedPoint(Long orderGroupId);
+    long getUsedPoint(Long orderGroupId);
 
-    int getEarnedPoint(Long orderGroupId);
+    long getEarnedPoint(Long orderGroupId);
 
     OrderGroupPointHistoryResponseDTO createOrderGroupPointHistory(OrderGroupPointHistoryRequestDTO request);
 }

@@ -29,6 +29,7 @@ public enum ErrorCode {
     /* 409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     ALREADY_EXIST_CONFLICT(HttpStatus.CONFLICT, "이미 존재하고 있습니다."),
     POINT_FAILED_CONFLICT(HttpStatus.CONFLICT, "포인트가 충분하지 않습니다."),
+    AMOUNT_FAILED_CONFLICT(HttpStatus.CONFLICT, "수량이 충분하지 않습니다."),
 
     /* 422 Unprocessable Entity: 요청 데이터는 올바르지만, 처리할 수 없는 비즈니스 조건이 존재. */
     RETURN_EXPIRED_UNPROCESSABLE_ENTITY(HttpStatus.UNPROCESSABLE_ENTITY, "30일 환불 기간 만료되었습니다."),

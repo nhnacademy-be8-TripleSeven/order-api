@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
                     orderDetailResponseDTO.getId(),
                     orderDetailResponseDTO.getOrderStatus(),
                     bookName,
-                    orderDetailResponseDTO.getAmount(),
+                    orderDetailResponseDTO.getQuantity(),
                     orderDetailResponseDTO.getDiscountPrice(),
                     orderDetailResponseDTO.getPrimePrice());
 
@@ -86,8 +86,8 @@ public class OrderServiceImpl implements OrderService {
 
         WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupResponseDTO.getWrappingId());
 
-        int usedPoint = orderGroupPointHistoryService.getUsedPoint(orderGroupId);
-        int earnedPoint = orderGroupPointHistoryService.getEarnedPoint(orderGroupId);
+        long usedPoint = orderGroupPointHistoryService.getUsedPoint(orderGroupId);
+        long earnedPoint = orderGroupPointHistoryService.getEarnedPoint(orderGroupId);
         // 판매가 총합
         int primeTotalPrice = 0;
         // 할인 금액

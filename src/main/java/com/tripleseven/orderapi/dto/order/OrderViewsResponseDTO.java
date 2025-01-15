@@ -16,7 +16,7 @@ public class OrderViewsResponseDTO {
     private String orderContent;
 
     @Setter
-    private int price;
+    private long price;
 
     @Setter
     private int amount;
@@ -28,7 +28,7 @@ public class OrderViewsResponseDTO {
 
     private String recipientName;
 
-    public OrderViewsResponseDTO(Long orderId, LocalDate orderDate, String orderContent, int price, int amount,
+    public OrderViewsResponseDTO(Long orderId, LocalDate orderDate, String orderContent, long price, int amount,
                                  OrderStatus orderStatus, String ordererName, String recipientName) {
         this.orderId = orderId;
         this.orderDate = orderDate;

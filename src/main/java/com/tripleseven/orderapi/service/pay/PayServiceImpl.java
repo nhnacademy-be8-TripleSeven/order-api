@@ -2,9 +2,10 @@ package com.tripleseven.orderapi.service.pay;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.cartitem.OrderItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
+import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.*;
 import com.tripleseven.orderapi.dto.properties.ApiProperties;
@@ -46,12 +47,11 @@ public class PayServiceImpl implements PayService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // TODO save 해서 반환받아야할 경우가 있는지 확인
-    //  저장되는 값 더 추가해야됨
+    // TODO save 해서 반환해야될 경우가 있는지 확인(void 타입)
     @Override
     public void createPay(Long userId, JSONObject jsonObject) {
         Pay pay = new Pay();
-        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "OrderInfo");
+        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "PayInfo");
         //infoDTO를 각 db에 저장해야함
 
         payRepository.save(pay);
@@ -60,7 +60,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
-        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getAPI_SECRET_KEY(),url);
+        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getSecretApiKey(), url);
 
         if (response.containsKey("error")) {
             // Error 객체 반환
@@ -71,33 +71,31 @@ public class PayServiceImpl implements PayService {
         return PaymentDTO.fromJson(response);
     }
 
-
     @Override
     public PayInfoResponseDTO createPayInfo(Long userId, String guestId, PayInfoRequestDTO request) {
         long orderId = UUID.randomUUID().getMostSignificantBits();
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
-//        checkValid(userId, payInfoDTO);
+        checkValid(userId, payInfoDTO);
 
-        // TODO 검증 후 저장 (수정 해야됨)
-        if(Objects.nonNull(userId)){
+        if (Objects.nonNull(userId)) {
             redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
-        }
-        else{
+        } else {
             redisTemplate.opsForHash().put(guestId, "PayInfo", payInfoDTO);
         }
         return new PayInfoResponseDTO(orderId, request.getTotalAmount());
     }
 
+    @Override
     public OrderPayInfoDTO getOrderPayInfo(Long orderId) {
 
         return payRepository.getDTOByOrderGroupId(orderId);
     }
 
     @Override
-    public Object confirmRequest(HttpServletRequest request,String jsonBody) throws IOException {
-        String secretKey = request.getRequestURI().contains("/confirm/payment") ? apiProperties.getAPI_SECRET_KEY() : apiProperties.getWIDGET_SECRET_KEY();
+    public Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException {
+        String secretKey = request.getRequestURI().contains("/confirm/payment") ? apiProperties.getSecretApiKey() : apiProperties.getWidgetApiKey();
 
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
@@ -112,41 +110,44 @@ public class PayServiceImpl implements PayService {
 
 
     private void checkValid(Long userId, PayInfoDTO payInfo) {
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
         Long couponId = payInfo.getCouponId();
         Long usePoint = payInfo.getPoint();
         Long totalAmount = payInfo.getTotalAmount();
 
+
+        Map<Long, Integer> bookAmounts = new HashMap<>();
         List<Long> bookIds = new ArrayList<>();
 
-        for (CartItemDTO cartItem : cartItems) {
-            bookIds.add(cartItem.getBookId());
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            bookIds.add(bookInfo.getBookId());
+            bookAmounts.put(bookInfo.getBookId(), bookInfo.getQuantity());
         }
 
+        List<OrderItemDTO> realItems = bookCouponApiClient.getOrderItems(bookIds);
+
         // 재고 검증
-        checkAmount(bookIds);
+        checkAmount(bookAmounts, realItems);
 
         // 쿠폰 검증
-        checkCoupon(couponId, totalAmount, 0L);
+        checkCoupon(couponId, bookInfos);
 
         // 포인트 검증
         checkPoint(userId, totalAmount, usePoint);
     }
 
-    private void checkAmount(List<Long> bookIds) {
-        // 재고 확인
-        List<CartItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
+    private void checkAmount(Map<Long, Integer> bookAmounts, List<OrderItemDTO> realItems) {
+        for (OrderItemDTO realItem : realItems) {
+            int amount = bookAmounts.get(realItem.getBookId());
 
-        for (CartItemDTO cartItem : realItems) {
-            // 재고 비교
-            cartItem.getQuantity();
+            if (realItem.getAmount() > amount) {
+                throw new CustomException(ErrorCode.AMOUNT_FAILED_CONFLICT);
+            }
         }
-
     }
 
-    private void checkCoupon(Long couponId, Long totalAmount, Long discountAmount) {
-        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
-        Long discount = bookCouponApiClient.applyCoupon(couponId, totalAmount);
+    private void checkCoupon(Long totalAmount, List<OrderBookInfoDTO> bookInfos) {
+        CouponDTO coupon = bookCouponApiClient.getCoupon(1L);
 
         // 쿠폰 존재 검증
         if (Objects.isNull(coupon)) {
@@ -163,9 +164,17 @@ public class PayServiceImpl implements PayService {
             throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
         }
 
-        // 계산된 할인 금액과 맞지 않음
-        if(!discountAmount.equals(discount)) {
-            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            if (bookInfo.getCouponId() != null) {
+                // 계산 재확인
+                Long realDiscount = bookCouponApiClient.applyCoupon(bookInfo.getCouponId(), bookInfo.getPrice());
+
+                // 계산된 할인 금액과 맞지 않음
+                if (bookInfo.getCouponSalePrice() != realDiscount) {
+                    throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+
+                }
+            }
         }
 
     }
