@@ -30,6 +30,7 @@ public class PayInfoDTO implements Serializable {
 
     private String ordererName;
 
+    private String payType;
 
     private long point; //사용하는 포인트
     private long totalAmount; //총 가격
@@ -43,6 +44,7 @@ public class PayInfoDTO implements Serializable {
         this.wrapperId = payInfoRequestDTO.getWrapperId();
         this.couponId = payInfoRequestDTO.getCouponId();
         this.ordererName = payInfoRequestDTO.getOrdererName();
+        this.payType = payInfoRequestDTO.getPayType();
         this.point = payInfoRequestDTO.getPoint();
         this.totalAmount = payInfoRequestDTO.getTotalAmount();
     }
