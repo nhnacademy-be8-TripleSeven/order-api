@@ -30,7 +30,6 @@ public class DeliveryPolicy {
         this.name = name;
         this.minPrice = minPrice;
         this.price = price;
-
     }
 
     public void ofUpdate(String name, int minPrice, int price) {
