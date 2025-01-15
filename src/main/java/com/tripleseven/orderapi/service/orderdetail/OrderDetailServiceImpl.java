@@ -138,7 +138,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 Long userId = orderGroup.getUserId();
 
                 // 환불 금액 (쿠폰은 재발급 x)
-                int refundPrice = orderDetail.getPrimePrice() - orderDetail.getDiscountPrice();
+                long refundPrice = orderDetail.getPrimePrice() - orderDetail.getDiscountPrice();
 
                 String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
 

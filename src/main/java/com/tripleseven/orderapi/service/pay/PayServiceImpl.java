@@ -60,7 +60,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
-        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getAPI_SECRET_KEY(), url);
+        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getSecretApiKey(), url);
 
         if (response.containsKey("error")) {
             // Error 객체 반환
@@ -95,7 +95,7 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException {
-        String secretKey = request.getRequestURI().contains("/confirm/payment") ? apiProperties.getAPI_SECRET_KEY() : apiProperties.getWIDGET_SECRET_KEY();
+        String secretKey = request.getRequestURI().contains("/confirm/payment") ? apiProperties.getSecretApiKey() : apiProperties.getWidgetApiKey();
 
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 

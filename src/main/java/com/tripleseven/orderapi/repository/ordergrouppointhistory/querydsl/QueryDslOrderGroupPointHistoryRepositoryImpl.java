@@ -32,12 +32,12 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
     private EntityManager entityManager;
 
     @Override
-    public Integer findTotalAmountByOrderGroupId(Long orderGroupId, HistoryTypes historyTypes) {
+    public Long findTotalAmountByOrderGroupId(Long orderGroupId, HistoryTypes historyTypes) {
         QPointHistory pointHistory = QPointHistory.pointHistory;
         QOrderGroupPointHistory orderGroupPointHistory = QOrderGroupPointHistory.orderGroupPointHistory;
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
 
-        JPAQuery<Integer> query = new JPAQuery<>(entityManager)
+        JPAQuery<Long> query = new JPAQuery<>(entityManager)
                 .select(pointHistory.amount.sum())
                 .from(pointHistory)
                 .join(pointHistory.orderGroupPointHistories, orderGroupPointHistory)
@@ -58,7 +58,7 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
         JPAQuery<UserPointHistoryDTO> baseQuery = new JPAQuery<>(entityManager)
                 .select(new QUserPointHistoryDTO(
                         pointHistory.id,
-                        pointHistory.amount,
+                        pointHistory.amount.intValue(),
                         pointHistory.changedAt,
                         pointHistory.types,
                         pointHistory.comment,

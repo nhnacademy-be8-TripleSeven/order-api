@@ -27,14 +27,14 @@ public class OrderGroupPointHistoryServiceImpl implements OrderGroupPointHistory
     private final PointHistoryRepository pointHistoryRepository;
 
     @Override
-    public int getUsedPoint(Long orderGroupId) {
-        Integer amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.SPEND);
+    public long getUsedPoint(Long orderGroupId) {
+        Long amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.SPEND);
         return Objects.isNull(amount) ? 0 : amount;
     }
 
     @Override
-    public int getEarnedPoint(Long orderGroupId) {
-        Integer amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.EARN);
+    public long getEarnedPoint(Long orderGroupId) {
+        Long amount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(orderGroupId, HistoryTypes.EARN);
         return Objects.isNull(amount) ? 0 : amount;
     }
 
