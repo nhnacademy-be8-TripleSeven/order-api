@@ -2,9 +2,11 @@ package com.tripleseven.orderapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.business.order.process.OrderProcessing;
+import com.tripleseven.orderapi.dto.pay.ErrorDTO;
 import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
+import com.tripleseven.orderapi.dto.properties.ApiProperties;
 import com.tripleseven.orderapi.service.pay.PayService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,14 +33,10 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@Profile({"instance1", "instance2", "dev"})
 @Tag(name = "Payment API", description = "결제 관련 API를 제공합니다.")
 public class PayApiController {
 
-    @Value("${payment.toss.test_widget_api_key}")
-    private String WIDGET_SECRET_KEY;
-    @Value("${payment.toss.test_secret_api_key}")
-    private String API_SECRET_KEY;
+    private final ApiProperties apiProperties;
     private final Map<String, String> billingKeyMap = new HashMap<>();
     private final PayService payService;
     private final PointHistoryService pointHistoryService;
@@ -67,26 +65,27 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 승인 실패")
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
-    public ResponseEntity<JSONObject> confirmPayment(HttpServletRequest request,
+    public ResponseEntity<?> confirmPayment(HttpServletRequest request,
                                                      @RequestHeader(value = "X-USER", required = false) Long userId,
                                                      @CookieValue(value = "GUEST-ID") String guestId,
                                                      @RequestBody String jsonBody) throws Exception {
-        String secretKey = request.getRequestURI().contains("/confirm/payment") ? API_SECRET_KEY : WIDGET_SECRET_KEY;
-        JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
-
+        Object response = payService.confirmRequest(request,jsonBody);
         // TODO API 키 서비스에서 관리해서 DTO 만들어서
         //  서비스 로직으로 DTO 생성하여 후
         //  OrderProcessing 보내서 서비스 호출
 
-        if (response.containsKey("error")) {
+
+        if(response.getClass().isAssignableFrom(ErrorDTO.class))
             return ResponseEntity.badRequest().body(response);
-        }
+
 
         if (userId != null) {
             orderProcessing.processMemberOrder(userId);
         } else {
             orderProcessing.processNonMemberOrder(guestId);
         }
+
+
 
         return ResponseEntity.ok(response);
     }
@@ -98,12 +97,15 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 취소 실패")
     })
     @PostMapping("/payments/{paymentKey}/cancel")
-    public ResponseEntity<JSONObject> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
+    public ResponseEntity<?> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
         JSONObject requestData = convertToJSONObject(request);
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
-        JSONObject response = sendRequest(requestData, API_SECRET_KEY, url);
-        payService.cancelPay(response);
-        return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
+        Object response = payService.cancelRequest(paymentKey,request);
+
+        if(response.getClass().isAssignableFrom(ErrorDTO.class))
+            return ResponseEntity.badRequest().body(response);
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "결제 조회 (PaymentKey)", description = "PaymentKey를 사용하여 결제 정보를 조회합니다.")
@@ -114,7 +116,7 @@ public class PayApiController {
     @GetMapping("/payments/{paymentKey}")
     public ResponseEntity<JSONObject> getPayment(@PathVariable("paymentKey") String paymentKey) throws Exception {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
-        JSONObject response = sendRequest(new JSONObject(), API_SECRET_KEY, url);
+        JSONObject response = sendRequest(new JSONObject(), apiProperties.getAPI_SECRET_KEY(), url);
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 
@@ -127,28 +129,13 @@ public class PayApiController {
     @GetMapping("/payments/orders/{orderId}")
     public ResponseEntity<?> getOrder(@PathVariable("orderId") String orderId) throws Exception {
         String url = "https://api.tosspayments.com/v1/orders/" + orderId;
-        JSONObject response = sendRequest(new JSONObject(), API_SECRET_KEY, url);
+        JSONObject response = sendRequest(new JSONObject(), apiProperties.getAPI_SECRET_KEY(), url);
 
         return ResponseEntity.status(response.containsKey("error") ? 400 : 200).body(response);
     }
 
 
-//
-//    private JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
-//        HttpURLConnection connection = createConnection(secretKey, urlString);
-//        try (OutputStream os = connection.getOutputStream()) {
-//            os.write(requestData.toString().getBytes(StandardCharsets.UTF_8));
-//        }
-//
-//        try (InputStream responseStream = connection.getResponseCode() == 200 ? connection.getInputStream() : connection.getErrorStream();
-//             Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
-//            return (JSONObject) new JSONParser().parse(reader);
-//        } catch (Exception e) {
-//            JSONObject errorResponse = new JSONObject();
-//            errorResponse.put("error", "Error reading response");
-//            return errorResponse;
-//        }
-//    }
+
 
     private JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
         // GET 요청의 경우 requestData를 보내지 않음

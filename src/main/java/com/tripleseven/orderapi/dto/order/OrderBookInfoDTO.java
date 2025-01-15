@@ -16,5 +16,6 @@ public class OrderBookInfoDTO implements Serializable {
     private String title;
     private int price; //판매가
     private int quantity;
+    private Long couponId;
     private int couponSalePrice; //쿠폰으로 할인된 가격
 }

@@ -25,8 +25,8 @@ public class PayInfoDTO implements Serializable {
 
     private LocalDate deliveryDate; //배송 날짜
 
-    private long wrapperId; //포장지 아이디
-    private long couponId; //쿠폰 아이디
+    private Long wrapperId; //포장지 아이디
+    private Long couponId; //쿠폰 아이디
 
     private String ordererName;
 
