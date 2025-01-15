@@ -1,9 +1,10 @@
 package com.tripleseven.orderapi.service.pay;
 
 import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.cartitem.OrderItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
+import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
@@ -22,10 +23,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -73,56 +71,64 @@ public class PayServiceImpl implements PayService {
 //        checkValid(userId, payInfoDTO);
 
         // TODO 검증 후 저장 (수정 해야됨)
-        if(Objects.nonNull(userId)){
+        if (Objects.nonNull(userId)) {
             redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
-        }
-        else{
+        } else {
             redisTemplate.opsForHash().put(guestId, "PayInfo", payInfoDTO);
         }
         return new PayInfoResponseDTO(orderId, request.getTotalAmount());
     }
 
+    @Override
     public OrderPayInfoDTO getOrderPayInfo(Long orderId) {
 
         return payRepository.getDTOByOrderGroupId(orderId);
     }
 
     private void checkValid(Long userId, PayInfoDTO payInfo) {
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
         Long couponId = payInfo.getCouponId();
         Long usePoint = payInfo.getPoint();
         Long totalAmount = payInfo.getTotalAmount();
 
+
+        Map<Long, Integer> bookAmounts = new HashMap<>();
         List<Long> bookIds = new ArrayList<>();
 
-        for (CartItemDTO cartItem : cartItems) {
-            bookIds.add(cartItem.getBookId());
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            bookIds.add(bookInfo.getBookId());
+            bookAmounts.put(bookInfo.getBookId(), bookInfo.getQuantity());
         }
 
+        List<OrderItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
+
         // 재고 검증
-        checkAmount(bookIds);
+        checkAmount(bookAmounts, realItems);
 
         // 쿠폰 검증
-        checkCoupon(couponId, totalAmount, 0L);
+        checkCoupon(couponId, bookInfos);
 
         // 포인트 검증
         checkPoint(userId, totalAmount, usePoint);
     }
 
-    private void checkAmount(List<Long> bookIds) {
-        // 재고 확인
-        List<CartItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
+    private void checkAmount(Map<Long, Integer> bookAmounts, List<OrderItemDTO> realItems) {
+        for (OrderItemDTO realItem : realItems) {
+            int amount = bookAmounts.get(realItem.getBookId());
 
-        for (CartItemDTO cartItem : realItems) {
-            // 재고 비교
-            cartItem.getQuantity();
+            if (realItem.getAmount() > amount) {
+                throw new CustomException(ErrorCode.AMOUNT_FAILED_CONFLICT);
+            }
         }
-
     }
 
-    private void checkCoupon(Long couponId, Long totalAmount, Long discountAmount) {
-        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
-        Long discount = bookCouponApiClient.applyCoupon(couponId, totalAmount);
+    private void checkCoupon(Long totalAmount, List<OrderBookInfoDTO> bookInfos) {
+        CouponDTO coupon = bookCouponApiClient.getCoupon(1L);
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            // bookInfo.getCouponId() != null
+//            Long realDiscount = bookCouponApiClient.applyCoupon(1L, bookInfo.getPrice());
+        }
+
 
         // 쿠폰 존재 검증
         if (Objects.isNull(coupon)) {
@@ -140,9 +146,9 @@ public class PayServiceImpl implements PayService {
         }
 
         // 계산된 할인 금액과 맞지 않음
-        if(!discountAmount.equals(discount)) {
-            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
-        }
+//        if (!discountAmount.equals(realDiscount)) {
+//            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+//        }
 
     }
 

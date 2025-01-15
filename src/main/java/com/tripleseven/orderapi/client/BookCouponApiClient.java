@@ -1,6 +1,7 @@
 package com.tripleseven.orderapi.client;
 
 import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.cartitem.OrderItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +18,13 @@ public interface BookCouponApiClient {
     CouponDTO getCoupon(@PathVariable("couponId") Long couponId);
 
     @PostMapping("/books/cart")
-    List<CartItemDTO> getCartItems(@RequestBody List<Long> bookIds);
+    List<OrderItemDTO> getCartItems(@RequestBody List<Long> bookIds);
 
     @GetMapping("/books/{bookId}/name")
     String getBookName(@PathVariable("bookId") Long bookId);
 
     @PostMapping("/coupons/apply")
     Long applyCoupon(
-            @RequestParam Long couponDTO,
+            @RequestParam Long couponId,
             @RequestParam Long paymentAmount);
 }
