@@ -47,12 +47,11 @@ public class PayServiceImpl implements PayService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // TODO save 해서 반환받아야할 경우가 있는지 확인
-    //  저장되는 값 더 추가해야됨
+    // TODO save 해서 반환해야될 경우가 있는지 확인(void 타입)
     @Override
     public void createPay(Long userId, JSONObject jsonObject) {
         Pay pay = new Pay();
-        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "OrderInfo");
+        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "PayInfo");
         //infoDTO를 각 db에 저장해야함
 
         payRepository.save(pay);
@@ -61,7 +60,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
-        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getAPI_SECRET_KEY(),url);
+        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getAPI_SECRET_KEY(), url);
 
         if (response.containsKey("error")) {
             // Error 객체 반환
@@ -78,9 +77,8 @@ public class PayServiceImpl implements PayService {
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
-//        checkValid(userId, payInfoDTO);
+        checkValid(userId, payInfoDTO);
 
-        // TODO 검증 후 저장 (수정 해야됨)
         if (Objects.nonNull(userId)) {
             redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
         } else {
@@ -96,7 +94,7 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public Object confirmRequest(HttpServletRequest request,String jsonBody) throws IOException {
+    public Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException {
         String secretKey = request.getRequestURI().contains("/confirm/payment") ? apiProperties.getAPI_SECRET_KEY() : apiProperties.getWIDGET_SECRET_KEY();
 
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
@@ -126,7 +124,7 @@ public class PayServiceImpl implements PayService {
             bookAmounts.put(bookInfo.getBookId(), bookInfo.getQuantity());
         }
 
-        List<OrderItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
+        List<OrderItemDTO> realItems = bookCouponApiClient.getOrderItems(bookIds);
 
         // 재고 검증
         checkAmount(bookAmounts, realItems);
@@ -150,11 +148,6 @@ public class PayServiceImpl implements PayService {
 
     private void checkCoupon(Long totalAmount, List<OrderBookInfoDTO> bookInfos) {
         CouponDTO coupon = bookCouponApiClient.getCoupon(1L);
-        for (OrderBookInfoDTO bookInfo : bookInfos) {
-            // bookInfo.getCouponId() != null
-//            Long realDiscount = bookCouponApiClient.applyCoupon(1L, bookInfo.getPrice());
-        }
-
 
         // 쿠폰 존재 검증
         if (Objects.isNull(coupon)) {
@@ -171,10 +164,18 @@ public class PayServiceImpl implements PayService {
             throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
         }
 
-        // 계산된 할인 금액과 맞지 않음
-//        if (!discountAmount.equals(realDiscount)) {
-//            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
-//        }
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            if (bookInfo.getCouponId() != null) {
+                // 계산 재확인
+                Long realDiscount = bookCouponApiClient.applyCoupon(bookInfo.getCouponId(), bookInfo.getPrice());
+
+                // 계산된 할인 금액과 맞지 않음
+                if (bookInfo.getCouponSalePrice() != realDiscount) {
+                    throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+
+                }
+            }
+        }
 
     }
 

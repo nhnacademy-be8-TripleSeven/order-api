@@ -18,7 +18,7 @@ public interface BookCouponApiClient {
     CouponDTO getCoupon(@PathVariable("couponId") Long couponId);
 
     @PostMapping("/books/cart")
-    List<OrderItemDTO> getCartItems(@RequestBody List<Long> bookIds);
+    List<OrderItemDTO> getOrderItems(@RequestBody List<Long> bookIds);
 
     @GetMapping("/books/{bookId}/name")
     String getBookName(@PathVariable("bookId") Long bookId);
