@@ -23,6 +23,11 @@ public class RedisConfig {
         objectMapper.registerModule(new JavaTimeModule()); // Java 8 날짜/시간 모듈 등록
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // 타임스탬프로 쓰지 않도록 설정
 
+        // 타입 정보를 포함하도록 설정
+        objectMapper.activateDefaultTyping(
+                objectMapper.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
         // 커스텀 ObjectMapper를 사용하는 Serializer
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
