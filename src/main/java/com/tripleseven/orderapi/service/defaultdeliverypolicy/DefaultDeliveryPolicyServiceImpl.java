@@ -60,6 +60,7 @@ public class DefaultDeliveryPolicyServiceImpl implements DefaultDeliveryPolicySe
         return new DefaultDeliveryPolicyDTO(
                 defaultDeliveryPolicy.getId(),
                 defaultDeliveryPolicy.getDeliveryPolicy().getName(),
+                defaultDeliveryPolicy.getDeliveryPolicy().getMinPrice(),
                 defaultDeliveryPolicy.getDeliveryPolicy().getPrice(),
                 defaultDeliveryPolicy.getDeliveryPolicyType()
         );

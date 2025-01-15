@@ -14,17 +14,20 @@ public class DeliveryPolicyResponseDTO {
 
     private final String name;
 
+    private final int minPrice;
+
     private final int price;
 
 
     @Builder
-    private DeliveryPolicyResponseDTO(Long id, String name, int price) {
+    private DeliveryPolicyResponseDTO(Long id, String name, int minPrice, int price) {
         if (Objects.isNull(id)) {
             log.error("DeliveryPolicy id cannot be null");
             throw new IllegalArgumentException("id cannot be null");
         }
         this.id = id;
         this.name = name;
+        this.minPrice = minPrice;
         this.price = price;
     }
 
@@ -32,6 +35,7 @@ public class DeliveryPolicyResponseDTO {
         return DeliveryPolicyResponseDTO.builder()
                 .id(deliveryPolicy.getId())
                 .name(deliveryPolicy.getName())
+                .minPrice(deliveryPolicy.getMinPrice())
                 .price(deliveryPolicy.getPrice())
                 .build();
     }

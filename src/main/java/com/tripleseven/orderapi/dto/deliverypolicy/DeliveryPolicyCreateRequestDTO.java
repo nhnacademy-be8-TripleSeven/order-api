@@ -13,5 +13,9 @@ public class DeliveryPolicyCreateRequestDTO {
 
     @NotNull
     @Min(100)
+    int minPrice;
+
+    @NotNull
+    @Min(100)
     int price;
 }
