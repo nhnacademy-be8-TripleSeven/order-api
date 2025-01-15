@@ -28,7 +28,9 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
     })
-    public ResponseEntity<DeliveryPolicyResponseDTO> getDeliveryPolicy(@PathVariable Long id) {
+    public ResponseEntity<DeliveryPolicyResponseDTO> getDeliveryPolicy(
+            @PathVariable Long id
+    ) {
         return ResponseEntity.ok(deliveryPolicyService.getDeliveryPolicy(id));
     }
 
@@ -38,7 +40,9 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
-    public ResponseEntity<DeliveryPolicyResponseDTO> createDeliveryPolicy(@RequestBody DeliveryPolicyCreateRequestDTO request) {
+    public ResponseEntity<DeliveryPolicyResponseDTO> createDeliveryPolicy(
+            @RequestBody DeliveryPolicyCreateRequestDTO request
+    ) {
         DeliveryPolicyResponseDTO response = deliveryPolicyService.createDeliveryPolicy(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -50,7 +54,9 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
     })
     public ResponseEntity<DeliveryPolicyResponseDTO> updateDeliveryPolicy(
-            @PathVariable Long id, @RequestBody DeliveryPolicyUpdateRequestDTO request) {
+            @PathVariable Long id,
+            @RequestBody DeliveryPolicyUpdateRequestDTO request
+    ) {
         DeliveryPolicyResponseDTO response = deliveryPolicyService.updateDeliveryPolicy(id, request);
         return ResponseEntity.ok(response);
     }
@@ -61,12 +67,19 @@ public class DeliveryPolicyController {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
             @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
     })
-    public ResponseEntity<Void> deleteDeliveryPolicy(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDeliveryPolicy(
+            @PathVariable Long id
+    ) {
         deliveryPolicyService.deleteDeliveryPolicy(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/admin/orders/delivery-policies")
+    @Operation(summary = "전체 배송 정책 조회", description = "모든 배송 정책을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "배송 정책이 존재하지 않음")
+    })
     public ResponseEntity<List<DeliveryPolicyResponseDTO>> getAllDeliveryPolicies() {
         List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
         return ResponseEntity.status(HttpStatus.OK).body(responses);

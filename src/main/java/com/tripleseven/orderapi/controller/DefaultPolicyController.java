@@ -7,7 +7,6 @@ import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.defaultpolicy.DefaultPolicyDTO;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
-import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
 import com.tripleseven.orderapi.entity.defaultpointpolicy.PointPolicyType;
 import com.tripleseven.orderapi.service.defaultdeliverypolicy.DefaultDeliveryPolicyService;
 import com.tripleseven.orderapi.service.defaultpointpolicy.DefaultPointPolicyService;
@@ -49,17 +48,16 @@ public class DefaultPolicyController {
 
     // 기본 포인트 정책 가져오기
     @GetMapping("/orders/default-policy/point")
-    public ResponseEntity<DefaultPointPolicyDTO> getDefaultPointPolicy(@RequestParam PointPolicyType type){
+    public ResponseEntity<DefaultPointPolicyDTO> getDefaultPointPolicy(@RequestParam PointPolicyType type) {
         DefaultPointPolicyDTO dto = defaultPointPolicyService.getDefaultPointPolicy(type);
         return ResponseEntity.ok(dto);
     }
 
     // 기본 배송비 정책 가져오기
     @GetMapping("/orders/default-policy/delivery")
-    public ResponseEntity<DefaultDeliveryPolicyDTO> getDefaultPointPolicy(@RequestParam DeliveryPolicyType type){
+    public ResponseEntity<DefaultDeliveryPolicyDTO> getDefaultPointPolicy(@RequestParam DeliveryPolicyType type) {
         DefaultDeliveryPolicyDTO dto = defaultDeliveryPolicyService.getDefaultDeliveryPolicy(type);
         return ResponseEntity.ok(dto);
     }
-
 
 }

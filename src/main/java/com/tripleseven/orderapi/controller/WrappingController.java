@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class WrappingController {
     private final WrappingService wrappingService;
 
     // 1. 포장지 전부 조회
-    @GetMapping("/wrappings")
+    @GetMapping("/orders/wrappings")
     @Operation(summary = "포장지 전부 조회", description = "포장지를 전부 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -34,19 +35,20 @@ public class WrappingController {
     }
 
     // 2. 포장지 생성
-    @PostMapping("/admin/wrappings")
+    @PostMapping("/admin/orders/wrappings")
     @Operation(summary = "포장지 생성", description = "포장지를 생성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ResponseEntity<WrappingResponseDTO> createWrapping(@RequestBody WrappingCreateRequestDTO request) {
+    public ResponseEntity<WrappingResponseDTO> createWrapping(
+            @Valid @RequestBody WrappingCreateRequestDTO request) {
         WrappingResponseDTO response = wrappingService.createWrapping(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 3. 포장지 삭제
-    @DeleteMapping("/admin/wrappings/{id}")
+    @DeleteMapping("/admin/orders/wrappings/{id}")
     @Operation(summary = "포장지 삭제", description = "포장지를 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),

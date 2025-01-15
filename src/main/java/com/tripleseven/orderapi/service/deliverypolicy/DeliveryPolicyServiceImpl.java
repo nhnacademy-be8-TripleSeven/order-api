@@ -4,7 +4,8 @@ import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDT
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
-import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional
@@ -23,11 +23,10 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
     @Override
     public DeliveryPolicyResponseDTO getDeliveryPolicy(Long id) {
-        Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
-        if (optionalDeliveryPolicy.isEmpty()) {
-            throw new DeliveryPolicyNotFoundException(id);
-        }
-        return DeliveryPolicyResponseDTO.fromEntity(optionalDeliveryPolicy.get());
+        DeliveryPolicy deliveryPolicy = deliveryPolicyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
+        return DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy);
     }
 
     @Override
@@ -35,18 +34,15 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
         DeliveryPolicy deliveryPolicy = new DeliveryPolicy();
         deliveryPolicy.ofCreate(deliveryPolicyCreateRequestDTO.getName(), deliveryPolicyCreateRequestDTO.getPrice());
         DeliveryPolicy createDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
+
         return DeliveryPolicyResponseDTO.fromEntity(createDeliveryPolicy);
     }
 
     @Override
     public DeliveryPolicyResponseDTO updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequestDTO deliveryPolicyUpdateRequestDTO) {
-        Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(id);
+        DeliveryPolicy deliveryPolicy = deliveryPolicyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        if (optionalDeliveryPolicy.isEmpty()) {
-            throw new DeliveryPolicyNotFoundException(id);
-        }
-
-        DeliveryPolicy deliveryPolicy = optionalDeliveryPolicy.get();
         deliveryPolicy.ofUpdate(deliveryPolicyUpdateRequestDTO.getName(), deliveryPolicyUpdateRequestDTO.getPrice());
 
         return DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy);
@@ -54,20 +50,26 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
     @Override
     public void deleteDeliveryPolicy(Long id) {
-        if(!deliveryPolicyRepository.existsById(id)){
-            throw new DeliveryPolicyNotFoundException(id);
+        if (!deliveryPolicyRepository.existsById(id)) {
+            throw new CustomException(ErrorCode.ID_NOT_FOUND);
         }
         deliveryPolicyRepository.deleteById(id);
     }
 
     @Override
-    public List<DeliveryPolicyResponseDTO> getAllDeliveryPolicies(){
+    public List<DeliveryPolicyResponseDTO> getAllDeliveryPolicies() {
         List<DeliveryPolicy> deliveryPolicies = deliveryPolicyRepository.findAll();
 
+        if (deliveryPolicies.isEmpty()) {
+            return List.of();
+        }
+
         List<DeliveryPolicyResponseDTO> responses = new ArrayList<>();
-        for(DeliveryPolicy deliveryPolicy: deliveryPolicies){
+
+        for (DeliveryPolicy deliveryPolicy : deliveryPolicies) {
             responses.add(DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy));
         }
+
         return responses;
     }
 }

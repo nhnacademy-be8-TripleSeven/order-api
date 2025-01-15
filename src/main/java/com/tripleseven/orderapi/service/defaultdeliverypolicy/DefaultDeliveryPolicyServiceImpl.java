@@ -5,7 +5,8 @@ import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyU
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DefaultDeliveryPolicy;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
-import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.defaultdeliverypolicy.DefaultDeliveryPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultdeliverypolicy.querydsl.QueryDslDefaultDeliveryPolicyRepository;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +33,9 @@ public class DefaultDeliveryPolicyServiceImpl implements DefaultDeliveryPolicySe
     @Override
     public Long updateDefaultDelivery(DefaultDeliveryPolicyUpdateRequestDTO request) {
         DefaultDeliveryPolicy defaultDeliveryPolicy = defaultDeliveryPolicyRepository.findDefaultDeliveryPolicyByDeliveryPolicyType(request.getType());
-        Optional<DeliveryPolicy> optionalDeliveryPolicy = deliveryPolicyRepository.findById(request.getDeliveryPolicyId());
-        if (optionalDeliveryPolicy.isEmpty()) {
-            throw new DeliveryPolicyNotFoundException(request.getDeliveryPolicyId());
-        }
-        DeliveryPolicy deliveryPolicy = optionalDeliveryPolicy.get();
+
+        DeliveryPolicy deliveryPolicy = deliveryPolicyRepository.findById(request.getDeliveryPolicyId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         if (Objects.isNull(defaultDeliveryPolicy)) {
             defaultDeliveryPolicy = new DefaultDeliveryPolicy();
@@ -45,6 +43,7 @@ public class DefaultDeliveryPolicyServiceImpl implements DefaultDeliveryPolicySe
                     request.getType(),
                     deliveryPolicy
             );
+            defaultDeliveryPolicy = defaultDeliveryPolicyRepository.save(defaultDeliveryPolicy);
         } else {
             defaultDeliveryPolicy.ofUpdate(
                     deliveryPolicy

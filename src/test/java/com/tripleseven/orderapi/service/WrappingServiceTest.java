@@ -4,7 +4,7 @@ import com.tripleseven.orderapi.dto.wrapping.WrappingCreateRequestDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.WrappingNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.wrapping.WrappingRepository;
 import com.tripleseven.orderapi.service.wrapping.WrappingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,13 +15,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WrappingServiceTest {
+class WrappingServiceTest {
 
     @Mock
     private WrappingRepository wrappingRepository;
@@ -57,7 +58,7 @@ public class WrappingServiceTest {
     void testGetWrappingById_Fail() {
         when(wrappingRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(WrappingNotFoundException.class, () -> wrappingService.getWrappingById(1L));
+        assertThrows(CustomException.class, () -> wrappingService.getWrappingById(1L));
     }
 
     @Test
@@ -79,9 +80,12 @@ public class WrappingServiceTest {
 
     @Test
     void testCreateWrapping_Fail() {
-        assertThrows(NullPointerException.class, () ->
-                wrappingService.createWrapping(
-                        new WrappingCreateRequestDTO(null, -1)));
+        WrappingCreateRequestDTO requestDTO = new WrappingCreateRequestDTO(null, -1);
+
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> wrappingService.createWrapping(requestDTO));
+
+        assertNotNull(exception.getMessage());
     }
 
     @Test
@@ -101,7 +105,7 @@ public class WrappingServiceTest {
         WrappingUpdateRequestDTO updateRequest = new WrappingUpdateRequestDTO("Updated Wrapping", 150);
         when(wrappingRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(WrappingNotFoundException.class, () -> wrappingService.updateWrapping(1L, updateRequest));
+        assertThrows(CustomException.class, () -> wrappingService.updateWrapping(1L, updateRequest));
     }
 
     @Test
@@ -118,6 +122,50 @@ public class WrappingServiceTest {
     void testDeleteWrapping_Fail() {
         when(wrappingRepository.existsById(1L)).thenReturn(false);
 
-        assertThrows(WrappingNotFoundException.class, () -> wrappingService.deleteWrapping(1L));
+        assertThrows(CustomException.class, () -> wrappingService.deleteWrapping(1L));
+    }
+
+    @Test
+    void testGetWrappingsToList_Success() {
+        Wrapping wrapping1 = new Wrapping();
+        ReflectionTestUtils.setField(wrapping1, "id", 1L);
+        wrapping1.ofCreate("Wrapping 1", 100);
+
+        Wrapping wrapping2 = new Wrapping();
+        ReflectionTestUtils.setField(wrapping2, "id", 2L);
+        wrapping2.ofCreate("Wrapping 2", 150);
+
+        List<Wrapping> wrappingList = List.of(wrapping1, wrapping2);
+
+        when(wrappingRepository.findAll()).thenReturn(wrappingList);
+
+        List<WrappingResponseDTO> responseList = wrappingService.getWrappingsToList();
+
+        assertNotNull(responseList);
+        assertEquals(2, responseList.size());
+
+        WrappingResponseDTO firstResponse = responseList.get(0);
+        assertEquals(1L, firstResponse.getId());
+        assertEquals("Wrapping 1", firstResponse.getName());
+        assertEquals(100, firstResponse.getPrice());
+
+        WrappingResponseDTO secondResponse = responseList.get(1);
+        assertEquals(2L, secondResponse.getId());
+        assertEquals("Wrapping 2", secondResponse.getName());
+        assertEquals(150, secondResponse.getPrice());
+
+        verify(wrappingRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetWrappingsToList_EmptyList() {
+        when(wrappingRepository.findAll()).thenReturn(List.of());
+
+        List<WrappingResponseDTO> responseList = wrappingService.getWrappingsToList();
+
+        assertNotNull(responseList);
+        assertTrue(responseList.isEmpty());
+
+        verify(wrappingRepository, times(1)).findAll();
     }
 }

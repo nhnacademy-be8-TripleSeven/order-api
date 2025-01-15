@@ -5,9 +5,11 @@ import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyUpdateR
 import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
 import com.tripleseven.orderapi.entity.defaultpointpolicy.PointPolicyType;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.PointHistoryNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
+import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,22 +17,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService {
     private final QueryDslDefaultPointPolicyRepository queryDslDefaultPointPolicyRepository;
     private final DefaultPointPolicyRepository defaultPointPolicyRepository;
     private final PointPolicyRepository pointPolicyRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public DefaultPointPolicyDTO getDefaultPointPolicyDTO(PointPolicyType type) {
         return queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(type);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DefaultPointPolicyDTO> getDefaultPointPolicies() {
         List<DefaultPointPolicyDTO> defaultPointPolicies = queryDslDefaultPointPolicyRepository.findDefaultPointPolicies();
         if (Objects.isNull(defaultPointPolicies)) {
@@ -41,16 +44,12 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
 
 
     @Override
+    @Transactional
     public Long updateDefaultPoint(DefaultPointPolicyUpdateRequestDTO request) {
         DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(request.getType());
 
-        Optional<PointPolicy> optionalPointPolicy = pointPolicyRepository.findById(request.getPointPolicyId());
-
-        if (optionalPointPolicy.isEmpty()) {
-            throw new PointHistoryNotFoundException("not found id: " + request.getPointPolicyId());
-        }
-
-        PointPolicy pointPolicy = optionalPointPolicy.get();
+        PointPolicy pointPolicy = pointPolicyRepository.findById(request.getPointPolicyId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         if (Objects.isNull(defaultPointPolicy)) {
             defaultPointPolicy = new DefaultPointPolicy();
@@ -58,6 +57,7 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
                     request.getType(),
                     pointPolicy
             );
+            defaultPointPolicy = defaultPointPolicyRepository.save(defaultPointPolicy);
         } else {
             defaultPointPolicy.ofUpdate(
                     pointPolicy
@@ -68,7 +68,8 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
     }
 
     @Override
-    public DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type){
+    @Transactional(readOnly = true)
+    public DefaultPointPolicyDTO getDefaultPointPolicy(PointPolicyType type) {
         DefaultPointPolicy defaultPointPolicy = defaultPointPolicyRepository.findDefaultPointPolicyByPointPolicyType(type);
 
         return new DefaultPointPolicyDTO(
@@ -80,5 +81,6 @@ public class DefaultPointPolicyServiceImpl implements DefaultPointPolicyService 
                 defaultPointPolicy.getPointPolicy().getRate()
         );
     }
+
 
 }

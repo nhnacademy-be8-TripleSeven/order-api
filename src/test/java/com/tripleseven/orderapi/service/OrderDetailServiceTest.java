@@ -1,16 +1,22 @@
 package com.tripleseven.orderapi.service;
 
+import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
+import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
+import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailServiceImpl;
+import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,12 +32,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderDetailServiceTest {
+class OrderDetailServiceTest {
     @Mock
     private OrderDetailRepository orderDetailRepository;
 
     @Mock
     private OrderGroupRepository orderGroupRepository;
+
+    @Mock
+    private DeliveryInfoRepository deliveryInfoRepository;
+
+    @Mock
+    private BookCouponApiClient bookCouponApiClient;
+
+    @Mock
+    private PointHistoryRepository pointHistoryRepository;
+
+    @Mock
+    private OrderGroupPointHistoryService orderGroupPointHistoryService;
 
     @InjectMocks
     private OrderDetailServiceImpl orderDetailService;
@@ -78,7 +96,7 @@ public class OrderDetailServiceTest {
     void testGetOrderDetailById_Fail() {
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.getOrderDetailService(1L));
+        assertThrows(CustomException.class, () -> orderDetailService.getOrderDetailService(1L));
         verify(orderDetailRepository, times(1)).findById(1L);
     }
 
@@ -107,41 +125,55 @@ public class OrderDetailServiceTest {
 
     @Test
     void testCreateOrderDetail_Fail() {
+        OrderDetailCreateRequestDTO requestDTO = new OrderDetailCreateRequestDTO(2L, 100, 100, 100, 1L);
+
         when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(OrderGroupNotFoundException.class, () -> orderDetailService.createOrderDetail(
-                new OrderDetailCreateRequestDTO(
-                        2L,
-                        100,
-                        100,
-                        100,
-                        1L)));
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.createOrderDetail(requestDTO));
+
+        assertNotNull(exception);
+        verify(orderGroupRepository, times(1)).findById(1L);
     }
 
     @Test
     void testUpdateOrderDetailStatus_Success() {
-//        when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.of(orderDetail));
-//
-//        List<OrderDetailResponseDTO> response = orderDetailService.updateOrderDetailStatus(
-//                List.of(1L, 2L),
-//                OrderStatus.PAYMENT_COMPLETED);
-//
-//        assertNotNull(response);
-//        assertEquals(1L, response.getBookId());
-//        assertEquals(3, response.getAmount());
-//        assertEquals(10000, response.getPrimePrice());
-//        assertEquals(9000, response.getDiscountPrice());
-//
-//        assertEquals(Status.PAYMENT_COMPLETED, response.getStatus());
+        OrderDetail orderDetail1 = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail1, "id", 1L);
+        orderDetail1.ofCreate(1L, 2, 5000, 4500, orderGroup);
+        orderDetail1.ofUpdateStatus(OrderStatus.PAYMENT_PENDING);
 
-//        verify(orderDetailRepository, times(2)).findById(anyLong());
+        OrderDetail orderDetail2 = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail2, "id", 2L);
+        orderDetail2.ofCreate(2L, 1, 3000, 2800, orderGroup);
+        orderDetail2.ofUpdateStatus(OrderStatus.PAYMENT_PENDING);
+
+        List<Long> ids = List.of(1L, 2L);
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail1));
+        when(orderDetailRepository.findById(2L)).thenReturn(Optional.of(orderDetail2));
+
+        List<OrderDetailResponseDTO> response = orderDetailService.updateOrderDetailStatus(ids, OrderStatus.ORDER_CANCELED);
+
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(OrderStatus.ORDER_CANCELED, response.get(0).getOrderStatus());
+        assertEquals(OrderStatus.ORDER_CANCELED, response.get(1).getOrderStatus());
+
+        verify(orderDetailRepository, times(2)).findById(anyLong());
     }
 
     @Test
     void testUpdateOrderDetailStatus_Fail() {
+        List<Long> orderIds = List.of(1L);
+        OrderStatus status = OrderStatus.PAYMENT_COMPLETED;
+
         when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
-        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.updateOrderDetailStatus(
-                List.of(1L),
-                OrderStatus.PAYMENT_COMPLETED));
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.updateOrderDetailStatus(orderIds, status));
+
+        assertNotNull(exception);
+        verify(orderDetailRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -156,7 +188,7 @@ public class OrderDetailServiceTest {
     @Test
     void testDeleteOrderDetail_Fail() {
         when(orderDetailRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(OrderDetailNotFoundException.class, () -> orderDetailService.deleteOrderDetail(1L));
+        assertThrows(CustomException.class, () -> orderDetailService.deleteOrderDetail(1L));
         verify(orderDetailRepository, times(0)).deleteById(anyLong());
     }
 
@@ -186,5 +218,66 @@ public class OrderDetailServiceTest {
         List<OrderDetailResponseDTO> orderDetailsToList = orderDetailService.getOrderDetailsToList(1L);
         assertNotNull(orderDetailsToList);
         verify(orderDetailRepository, times(1)).findAllByOrderGroupId(anyLong());
+    }
+
+    @Test
+    void testUpdateAdminOrderDetailStatus_Success() {
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail));
+        when(orderGroupRepository.findById(1L)).thenReturn(Optional.of(orderGroup));
+        when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.of(new DeliveryInfo()));
+        when(bookCouponApiClient.getBookName(1L)).thenReturn("Test Book");
+
+        PointHistory pointHistory = PointHistory.ofCreate(
+                HistoryTypes.EARN, 9000, "Refund: Test Book", orderGroup.getUserId());
+        when(pointHistoryRepository.save(any())).thenReturn(pointHistory);
+
+        List<OrderDetailResponseDTO> response = orderDetailService.updateAdminOrderDetailStatus(
+                List.of(1L),
+                OrderStatus.RETURNED);
+
+        assertNotNull(response);
+        assertEquals(1, response.size());
+        assertEquals(OrderStatus.RETURNED, response.get(0).getOrderStatus());
+
+        verify(orderDetailRepository, times(1)).findById(1L);
+        verify(pointHistoryRepository, times(1)).save(any());
+    }
+
+    @Test
+    void testUpdateAdminOrderDetailStatus_Fail() {
+        List<Long> orderIds = List.of(1L);
+        OrderStatus newStatus = OrderStatus.RETURNED;
+
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.updateAdminOrderDetailStatus(orderIds, newStatus));
+
+        assertNotNull(exception);
+        verify(orderDetailRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testHasUserPurchasedBook_Success() {
+        when(orderDetailRepository.existsByOrderGroupUserIdAndBookId(1L, 1L))
+                .thenReturn(true);
+
+        boolean result = orderDetailService.hasUserPurchasedBook(1L, 1L);
+
+        assertTrue(result);
+        verify(orderDetailRepository, times(1))
+                .existsByOrderGroupUserIdAndBookId(1L, 1L);
+    }
+
+    @Test
+    void testHasUserPurchasedBook_Fail() {
+        when(orderDetailRepository.existsByOrderGroupUserIdAndBookId(1L, 1L))
+                .thenReturn(false);
+
+        boolean result = orderDetailService.hasUserPurchasedBook(1L, 1L);
+
+        assertFalse(result);
+        verify(orderDetailRepository, times(1))
+                .existsByOrderGroupUserIdAndBookId(1L, 1L);
     }
 }

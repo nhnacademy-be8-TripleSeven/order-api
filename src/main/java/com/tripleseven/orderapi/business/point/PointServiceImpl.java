@@ -1,13 +1,20 @@
 package com.tripleseven.orderapi.business.point;
 
+import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
+import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
+import com.tripleseven.orderapi.entity.defaultpointpolicy.PointPolicyType;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.ordergrouppointhistory.OrderGroupPointHistory;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.pointpolicy.PointPolicy;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.PointPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
+import com.tripleseven.orderapi.repository.defaultpointpolicy.DefaultPointPolicyRepository;
+import com.tripleseven.orderapi.repository.defaultpointpolicy.querydsl.QueryDslDefaultPointPolicyRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.ordergrouppointhistory.OrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Objects;
 
 @Transactional
 @Service
@@ -24,16 +31,11 @@ import java.util.Optional;
 public class PointServiceImpl implements PointService {
 
     private final PointHistoryRepository pointHistoryRepository;
-    private final PointPolicyRepository pointPolicyRepository;
     private final OrderGroupRepository orderGroupRepository;
-
-    private static final Long BASIC_EARN_POINT_POLICY_ID = 1L;
-    private static final Long REGISTER_POINT_POLICY_ID = 2L;
-    private static final Long REVIEW_POINT_POLICY_ID = 3L;
-    private static final Long REVIEW_AND_PHOTO_POINT_POLICY_ID = 4L;
-
-    // 결제 관련 정책 ID를 상수로 정의
-//    private static final Long PAYMENT_POLICY_ID = 3L;
+    private final QueryDslDefaultPointPolicyRepository queryDslDefaultPointPolicyRepository;
+    private final OrderGroupPointHistoryRepository orderGroupPointHistoryRepository;
+    private final PointPolicyRepository pointPolicyRepository;
+    private final DefaultPointPolicyRepository defaultPointPolicyRepository;
 
     // 결제 시 포인트 사용 내역 생성
     @Override
@@ -42,77 +44,82 @@ public class PointServiceImpl implements PointService {
                 HistoryTypes.SPEND,
                 memberId,
                 -usePoint, // 사용 포인트는 음수로 저장
-                "포인트 사용",
-                orderGroupId
+                "포인트 사용"
         );
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
+
+        saveOrderGroupHistory(orderGroupId, savedHistory);
+
         return PointHistoryResponseDTO.fromEntity(savedHistory);
     }
 
     // 결제 시 포인트 적립 내역 생성
     @Override
     public PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, int usedMoney, Long orderGroupId) {
-        PointPolicy policy = getPointPolicyById(BASIC_EARN_POINT_POLICY_ID); // 적립 정책 조회
+        DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.DEFAULT_BUY);
 
-        int earnPoint = policy.getRate().multiply(BigDecimal.valueOf(usedMoney)).intValue();
-
-        PointHistory pointHistory = createPointHistory(
-                HistoryTypes.EARN,
-                memberId,
-                earnPoint, // 정책에 따라 적립 포인트 결정
-                policy.getName(),
-                orderGroupId
-        );
-        PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
-        return PointHistoryResponseDTO.fromEntity(savedHistory);
-    }
-
-    @Override
-    public PointHistoryResponseDTO createPointHistoryByAmount(Long memberId, Long policyId, Long orderGroupId) {
-        PointPolicy policy = getPointPolicyById(policyId); // 적립 정책 조회
-
-
-        PointHistory pointHistory = createPointHistory(
-                HistoryTypes.EARN,
-                memberId,
-                policy.getAmount(), // 정책에 따라 적립 포인트 결정
-                policy.getName(),
-                orderGroupId
-        );
-        PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
-        return PointHistoryResponseDTO.fromEntity(savedHistory);
-    }
-
-    @Override
-    public PointHistoryResponseDTO createPointHistoryByRate(Long memberId, int usedMoney, Long policyId, Long orderGroupId) {
-        PointPolicy policy = getPointPolicyById(policyId); // 적립 정책 조회
-
-        int earnPoint = policy.getRate().multiply(BigDecimal.valueOf(usedMoney)).intValue();
+        int earnPoint = dto.getAmount() != 0 ?
+                dto.getAmount() : dto.getRate().multiply(BigDecimal.valueOf(usedMoney)).intValue();
 
         PointHistory pointHistory = createPointHistory(
                 HistoryTypes.EARN,
                 memberId,
                 earnPoint, // 정책에 따라 적립 포인트 결정
-                policy.getName(),
-                orderGroupId
+                dto.getName()
         );
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
+
+        saveOrderGroupHistory(orderGroupId, savedHistory);
+
         return PointHistoryResponseDTO.fromEntity(savedHistory);
     }
 
+    // 회원 가입 포인트 적립
+    @Override
+    @Transactional
+    public PointHistoryResponseDTO createRegisterPointHistory(Long memberId) {
 
-    // 정책 조회 공통 메서드
-    private PointPolicy getPointPolicyById(Long policyId) {
-        return pointPolicyRepository.findById(policyId)
-                .orElseThrow(() -> new PointPolicyNotFoundException("PointPolicyId=" + policyId + " not found"));
+        String earnRegisterComment = "회원 가입 적립";
+
+        // 회원가입 적립 내력에 있나 체크
+        pointHistoryRepository.findPointHistoryByComment(memberId, earnRegisterComment)
+                .ifPresent(history -> {
+                    throw new CustomException(ErrorCode.ALREADY_EXIST_CONFLICT);
+                });
+
+        DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.REGISTER);
+
+        if (Objects.isNull(dto)) {
+            PointPolicy pointPolicy = new PointPolicy();
+            pointPolicy.ofCreate("회원 가입 정책", 5000, BigDecimal.ZERO);
+
+            PointPolicy savedPointPolicy = pointPolicyRepository.save(pointPolicy);
+
+            DefaultPointPolicy defaultPointPolicy = new DefaultPointPolicy();
+            defaultPointPolicy.ofCreate(PointPolicyType.REGISTER, savedPointPolicy);
+
+            DefaultPointPolicy savedDefault = defaultPointPolicyRepository.save(defaultPointPolicy);
+            dto = new DefaultPointPolicyDTO(
+                    savedDefault.getId(),
+                    savedDefault.getPointPolicyType(),
+                    savedDefault.getPointPolicy()
+            );
+        }
+
+        PointHistory pointHistory = createPointHistory(
+                HistoryTypes.EARN,
+                memberId,
+                dto.getAmount(),
+                earnRegisterComment
+        );
+
+        PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
+
+        return PointHistoryResponseDTO.fromEntity(savedPointHistory);
     }
 
     // PointHistory 생성 공통 메서드
-    private PointHistory createPointHistory(HistoryTypes type, Long memberId, int amount, String comment, Long orderGroupId) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderGroupId);
-        if(optionalOrderGroup.isEmpty()){
-            throw new OrderGroupNotFoundException(orderGroupId);
-        }
+    private PointHistory createPointHistory(HistoryTypes type, Long memberId, int amount, String comment) {
         return new PointHistory(
                 type,
                 amount,
@@ -121,4 +128,17 @@ public class PointServiceImpl implements PointService {
                 memberId
         );
     }
+
+    private void saveOrderGroupHistory(Long id, PointHistory pointHistory) {
+        OrderGroup orderGroup = orderGroupRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
+        OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
+        orderGroupPointHistory.ofCreate(
+                pointHistory,
+                orderGroup
+        );
+        orderGroupPointHistoryRepository.save(orderGroupPointHistory);
+    }
+
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -22,21 +21,6 @@ public enum OrderStatus {
 
     OrderStatus(String korean) {
         this.korean = korean;
-    }
-
-    @JsonCreator
-    public static OrderStatus fromString(String str) {
-        for (OrderStatus orderStatus : OrderStatus.values()) {
-            if (orderStatus.name().equalsIgnoreCase(str)) {
-                return orderStatus;
-            }
-        }
-        return ERROR;
-    }
-
-    @JsonValue
-    public String toJson() {
-        return this.name().toLowerCase();
     }
 
     public static List<OrderStatus> mainOrderStatuses() {

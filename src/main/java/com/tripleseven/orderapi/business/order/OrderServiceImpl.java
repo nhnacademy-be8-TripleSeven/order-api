@@ -5,14 +5,13 @@ import com.tripleseven.orderapi.dto.order.*;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.wrapping.WrappingResponseDTO;
-import com.tripleseven.orderapi.repository.deliveryinfo.querydsl.QueryDslDeliveryInfoRepository;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
-import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
 import com.tripleseven.orderapi.service.pay.PayService;
-import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.wrapping.WrappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,33 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderInfoDTO> getOrderInfos(Long orderGroupId) {
+    public OrderPayDetailDTO getOrderPayDetail(Long userId, Long orderGroupId) {
+        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(orderGroupId);
+
+        if (response.getUserId() != userId) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return new OrderPayDetailDTO(
+                this.getOrderInfos(orderGroupId),
+                this.getOrderGroupInfo(orderGroupId),
+                this.getDeliveryInfo(orderGroupId),
+                this.getOrderPayInfo(orderGroupId)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderPayDetailDTO getOrderPayDetailAdmin(Long orderGroupId) {
+        return new OrderPayDetailDTO(
+                this.getOrderInfos(orderGroupId),
+                this.getOrderGroupInfo(orderGroupId),
+                this.getDeliveryInfo(orderGroupId),
+                this.getOrderPayInfo(orderGroupId)
+        );
+    }
+
+    private List<OrderInfoDTO> getOrderInfos(Long orderGroupId) {
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
 
         List<OrderInfoDTO> orderInfoList = new ArrayList<>();
@@ -55,9 +80,7 @@ public class OrderServiceImpl implements OrderService {
         return orderInfoList;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public OrderGroupInfoDTO getOrderGroupInfo(Long orderGroupId) {
+    private OrderGroupInfoDTO getOrderGroupInfo(Long orderGroupId) {
         OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.getOrderGroupById(orderGroupId);
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
 
@@ -89,27 +112,12 @@ public class OrderServiceImpl implements OrderService {
                 earnedPoint);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public DeliveryInfoDTO getDeliveryInfo(Long orderGroupId) {
+    private DeliveryInfoDTO getDeliveryInfo(Long orderGroupId) {
         return deliveryInfoService.getDeliveryInfoDTO(orderGroupId);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public OrderPayInfoDTO getOrderPayInfo(Long orderGroupId) {
+    private OrderPayInfoDTO getOrderPayInfo(Long orderGroupId) {
         return payService.getOrderPayInfo(orderGroupId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public OrderPayDetailDTO getOrderPayDetail(Long orderGroupId) {
-        return new OrderPayDetailDTO(
-                getOrderInfos(orderGroupId),
-                getOrderGroupInfo(orderGroupId),
-                getDeliveryInfo(orderGroupId),
-                getOrderPayInfo(orderGroupId)
-        );
     }
 
 

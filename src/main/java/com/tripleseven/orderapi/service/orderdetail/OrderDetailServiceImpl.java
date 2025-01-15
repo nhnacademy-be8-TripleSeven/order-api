@@ -10,10 +10,8 @@ import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
-import com.tripleseven.orderapi.exception.ReturnedFailedException;
-import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.OrderDetailNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
@@ -27,7 +25,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,24 +39,18 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional(readOnly = true)
     public OrderDetailResponseDTO getOrderDetailService(Long id) {
-        Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
-        if (optionalOrderDetail.isEmpty()) {
-            throw new OrderDetailNotFoundException(id);
-        }
+        OrderDetail orderDetail = orderDetailRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        return OrderDetailResponseDTO.fromEntity(optionalOrderDetail.get());
+
+        return OrderDetailResponseDTO.fromEntity(orderDetail);
     }
 
     @Override
     @Transactional
     public OrderDetailResponseDTO createOrderDetail(OrderDetailCreateRequestDTO orderDetailCreateRequestDTO) {
-        Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderDetailCreateRequestDTO.getOrderGroupId());
-
-        if (optionalOrderGroup.isEmpty()) {
-            throw new OrderGroupNotFoundException(orderDetailCreateRequestDTO.getOrderGroupId());
-        }
-
-        OrderGroup orderGroup = optionalOrderGroup.get();
+        OrderGroup orderGroup = orderGroupRepository.findById(orderDetailCreateRequestDTO.getOrderGroupId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.ofCreate(
@@ -78,25 +69,17 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional
     public List<OrderDetailResponseDTO> updateOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
-        if (ids.isEmpty()) {
-            throw new RuntimeException();
-        }
         List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
 
         if (orderStatus.equals(OrderStatus.ORDER_CANCELED)) {
 
             for (Long id : ids) {
-                Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
-
-                if (optionalOrderDetail.isEmpty()) {
-                    throw new OrderDetailNotFoundException(id);
-                }
-
-                OrderDetail orderDetail = optionalOrderDetail.get();
+                OrderDetail orderDetail = orderDetailRepository.findById(id)
+                        .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
                 // 결제 대기 중이나 결제 완료 일때만 취소 가능
                 if (!orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) && !orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
-                    throw new RuntimeException();
+                    throw new CustomException(ErrorCode.CANCEL_BAD_REQUEST);
                 }
                 orderDetail.ofUpdateStatus(orderStatus);
 
@@ -104,39 +87,29 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             }
         } else {
             for (Long id : ids) {
-                Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
-
-                if (optionalOrderDetail.isEmpty()) {
-                    throw new OrderDetailNotFoundException(id);
-                }
-
-                OrderDetail orderDetail = optionalOrderDetail.get();
+                OrderDetail orderDetail = orderDetailRepository.findById(id)
+                        .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
                 if (!orderDetail.getOrderStatus().equals(OrderStatus.SHIPPING) || !orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                    throw new RuntimeException();
+                    throw new CustomException(ErrorCode.REFUND_BAD_REQUEST);
                 }
 
                 // 배송 완료 될 시에만 로직 실행
                 if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
                     Long orderGroupId = orderDetail.getOrderGroup().getId();
 
-                    Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderGroupId);
-                    if (optionalOrderGroup.isEmpty()) {
-                        throw new OrderGroupNotFoundException(orderGroupId);
+                    if (!orderGroupRepository.existsById(orderGroupId)) {
+                        throw new CustomException(ErrorCode.ID_NOT_FOUND);
                     }
 
-                    Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(orderGroupId);
+                    DeliveryInfo deliveryInfo = deliveryInfoRepository.findById(orderGroupId)
+                            .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-                    if (optionalDeliveryInfo.isEmpty()) {
-                        throw new DeliveryInfoNotFoundException(id);
-                    }
-
-                    DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
                     LocalDate today = LocalDate.now();
 
                     // 출고일 기준
-                    if (today.isAfter(deliveryInfo.getShippingAt().plusMonths(30))) {
-                        throw new ReturnedFailedException("over day :" + deliveryInfo.getShippingAt());
+                    if (today.isAfter(deliveryInfo.getShippingAt().plusDays(30))) {
+                        throw new CustomException(ErrorCode.RETURN_EXPIRED_UNPROCESSABLE_ENTITY);
                     }
                     orderDetail.ofUpdateStatus(orderStatus);
                 }
@@ -152,36 +125,27 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public List<OrderDetailResponseDTO> updateAdminOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
         List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
         for (Long id : ids) {
-            Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(id);
-
-            if (optionalOrderDetail.isEmpty()) {
-                throw new OrderDetailNotFoundException(id);
-            }
-
-            OrderDetail orderDetail = optionalOrderDetail.get();
+            OrderDetail orderDetail = orderDetailRepository.findById(id)
+                    .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
             // 반품 시 환불 로직
             if (orderStatus.equals(OrderStatus.RETURNED)) {
                 Long orderGroupId = orderDetail.getOrderGroup().getId();
-                Optional<OrderGroup> optionalOrderGroup = orderGroupRepository.findById(orderGroupId);
-                if (optionalOrderDetail.isEmpty()) {
-                    throw new OrderGroupNotFoundException(orderGroupId);
-                }
-                OrderGroup orderGroup = optionalOrderGroup.get();
+
+                OrderGroup orderGroup = orderGroupRepository.findById(orderGroupId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
                 Long userId = orderGroup.getUserId();
+
                 // 환불 금액 (쿠폰은 재발급 x)
                 int refundPrice = orderDetail.getPrimePrice() - orderDetail.getDiscountPrice();
 
                 String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
 
                 // 배송비 감면
-                Optional<DeliveryInfo> optionalDeliveryInfo = deliveryInfoRepository.findById(orderGroupId);
+                DeliveryInfo deliveryInfo = deliveryInfoRepository.findById(orderGroupId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-                if (optionalDeliveryInfo.isEmpty()) {
-                    throw new DeliveryInfoNotFoundException(orderGroupId);
-                }
-
-                DeliveryInfo deliveryInfo = optionalDeliveryInfo.get();
                 LocalDate today = LocalDate.now();
 
                 // 관리자는 무조건 바꿀 수 있도록
@@ -218,7 +182,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Transactional
     public void deleteOrderDetail(Long id) {
         if (!orderDetailRepository.existsById(id)) {
-            throw new OrderDetailNotFoundException(id);
+            throw new CustomException(ErrorCode.ID_NOT_FOUND);
         }
         orderDetailRepository.deleteById(id);
     }
@@ -233,12 +197,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         }
 
         return orderDetails.stream().map(OrderDetailResponseDTO::fromEntity).toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrderDetailResponseDTO> getOrderDetailsForGroupWithStatus(Long orderGroupId, OrderStatus orderStatus) {
-        return List.of();
     }
 
     @Override

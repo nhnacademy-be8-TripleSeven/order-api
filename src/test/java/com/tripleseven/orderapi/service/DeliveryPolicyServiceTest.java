@@ -4,7 +4,7 @@ import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyCreateRequestDT
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyResponseDTO;
 import com.tripleseven.orderapi.dto.deliverypolicy.DeliveryPolicyUpdateRequestDTO;
 import com.tripleseven.orderapi.entity.deliverypolicy.DeliveryPolicy;
-import com.tripleseven.orderapi.exception.notfound.DeliveryPolicyNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.deliverypolicy.DeliveryPolicyRepository;
 import com.tripleseven.orderapi.service.deliverypolicy.DeliveryPolicyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-public class DeliveryPolicyServiceTest {
+class DeliveryPolicyServiceTest {
     @Mock
     private DeliveryPolicyRepository deliveryPolicyRepository;
 
@@ -55,7 +56,7 @@ public class DeliveryPolicyServiceTest {
     void testFindById_Fail() {
         when(deliveryPolicyRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.getDeliveryPolicy(1L));
+        assertThrows(CustomException.class, () -> deliveryPolicyService.getDeliveryPolicy(1L));
         verify(deliveryPolicyRepository, times(1)).findById(1L);
     }
 
@@ -85,10 +86,12 @@ public class DeliveryPolicyServiceTest {
 
     @Test
     void testCreateDeliveryPolicy_Fail() {
-        assertThrows(NullPointerException.class, () -> deliveryPolicyService.createDeliveryPolicy(
-                new DeliveryPolicyCreateRequestDTO(
-                        null,
-                        -1)));
+        DeliveryPolicyCreateRequestDTO requestDTO = new DeliveryPolicyCreateRequestDTO(null, -1);
+
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> deliveryPolicyService.createDeliveryPolicy(requestDTO));
+
+        assertNotNull(exception.getMessage());
     }
 
     @Test
@@ -109,7 +112,7 @@ public class DeliveryPolicyServiceTest {
         DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));
+        assertThrows(CustomException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));
         verify(deliveryPolicyRepository, times(1)).findById(1L);
     }
 
@@ -126,8 +129,24 @@ public class DeliveryPolicyServiceTest {
     @Test
     void testDeleteDeliveryPolicy_Fail() {
         when(deliveryPolicyRepository.existsById(1L)).thenReturn(false);
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
+        assertThrows(CustomException.class, () -> deliveryPolicyService.deleteDeliveryPolicy(1L));
 
         verify(deliveryPolicyRepository, times(0)).deleteById(1L);
+    }
+
+    @Test
+    void testGetAllDeliveryPolicies_Success() {
+        when(deliveryPolicyRepository.findAll()).thenReturn(List.of(deliveryPolicy, deliveryPolicy));
+
+        List<DeliveryPolicyResponseDTO> responses = deliveryPolicyService.getAllDeliveryPolicies();
+
+        assertEquals(2, responses.size());
+        assertEquals("Test DeliveryPolicy", responses.get(0).getName());
+        assertEquals(1000, responses.get(0).getPrice());
+        assertEquals("Test DeliveryPolicy", responses.get(1).getName());
+        assertEquals(1000, responses.get(1).getPrice());
+
+        // Verifying the repository interaction
+        verify(deliveryPolicyRepository, times(1)).findAll();
     }
 }

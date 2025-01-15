@@ -7,11 +7,11 @@ import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
 import org.json.simple.JSONObject;
 
 public interface PayService {
-    void save(Long userId, JSONObject response);
+    void createPay(Long userId, JSONObject response);
 
-    void payCancel(JSONObject response);
+    void cancelPay(JSONObject response);
 
-    PayInfoResponseDTO getOrderInfo(Long userId, PayInfoRequestDTO requestDTO);
+    PayInfoResponseDTO createPayInfo(Long userId, String guestId, PayInfoRequestDTO requestDTO);
 
     OrderPayInfoDTO getOrderPayInfo(Long orderId);
 }

@@ -12,13 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class DeliveryInfoRepositoryTest {
+class DeliveryInfoRepositoryTest {
     @Autowired
     private DeliveryInfoRepository deliveryInfoRepository;
 
@@ -38,7 +37,7 @@ public class DeliveryInfoRepositoryTest {
         wrapping.ofCreate("Test Wrapping", 100);
         Wrapping savedWrapping = wrappingRepository.save(wrapping);
         OrderGroup orderGroup = new OrderGroup();
-        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678","01012345678", 1000, "Test Address", savedWrapping);
+        orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", savedWrapping);
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
         deliveryInfo = new DeliveryInfo();
         deliveryInfo.ofCreate(savedOrderGroup);
@@ -100,4 +99,5 @@ public class DeliveryInfoRepositoryTest {
 
         assertTrue(exists);
     }
+
 }

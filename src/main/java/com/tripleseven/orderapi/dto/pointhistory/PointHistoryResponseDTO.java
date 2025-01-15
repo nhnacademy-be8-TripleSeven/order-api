@@ -19,12 +19,12 @@ public class PointHistoryResponseDTO {
 
     private final int amount;
 
-    private final LocalDateTime changed_at;
+    private final LocalDateTime changedAt;
 
     private final String comment;
 
     @Builder
-    public PointHistoryResponseDTO(Long id, HistoryTypes types, int amount, LocalDateTime changed_at, String comment) {
+    public PointHistoryResponseDTO(Long id, HistoryTypes types, int amount, LocalDateTime changedAt, String comment) {
         // Validate input parameters using Objects.isNull()
         if (Objects.isNull(id)) {
             throw new IllegalArgumentException("ID cannot be null");
@@ -33,7 +33,7 @@ public class PointHistoryResponseDTO {
             throw new IllegalArgumentException("History Type cannot be null");
         }
 
-        if (Objects.isNull(changed_at)) {
+        if (Objects.isNull(changedAt)) {
             throw new IllegalArgumentException("Changed At cannot be null");
         }
         if (Objects.isNull(comment) || comment.trim().isEmpty()) {
@@ -43,7 +43,7 @@ public class PointHistoryResponseDTO {
         this.id = id;
         this.types = types;
         this.amount = amount;
-        this.changed_at = changed_at;
+        this.changedAt = changedAt;
         this.comment = comment;
     }
 

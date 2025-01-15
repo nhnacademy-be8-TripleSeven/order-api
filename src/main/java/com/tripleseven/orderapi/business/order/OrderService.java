@@ -1,17 +1,10 @@
 package com.tripleseven.orderapi.business.order;
 
-import com.tripleseven.orderapi.dto.order.*;
-
-import java.util.List;
+import com.tripleseven.orderapi.dto.order.OrderPayDetailDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface OrderService {
-    List<OrderInfoDTO> getOrderInfos(Long orderGroupId);
+    OrderPayDetailDTO getOrderPayDetail(Long userId, Long orderGroupId);
 
-    OrderGroupInfoDTO getOrderGroupInfo(Long orderGroupId);
-
-    DeliveryInfoDTO getDeliveryInfo(Long orderGroupId);
-
-    OrderPayInfoDTO getOrderPayInfo(Long orderGroupId);
-
-    OrderPayDetailDTO getOrderPayDetail(Long orderGroupId);
+    OrderPayDetailDTO getOrderPayDetailAdmin(Long orderGroupId);
 }

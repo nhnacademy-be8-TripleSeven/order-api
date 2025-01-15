@@ -1,14 +1,15 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
+import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoUpdateRequestDTO;
+import com.tripleseven.orderapi.dto.order.DeliveryInfoDTO;
 import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
-import com.tripleseven.orderapi.exception.notfound.DeliveryInfoNotFoundException;
-import com.tripleseven.orderapi.exception.notfound.OrderGroupNotFoundException;
+import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
+import com.tripleseven.orderapi.repository.deliveryinfo.querydsl.QueryDslDeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +27,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class DeliveryInfoServiceTest {
+class DeliveryInfoServiceTest {
     @Mock
     private DeliveryInfoRepository deliveryInfoRepository;
 
     @Mock
     private OrderGroupRepository orderGroupRepository;
 
+    @Mock
+    private QueryDslDeliveryInfoRepository queryDslDeliveryInfoRepository;
     @InjectMocks
     private DeliveryInfoServiceImpl deliveryInfoService;
 
@@ -81,7 +84,7 @@ public class DeliveryInfoServiceTest {
     @Test
     void testFindById_Fail() {
         when(deliveryInfoRepository.findById(any())).thenReturn(Optional.empty());
-        assertThrows(DeliveryInfoNotFoundException.class, () -> deliveryInfoService.getDeliveryInfoById(1L));
+        assertThrows(CustomException.class, () -> deliveryInfoService.getDeliveryInfoById(1L));
         verify(deliveryInfoRepository, times(1)).findById(1L);
     }
 
@@ -92,7 +95,8 @@ public class DeliveryInfoServiceTest {
 
         DeliveryInfoResponseDTO response = deliveryInfoService.createDeliveryInfo(
                 new DeliveryInfoCreateRequestDTO(
-                        1L
+                        1L,
+                        arrivedAt
                 ));
 
         assertNotNull(response);
@@ -103,9 +107,12 @@ public class DeliveryInfoServiceTest {
 
     @Test
     void testCreateDeliveryInfo_Fail() {
-        assertThrows(OrderGroupNotFoundException.class, () -> deliveryInfoService.createDeliveryInfo(
-                new DeliveryInfoCreateRequestDTO(
-                        null)));
+        DeliveryInfoCreateRequestDTO requestDTO = new DeliveryInfoCreateRequestDTO(1L, arrivedAt);
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> deliveryInfoService.createDeliveryInfo(requestDTO));
+
+        assertNotNull(exception);
     }
 
     @Test
@@ -129,7 +136,7 @@ public class DeliveryInfoServiceTest {
         DeliveryInfoUpdateRequestDTO updateRequest = new DeliveryInfoUpdateRequestDTO("Test DeliveryInfo",
                 12345678, arrivedAt);
         when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(DeliveryInfoNotFoundException.class, () -> deliveryInfoService.updateDeliveryInfo(1L, updateRequest));
+        assertThrows(CustomException.class, () -> deliveryInfoService.updateDeliveryInfo(1L, updateRequest));
         verify(deliveryInfoRepository, times(1)).findById(1L);
     }
 
@@ -146,7 +153,57 @@ public class DeliveryInfoServiceTest {
     @Test
     void testDeleteDeliveryInfo_Fail() {
         when(deliveryInfoRepository.existsById(1L)).thenReturn(false);
-        assertThrows(DeliveryInfoNotFoundException.class, () -> deliveryInfoService.deleteDeliveryInfo(1L));
+        assertThrows(CustomException.class, () -> deliveryInfoService.deleteDeliveryInfo(1L));
         verify(deliveryInfoRepository, times(0)).deleteById(1L);
+    }
+
+    @Test
+    void testUpdateDeliveryInfoShippingAt_Success() {
+        when(deliveryInfoRepository.findById(1L)).thenReturn(Optional.of(deliveryInfo));
+
+        DeliveryInfoResponseDTO response = deliveryInfoService.updateDeliveryInfoShippingAt(1L);
+
+        assertNotNull(response);
+        assertEquals(LocalDate.now(), response.getShippingAt());
+
+        verify(deliveryInfoRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testUpdateDeliveryInfoShippingAt_Fail() {
+        when(deliveryInfoRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class, () -> deliveryInfoService.updateDeliveryInfoShippingAt(1L));
+
+        verify(deliveryInfoRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testGetDeliveryInfoDTO_Success() {
+        DeliveryInfoDTO deliveryInfoDTO = new DeliveryInfoDTO(
+                "Test Delivery Info", 12345678, LocalDate.now(), 1L, LocalDate.now(),
+                "Test Orderer", "Test Recipient", "01012345678", "Test Address", null
+        );
+
+        when(queryDslDeliveryInfoRepository.getDeliveryInfo(1L)).thenReturn(deliveryInfoDTO);
+
+        DeliveryInfoDTO response = deliveryInfoService.getDeliveryInfoDTO(1L);
+
+        assertNotNull(response);
+        assertEquals(deliveryInfoDTO.getDeliveryInfoName(), response.getDeliveryInfoName());
+        assertEquals(deliveryInfoDTO.getOrderId(), response.getOrderId());
+
+        verify(queryDslDeliveryInfoRepository, times(1)).getDeliveryInfo(1L);
+    }
+
+    @Test
+    void testGetDeliveryInfoDTO_Fail() {
+        when(queryDslDeliveryInfoRepository.getDeliveryInfo(1L)).thenReturn(null);
+
+        DeliveryInfoDTO response = deliveryInfoService.getDeliveryInfoDTO(1L);
+
+        assertNull(response);
+
+        verify(queryDslDeliveryInfoRepository, times(1)).getDeliveryInfo(1L);
     }
 }

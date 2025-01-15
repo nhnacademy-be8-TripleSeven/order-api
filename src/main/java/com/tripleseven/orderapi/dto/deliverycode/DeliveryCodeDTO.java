@@ -8,7 +8,7 @@ public class DeliveryCodeDTO {
     @JsonProperty("Code")
     String code;
     @JsonProperty("International")
-    boolean International;
+    boolean international;
     @JsonProperty("Name")
     String name;
 }

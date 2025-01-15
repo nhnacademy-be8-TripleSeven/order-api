@@ -19,7 +19,5 @@ public interface OrderDetailService {
 
     List<OrderDetailResponseDTO> getOrderDetailsToList(Long orderGroupId);
 
-    List<OrderDetailResponseDTO> getOrderDetailsForGroupWithStatus(Long orderGroupId, OrderStatus orderStatus);
-
     boolean hasUserPurchasedBook(Long userId, Long bookId);
 }

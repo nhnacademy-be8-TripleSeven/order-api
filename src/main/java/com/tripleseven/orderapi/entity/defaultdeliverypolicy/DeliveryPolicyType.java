@@ -15,20 +15,4 @@ public enum DeliveryPolicyType {
     DeliveryPolicyType(String korean) {
         this.korean = korean;
     }
-
-    @JsonCreator
-    public static DeliveryPolicyType fromString(String str) {
-        for (DeliveryPolicyType deliveryPolicyType : DeliveryPolicyType.values()) {
-            if (deliveryPolicyType.name().equalsIgnoreCase(str)) {
-                return deliveryPolicyType;
-            }
-        }
-        return ERROR;
-    }
-
-    @JsonValue
-    public String toJson() {
-        return this.name().toLowerCase();
-    }
-
 }

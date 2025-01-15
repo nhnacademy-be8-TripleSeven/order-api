@@ -40,9 +40,8 @@ public class OrderGroup {
     @NotNull
     private String address;
 
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "wrapping_id", nullable = false)
+    @JoinColumn(name = "wrapping_id")
     private Wrapping wrapping;
 
     @OneToMany(mappedBy = "orderGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

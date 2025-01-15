@@ -3,7 +3,6 @@ package com.tripleseven.orderapi.business.policy;
 import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyDTO;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
 import com.tripleseven.orderapi.dto.defaultpolicy.DefaultPolicyDTO;
-import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.service.defaultdeliverypolicy.DefaultDeliveryPolicyService;
 import com.tripleseven.orderapi.service.defaultpointpolicy.DefaultPointPolicyService;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +23,6 @@ public class DefaultPolicyServiceImpl implements DefaultPolicyService {
         List<DefaultDeliveryPolicyDTO> defaultDelivery = defaultDeliveryPolicyService.getDefaultDeliveryDTO();
         List<DefaultPointPolicyDTO> defaultPointPolicies = defaultPointPolicyService.getDefaultPointPolicies();
 
-        return new DefaultPolicyDTO(
-                defaultPointPolicies,
-                defaultDelivery
-        );
+        return new DefaultPolicyDTO(defaultPointPolicies, defaultDelivery);
     }
 }
