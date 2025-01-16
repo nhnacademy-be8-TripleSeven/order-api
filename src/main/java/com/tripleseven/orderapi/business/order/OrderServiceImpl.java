@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,17 @@ public class OrderServiceImpl implements OrderService {
                 this.getOrderPayInfo(orderGroupId)
         );
     }
+
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Long getNetAmount(Long userId) {
+//        LocalDate today = LocalDate.now();
+//        LocalDate threeMonthsAgo = today.minusMonths(3);
+//
+//
+//
+//    }
+
 
     private List<OrderInfoDTO> getOrderInfos(Long orderGroupId) {
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
