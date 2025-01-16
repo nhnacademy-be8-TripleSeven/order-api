@@ -51,7 +51,16 @@ public class PointServiceImpl implements PointService {
         );
         PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
 
-        saveOrderGroupHistory(orderGroupId, savedHistory);
+        OrderGroup orderGroup = orderGroupRepository.findById(orderGroupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
+        OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
+        orderGroupPointHistory.ofCreate(
+                savedHistory,
+                orderGroup
+        );
+
+        orderGroupPointHistoryRepository.save(orderGroupPointHistory);
 
         return PointHistoryResponseDTO.fromEntity(savedHistory);
     }
@@ -110,7 +119,7 @@ public class PointServiceImpl implements PointService {
         );
 
         OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
-        orderGroupGradePointHistory.ofCreate(
+        orderGroupPointHistory.ofCreate(
                 savedPointHistory,
                 orderGroup
         );
@@ -175,10 +184,6 @@ public class PointServiceImpl implements PointService {
                 comment,
                 memberId
         );
-    }
-
-    private void saveOrderGroupHistory(Long id, PointHistory pointHistory) {
-
     }
 
 }
