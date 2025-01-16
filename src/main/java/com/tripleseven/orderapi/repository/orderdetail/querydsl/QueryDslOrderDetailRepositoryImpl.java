@@ -96,6 +96,23 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
                 .fetch();
     }
 
+    @Override
+    public Long computeNetTotal(Long userId, LocalDate startDate, LocalDate endDate) {
+        QOrderDetail orderDetail = QOrderDetail.orderDetail;
+
+        // null 값 방지용 coalesce
+        return new JPAQuery<>(entityManager).select(
+                        orderDetail.primePrice.coalesce(0L).
+                                multiply(orderDetail.amount).coalesce(1L).
+                                subtract(orderDetail.discountPrice).coalesce(0L).
+                                sum())
+                .from(orderDetail)
+                .where(orderDetail.orderGroup.userId.eq(userId)
+                        .and(betweenDates(orderDetail.orderGroup.orderedAt, startDate, endDate)))
+                .fetchOne();
+    }
+
+
     private BooleanExpression betweenDates(
             DatePath<LocalDate> dateTimeField,
             LocalDate startTime,

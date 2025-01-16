@@ -3,7 +3,9 @@ package com.tripleseven.orderapi.service.orderdetail;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface OrderDetailService {
@@ -20,4 +22,6 @@ public interface OrderDetailService {
     List<OrderDetailResponseDTO> getOrderDetailsToList(Long orderGroupId);
 
     boolean hasUserPurchasedBook(Long userId, Long bookId);
+
+    Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate);
 }

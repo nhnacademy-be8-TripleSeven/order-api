@@ -60,15 +60,14 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Long getNetAmount(Long userId) {
-//        LocalDate today = LocalDate.now();
-//        LocalDate threeMonthsAgo = today.minusMonths(3);
-//
-//
-//
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public Long getThreeMonthsNetAmount(Long userId) {
+        LocalDate today = LocalDate.now();
+        LocalDate threeMonthsAgo = today.minusMonths(3);
+        Long netAmount = orderDetailService.getNetTotalByPeriod(userId, threeMonthsAgo, today);
+        return netAmount;
+    }
 
 
     private List<OrderInfoDTO> getOrderInfos(Long orderGroupId) {

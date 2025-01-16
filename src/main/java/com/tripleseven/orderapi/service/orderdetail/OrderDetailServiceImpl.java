@@ -14,6 +14,7 @@ import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
+import com.tripleseven.orderapi.repository.orderdetail.querydsl.QueryDslOrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
@@ -34,6 +35,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     private final DeliveryInfoRepository deliveryInfoRepository;
     private final PointHistoryRepository pointHistoryRepository;
     private final OrderGroupPointHistoryService orderGroupPointHistoryService;
+    private final QueryDslOrderDetailRepository queryDslOrderDetailRepository;
+
     private final BookCouponApiClient bookCouponApiClient;
 
     @Override
@@ -204,5 +207,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public boolean hasUserPurchasedBook(Long userId, Long bookId) {
         // OrderGroup과 OrderDetail을 조인하여 해당 유저가 특정 도서를 구매했는지 확인
         return orderDetailRepository.existsByOrderGroupUserIdAndBookId(userId, bookId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate){
+        return queryDslOrderDetailRepository.computeNetTotal(userId, startDate, endDate);
     }
 }
