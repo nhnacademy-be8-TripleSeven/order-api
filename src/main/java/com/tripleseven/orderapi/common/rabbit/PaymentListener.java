@@ -40,9 +40,8 @@ public class PaymentListener {
     private static final Logger log = LoggerFactory.getLogger(PaymentListener.class);
 
     private final MemberApiClient memberApiClient;
-    private final BookCouponApiClient bookCouponApiClient;
-
     private final RetryStateService retryStateService;
+    private final PointService pointService;
 
     @RabbitListener(queues = "nhn24.cart.queue")
     public void processClearCart(CombinedMessageDTO messageDTO, Channel channel, Message message) {
@@ -66,15 +65,18 @@ public class PaymentListener {
         }
     }
 
-    @RabbitListener(queues = "nhn24.coupon.queue")
-    public void useCoupon(CombinedMessageDTO messageDTO, Channel channel, Message message) {
+    @RabbitListener(queues = "nhn24.point.queue")
+    public void usePoint(CombinedMessageDTO messageDTO, Channel channel, Message message) {
         try {
-            log.info("Used Coupon Update...");
+            log.info("Used Point save...");
 
-            Long couponId = (Long) messageDTO.getObject("couponId");
-            bookCouponApiClient.updateUseCoupon(couponId);
+            Long userId = (Long) messageDTO.getObject("UserId");
+            Long totalAmount = (Long) messageDTO.getObject("TotalAmount");
+            Long orderId = (Long) messageDTO.getObject("OrderId");
 
-            log.info("Completed Update Coupon!!");
+            pointService.createPointHistoryForPaymentEarn(userId, totalAmount, orderId);
+
+            log.info("Completed Point save!!");
         } catch (Exception e) {
             retryQueue(e, channel, message);
         }

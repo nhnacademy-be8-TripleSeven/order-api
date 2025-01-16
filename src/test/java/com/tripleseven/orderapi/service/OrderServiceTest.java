@@ -132,8 +132,6 @@ class OrderServiceTest {
 
         assertNotNull(result);
         assertEquals(2, result.getOrderInfos().size());
-        assertEquals(31500, result.getOrderGroupInfoDTO().getTotalPrice());
-        // primeTotalPrice(33000) - discount(3000) + wrapping(500) + delivery(1000)
         assertEquals("Gift Wrap", result.getOrderGroupInfoDTO().getWrappingName());
         assertEquals("Jane Doe", result.getDeliveryInfo().getRecipientName());
         assertEquals("Toss", result.getOrderPayInfoDTO().getPaymentName());

@@ -1,80 +1,149 @@
-INSERT INTO point_policy (name, amount, rate) VALUES ('Welcome Bonus', 5000, 0);
-INSERT INTO point_policy (name, amount, rate) VALUES ('Review Bonus', 500, 0);
-INSERT INTO point_policy (name, amount ,rate) VALUES ( 'Payment Point',0,1.5 );
+create table delivery_code
+(
+    id            varchar(255) not null
+        primary key,
+    international bit          not null,
+    name          varchar(255) not null
+);
 
+create table delivery_policy
+(
+    id        bigint auto_increment
+        primary key,
+    min_price int          not null,
+    name      varchar(255) not null,
+    price     int          not null
+);
 
+create table default_delivery_policy
+(
+    id                   bigint auto_increment
+        primary key,
+    delivery_policy_type enum ('DEFAULT', 'ERROR', 'EVENT') not null,
+    delivery_policy_id   bigint                             not null,
+    constraint UKl7qo9vkbm8e5fruiyttqw7s6n
+        unique (delivery_policy_type),
+    constraint FKc5ylb9pxw7rhyv5w1qk08fvr5
+        foreign key (delivery_policy_id) references delivery_policy (id)
+);
 
--- 포인트 기록 데이터
+create table pay_type
+(
+    id   bigint auto_increment
+        primary key,
+    name varchar(255) not null
+);
 
--- Initial deposit bonus
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('EARN', 150, '2024-12-08 09:00:00', 'Initial deposit bonus', 1);
+create table point_history
+(
+    id         bigint auto_increment
+        primary key,
+    amount     bigint                 not null,
+    changed_at datetime(6)            null,
+    comment    varchar(255)           null,
+    member_id  bigint                 null,
+    types      enum ('EARN', 'SPEND') null
+);
 
--- Points spent on gift
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('SPEND', -30, '2024-12-08 18:30:00', 'Points spent on gift', 1);
+create table point_policy
+(
+    id     bigint auto_increment
+        primary key,
+    amount int            not null,
+    name   varchar(255)   not null,
+    rate   decimal(38, 2) null
+);
 
--- Anniversary bonus
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('EARN', 500, '2024-12-07 15:20:00', 'Anniversary bonus', 2);
+create table default_point_policy
+(
+    id                bigint auto_increment
+        primary key,
+    point_policy_type enum ('CONTENT_REVIEW', 'DEFAULT_BUY', 'ERROR', 'NO_CONTENT_REVIEW', 'REGISTER') not null,
+    point_policy_id   bigint                                                                           not null,
+    constraint UK45q23t4vkyo5oatf756fm8oof
+        unique (point_policy_type),
+    constraint FKmvttxmf1wrxk7g59g7swmdrp
+        foreign key (point_policy_id) references point_policy (id)
+);
 
--- Discount on purchase
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('SPEND', -100, '2024-12-06 20:45:00', 'Discount on purchase', 2);
+create table wrapping
+(
+    id    bigint auto_increment
+        primary key,
+    name  varchar(255) not null,
+    price int          not null
+);
 
--- Monthly subscription bonus
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('EARN', 300, '2024-12-11 10:15:00', 'Monthly subscription bonus', 3);
+create table order_group
+(
+    id                   bigint auto_increment
+        primary key,
+    address              varchar(255) not null,
+    delivery_price       int          not null,
+    ordered_at           date         not null,
+    ordered_name         varchar(255) not null,
+    recipient_home_phone varchar(255) null,
+    recipient_name       varchar(255) not null,
+    recipient_phone      varchar(255) not null,
+    user_id              bigint       null,
+    wrapping_id          bigint       null,
+    constraint FKthto9t09xng0eknv731x8a22f
+        foreign key (wrapping_id) references wrapping (id)
+);
 
--- Referral bonus
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('EARN', 250, '2024-12-10 13:00:00', 'Referral bonus', 4);
+create table delivery_info
+(
+    order_group_id bigint       not null
+        primary key,
+    arrived_at     date         null,
+    invoice_number int          not null,
+    name           varchar(255) null,
+    shipping_at    date         null,
+    constraint FKhr1u8pbg4w73xu68wksg0per3
+        foreign key (order_group_id) references order_group (id)
+);
 
--- Points redeemed for service
-INSERT INTO point_history (types, amount, changed_at, comment, member_id)
-VALUES ('SPEND', -70, '2024-12-09 08:50:00', 'Points redeemed for service', 4);
+create table order_detail
+(
+    id             bigint auto_increment
+        primary key,
+    amount         int                                                                                                                               not null,
+    book_id        bigint                                                                                                                            not null,
+    discount_price bigint                                                                                                                            not null,
+    order_status   enum ('DELIVERED', 'ERROR', 'ORDER_CANCELED', 'PAYMENT_COMPLETED', 'PAYMENT_PENDING', 'RETURNED', 'RETURNED_PENDING', 'SHIPPING') null,
+    prime_price    bigint                                                                                                                            not null,
+    order_group_id bigint                                                                                                                            not null,
+    constraint FKtgyj06r2y49ohq800h51witkk
+        foreign key (order_group_id) references order_group (id),
+    check (`amount` >= 1)
+);
 
+create table order_group_point_history
+(
+    id               bigint auto_increment
+        primary key,
+    order_group_id   bigint not null,
+    point_history_id bigint not null,
+    constraint FKm4u84i22s336tq9jjjsul334q
+        foreign key (order_group_id) references order_group (id),
+    constraint FKtfgs7k8ylcmbnsosuufskhypt
+        foreign key (point_history_id) references point_history (id)
+);
 
--- Insert PayType with name "Credit Card"
-INSERT INTO pay_types (name) VALUES ('Credit Card');
+create table pay
+(
+    id             bigint auto_increment
+        primary key,
+    order_id       bigint                                                                                                             null,
+    payment_key    varchar(255)                                                                                                       null,
+    price          bigint                                                                                                             not null,
+    requested_at   date                                                                                                               null,
+    status         enum ('ABORTED', 'CANCELED', 'DONE', 'EXPIRED', 'IN_PROGRESS', 'PARTIAL_CANCELED', 'READY', 'WAITING_FOR_DEPOSIT') null,
+    order_group_id bigint                                                                                                             null,
+    pay_type_id    bigint                                                                                                             null,
+    constraint FKpjkccc8lx7ej7sdlv98uubm8a
+        foreign key (order_group_id) references order_group (id),
+    constraint FKq33vq57w5eaa2vlldet4t2yiq
+        foreign key (pay_type_id) references pay_type (id)
+);
 
--- Insert PayType with name "PayPal"
-INSERT INTO pay_types (name) VALUES ('PayPal');
-
--- Insert PayType with name "Bank Transfer"
-
--- Insert PayType with name "Cash"
-INSERT INTO pay_types (name) VALUES ('Cash');
-
--- Insert PayType with name "Mobile Payment"
-INSERT INTO pay_types (name) VALUES ('Mobile Payment');
-
--- Wrapping 테이블 데이터 삽입
-INSERT INTO wrapping (name, price) VALUES ('Gift Wrap', 200);
-INSERT INTO wrapping (name, price) VALUES ('Standard Wrap', 100);
-
--- DeliveryPolicy 테이블 데이터 삽입
-INSERT INTO delivery_policy (name, price) VALUES ('Standard Delivery', 3000);
-INSERT INTO delivery_policy (name, price) VALUES ('Express Delivery', 5000);
-
--- DeliveryInfo 테이블 데이터 삽입
-INSERT INTO delivery_info (name, invoice_number, forwarded_at, delivery_date, arrived_at)
-VALUES ('John Doe', 12345, '2024-12-10 15:00:00', '2024-12-12', '2024-12-14 10:00:00');
-INSERT INTO delivery_info (name, invoice_number, forwarded_at, delivery_date, arrived_at)
-VALUES ('Jane Smith', 12346, '2024-12-11 10:30:00', '2024-12-13', '2024-12-15 12:00:00');
-
--- OrderGroup 테이블 데이터 삽입
-INSERT INTO order_group (user_id, ordered_name, ordered_at, recipient_name, recipient_phone, delivery_price, wrapping_id, delivery_info_id)
-VALUES (1, 'Order 1', '2024-12-08 14:30:00', 'John Doe', '010-1234-5678', 3000, 1, 1);
-INSERT INTO order_group (user_id, ordered_name, ordered_at, recipient_name, recipient_phone, delivery_price, wrapping_id, delivery_info_id)
-VALUES (2, 'Order 2', '2024-12-09 11:00:00', 'Jane Smith', '010-2345-6789', 5000, 2, 2);
-
--- OrderDetail 테이블 데이터 삽입
-INSERT INTO order_detail (book_id, amount, orderStatus, price, wrapping_id, order_group_id)
-VALUES (1001, 2, 'PAYMENT_PENDING', 20000, 1, 1);
-INSERT INTO order_detail (book_id, amount, orderStatus, price, wrapping_id, order_group_id)
-VALUES (1002, 1, 'PAYMENT_PENDING', 15000, 2, 2);
-
--- DeliveryInfo 업데이트 (필요시)
-UPDATE order_group SET delivery_info_id = 1 WHERE id = 1;
-UPDATE order_group SET delivery_info_id = 2 WHERE id = 2;
