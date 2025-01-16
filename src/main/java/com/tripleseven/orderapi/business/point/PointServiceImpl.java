@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.business.point;
 
+import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.defaultpointpolicy.DefaultPointPolicy;
@@ -37,9 +38,11 @@ public class PointServiceImpl implements PointService {
     private final PointPolicyRepository pointPolicyRepository;
     private final DefaultPointPolicyRepository defaultPointPolicyRepository;
 
+    private final MemberApiClient memberApiClient;
+
     // 결제 시 포인트 사용 내역 생성
     @Override
-    public PointHistoryResponseDTO createPointHistoryForPaymentSpend(Long memberId, int usePoint, Long orderGroupId) {
+    public PointHistoryResponseDTO createPointHistoryForPaymentSpend(Long memberId, long usePoint, Long orderGroupId) {
         PointHistory pointHistory = createPointHistory(
                 HistoryTypes.SPEND,
                 memberId,
@@ -53,25 +56,54 @@ public class PointServiceImpl implements PointService {
         return PointHistoryResponseDTO.fromEntity(savedHistory);
     }
 
-    // 결제 시 포인트 적립 내역 생성
+    // 결제 시 포인트 적립 내역 생성 (기본 구매 적립 + 등급별 적립)
     @Override
-    public PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, int usedMoney, Long orderGroupId) {
+    public PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, long usedMoney, Long orderGroupId) {
         DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.DEFAULT_BUY);
 
         int earnPoint = dto.getAmount() != 0 ?
                 dto.getAmount() : dto.getRate().multiply(BigDecimal.valueOf(usedMoney)).intValue();
 
-        PointHistory pointHistory = createPointHistory(
+        PointHistory defaultPointHistory = createPointHistory(
                 HistoryTypes.EARN,
                 memberId,
                 earnPoint, // 정책에 따라 적립 포인트 결정
                 dto.getName()
         );
-        PointHistory savedHistory = pointHistoryRepository.save(pointHistory);
 
-        saveOrderGroupHistory(orderGroupId, savedHistory);
+        int gradePoint = memberApiClient.getGradePoint(memberId);
 
-        return PointHistoryResponseDTO.fromEntity(savedHistory);
+        PointHistory graderPointHistory = createPointHistory(
+                HistoryTypes.EARN,
+                memberId,
+                gradePoint,
+                "등급 혜택"
+        );
+
+        PointHistory savedGradeHistory = pointHistoryRepository.save(graderPointHistory);
+        PointHistory savedPointHistory = pointHistoryRepository.save(defaultPointHistory);
+
+
+        OrderGroup orderGroup = orderGroupRepository.findById(orderGroupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
+        OrderGroupPointHistory orderGroupGradePointHistory = new OrderGroupPointHistory();
+        orderGroupGradePointHistory.ofCreate(
+                savedGradeHistory,
+                orderGroup
+        );
+
+        OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
+        orderGroupGradePointHistory.ofCreate(
+                savedPointHistory,
+                orderGroup
+        );
+
+
+        orderGroupPointHistoryRepository.save(orderGroupPointHistory);
+        orderGroupPointHistoryRepository.save(orderGroupGradePointHistory);
+
+        return PointHistoryResponseDTO.fromEntity(savedPointHistory);
     }
 
     // 회원 가입 포인트 적립
@@ -119,7 +151,7 @@ public class PointServiceImpl implements PointService {
     }
 
     // PointHistory 생성 공통 메서드
-    private PointHistory createPointHistory(HistoryTypes type, Long memberId, int amount, String comment) {
+    private PointHistory createPointHistory(HistoryTypes type, Long memberId, long amount, String comment) {
         return new PointHistory(
                 type,
                 amount,
@@ -130,15 +162,7 @@ public class PointServiceImpl implements PointService {
     }
 
     private void saveOrderGroupHistory(Long id, PointHistory pointHistory) {
-        OrderGroup orderGroup = orderGroupRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
 
-        OrderGroupPointHistory orderGroupPointHistory = new OrderGroupPointHistory();
-        orderGroupPointHistory.ofCreate(
-                pointHistory,
-                orderGroup
-        );
-        orderGroupPointHistoryRepository.save(orderGroupPointHistory);
     }
 
 }
