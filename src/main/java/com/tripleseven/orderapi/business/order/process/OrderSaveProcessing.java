@@ -92,8 +92,7 @@ public class OrderSaveProcessing implements OrderProcessing {
             );
             orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
         }
-        // TODO 결제 정보 저장
-        //  orderId랑 같이 저장
+
         payService.createPay(paymentDTO, orderGroupId);
         
         cartProcessing(guestId, bookInfos);
@@ -138,8 +137,6 @@ public class OrderSaveProcessing implements OrderProcessing {
             orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
         }
 
-        // TODO 결제 정보 저장
-        //  orderId랑 같이 저장
         payService.createPay(paymentDTO, orderGroupId);
 
         Long couponId = payInfo.getCouponId();
@@ -174,7 +171,7 @@ public class OrderSaveProcessing implements OrderProcessing {
                 recipientInfo.getRecipientName(),
                 recipientInfo.getRecipientPhone(),
                 recipientInfo.getRecipientLandline(),
-                0, // TODO 배송비 수정
+                payInfo.getDeliveryFee(),
                 address
         );
     }

@@ -30,7 +30,7 @@ public class OrderGroupCreateRequestDTO {
 
     @NotNull
     @Min(100)
-    int deliveryPrice;
+    long deliveryPrice;
 
     @NotNull
     String address;
