@@ -9,9 +9,11 @@ import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.*;
 import com.tripleseven.orderapi.dto.properties.ApiProperties;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
@@ -39,21 +41,21 @@ import java.util.*;
 public class PayServiceImpl implements PayService {
     private final ApiProperties apiProperties;
     private final PayRepository payRepository;
-    private final OrderGroupService orderGroupService;
     private final PointHistoryService pointHistoryService;
-    private final PointPolicyService pointPolicyService;
-
     private final BookCouponApiClient bookCouponApiClient;
+    private final OrderGroupRepository orderGroupRepository;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     // TODO save 해서 반환해야될 경우가 있는지 확인(void 타입)
     @Override
-    public void createPay(Long userId, JSONObject jsonObject) {
+    public void createPay(PaymentDTO paymentDTO, Long orderGroupId) {
         Pay pay = new Pay();
-        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "PayInfo");
-        //infoDTO를 각 db에 저장해야함
-
+        Optional<OrderGroup> orderGroup = orderGroupRepository.findById(orderGroupId);
+        if(orderGroup.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        pay.ofCreate(paymentDTO,orderGroup.get());
         payRepository.save(pay);
     }
 
@@ -109,11 +111,16 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PaymentDTO getPaymentInfo(String paymentKey) {
+    public Object getPaymentInfo(String paymentKey) throws IOException {
         String secretKey = apiProperties.getSecretApiKey();
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
+        JSONObject response = sendRequest(new JSONObject(),secretKey,url);
 
-        return null;
+        if(response.containsKey("error")) {
+            return ErrorDTO.fromJson(response);
+        }
+
+        return PaymentDTO.fromJson(response);
     }
 
 

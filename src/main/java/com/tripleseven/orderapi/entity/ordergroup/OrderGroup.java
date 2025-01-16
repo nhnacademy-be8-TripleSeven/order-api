@@ -35,7 +35,7 @@ public class OrderGroup {
     private String recipientHomePhone;
 
     @NotNull
-    private int deliveryPrice;
+    private long deliveryPrice;
 
     @NotNull
     private String address;
@@ -48,7 +48,7 @@ public class OrderGroup {
     private List<OrderGroupPointHistory> orderGroupPointHistories = new ArrayList<>();
 
 
-    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, String recipientHomePhone, int deliveryPrice, String address, Wrapping wrapping) {
+    public void ofCreate(Long userId, String orderedName, String recipientName, String recipientPhone, String recipientHomePhone, long deliveryPrice, String address, Wrapping wrapping) {
         this.userId = userId;
         this.orderedName = orderedName;
         this.recipientName = recipientName;

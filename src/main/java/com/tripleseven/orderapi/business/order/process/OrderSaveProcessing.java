@@ -11,6 +11,8 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
+import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
@@ -54,7 +56,7 @@ public class OrderSaveProcessing implements OrderProcessing {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public void processNonMemberOrder(String guestId) {
+    public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
         // TODO Redis 저장 키 고민
         log.info("processNonMemberOrder guestId={}", guestId);
 
@@ -90,17 +92,18 @@ public class OrderSaveProcessing implements OrderProcessing {
             );
             orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
         }
-        // TODO 결제 정보 저장
-        //  orderId랑 같이 저장
 
+        payService.createPay(paymentDTO, orderGroupId);
+        
         cartProcessing(guestId, bookInfos);
 
         log.info("Successfully processed non-member order");
     }
 
     @Override
-    public void processMemberOrder(Long memberId) {
+    public void processMemberOrder(Long memberId, PaymentDTO paymentDTO) {
         log.info("processMemberOrder memberId={}", memberId);
+
         HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
 
         if (Objects.isNull(payHash)) {
@@ -134,8 +137,7 @@ public class OrderSaveProcessing implements OrderProcessing {
             orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
         }
 
-        // TODO 결제 정보 저장
-        //  orderId랑 같이 저장
+        payService.createPay(paymentDTO, orderGroupId);
 
         Long couponId = payInfo.getCouponId();
         Long point = payInfo.getPoint();
@@ -169,7 +171,7 @@ public class OrderSaveProcessing implements OrderProcessing {
                 recipientInfo.getRecipientName(),
                 recipientInfo.getRecipientPhone(),
                 recipientInfo.getRecipientLandline(),
-                0, // TODO 배송비 수정
+                payInfo.getDeliveryFee(),
                 address
         );
     }
