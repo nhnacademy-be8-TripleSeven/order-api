@@ -103,7 +103,7 @@ public class OrderSaveProcessing implements OrderProcessing {
         Long point = payInfo.getPoint();
         Long totalAmount = payInfo.getTotalAmount();
 
-        pointProcessing(memberId, orderGroupId, point, totalAmount);
+//        pointProcessing(memberId, orderGroupId, point, totalAmount); 포인트 정책 db에 데이터가 없어서 문제 발생 임시로 주석
 
         couponProcessing(memberId, payInfo.getCouponId());
 
