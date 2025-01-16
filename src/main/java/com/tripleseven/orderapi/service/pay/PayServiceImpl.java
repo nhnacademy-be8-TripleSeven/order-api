@@ -77,7 +77,7 @@ public class PayServiceImpl implements PayService {
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
-        checkValid(userId, payInfoDTO);
+//        checkValid(userId, payInfoDTO);
 
         if (Objects.nonNull(userId)) {
             redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
@@ -106,6 +106,14 @@ public class PayServiceImpl implements PayService {
 
         // 정상 응답 DTO 반환
         return PaymentDTO.fromJson(response);
+    }
+
+    @Override
+    public PaymentDTO getPaymentInfo(String paymentKey) {
+        String secretKey = apiProperties.getSecretApiKey();
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
+
+        return null;
     }
 
 

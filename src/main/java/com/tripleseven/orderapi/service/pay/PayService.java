@@ -5,6 +5,7 @@ import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.json.simple.JSONObject;
 
@@ -21,5 +22,5 @@ public interface PayService {
 
     Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException;
 
-
+    PaymentDTO getPaymentInfo(String paymentKey);
 }
