@@ -22,5 +22,5 @@ public interface PayService {
 
     Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException;
 
-    PaymentDTO getPaymentInfo(String paymentKey);
+    Object getPaymentInfo(String paymentKey) throws IOException;
 }

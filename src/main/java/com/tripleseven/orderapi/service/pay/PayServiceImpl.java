@@ -109,11 +109,16 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public PaymentDTO getPaymentInfo(String paymentKey) {
+    public Object getPaymentInfo(String paymentKey) throws IOException {
         String secretKey = apiProperties.getSecretApiKey();
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
+        JSONObject response = sendRequest(new JSONObject(),secretKey,url);
 
-        return null;
+        if(response.containsKey("error")) {
+            return ErrorDTO.fromJson(response);
+        }
+
+        return PaymentDTO.fromJson(response);
     }
 
 
