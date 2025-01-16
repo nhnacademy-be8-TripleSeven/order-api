@@ -70,6 +70,22 @@ public class PointServiceImpl implements PointService {
     public PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, long usedMoney, Long orderGroupId) {
         DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.DEFAULT_BUY);
 
+        if (Objects.isNull(dto)) {
+            PointPolicy pointPolicy = new PointPolicy();
+            pointPolicy.ofCreate("기본 구매 적립", 0, BigDecimal.ONE);
+            PointPolicy savedPointPolicy = pointPolicyRepository.save(pointPolicy);
+
+            DefaultPointPolicy defaultPointPolicy = new DefaultPointPolicy();
+            defaultPointPolicy.ofCreate(PointPolicyType.DEFAULT_BUY, savedPointPolicy);
+            DefaultPointPolicy savedDefaultPointPolicy = defaultPointPolicyRepository.save(defaultPointPolicy);
+
+            dto = new DefaultPointPolicyDTO(
+                    savedDefaultPointPolicy.getId(),
+                    savedDefaultPointPolicy.getPointPolicyType(),
+                    savedPointPolicy
+            );
+        }
+
         int earnPoint = dto.getAmount() != 0 ?
                 dto.getAmount() : dto.getRate().multiply(BigDecimal.valueOf(usedMoney)).intValue();
 

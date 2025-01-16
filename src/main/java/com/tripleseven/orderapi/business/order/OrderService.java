@@ -7,4 +7,6 @@ public interface OrderService {
     OrderPayDetailDTO getOrderPayDetail(Long userId, Long orderGroupId);
 
     OrderPayDetailDTO getOrderPayDetailAdmin(Long orderGroupId);
+
+    Long getThreeMonthsNetAmount(Long userId);
 }

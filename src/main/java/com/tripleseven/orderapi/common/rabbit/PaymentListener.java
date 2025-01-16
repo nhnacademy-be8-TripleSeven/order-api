@@ -2,37 +2,16 @@ package com.tripleseven.orderapi.common.rabbit;
 
 import com.rabbitmq.client.Channel;
 import com.tripleseven.orderapi.business.point.PointService;
-import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
-import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
-import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyDTO;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
-import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
-import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
-import com.tripleseven.orderapi.dto.point.PointDTO;
-import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
-import com.tripleseven.orderapi.exception.CustomException;
-import com.tripleseven.orderapi.exception.ErrorCode;
-import com.tripleseven.orderapi.service.defaultdeliverypolicy.DefaultDeliveryPolicyService;
-import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
-import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
-import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
-import com.tripleseven.orderapi.service.pay.PayService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +33,6 @@ public class PaymentListener {
 
             // 여러번 호출
             bookIdsS.stream()
-                    .map(Long::valueOf)
                     .forEach(bookId -> memberApiClient.deleteCart(Long.valueOf(userId), bookId));
 
             log.info("Completed Clearing Cart!!");

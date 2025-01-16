@@ -67,6 +67,7 @@ class PointServiceTest {
         ReflectionTestUtils.setField(pointHistory, "id", 100L);
 
         when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
+        when(orderGroupRepository.findById(anyLong())).thenReturn(Optional.of(new OrderGroup()));
 
         PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentSpend(memberId, usePoint, orderGroupId);
 
