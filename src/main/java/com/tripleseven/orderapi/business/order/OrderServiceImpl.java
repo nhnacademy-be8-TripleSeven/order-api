@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderPayDetailDTO getOrderPayDetail(Long userId, Long orderGroupId) {
         OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(orderGroupId);
 
-        if (response.getUserId() != userId) {
+        if (!response.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -94,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
         int discountPrice = 0;
 
         for (OrderDetailResponseDTO orderDetailResponseDTO : orderDetailResponseList) {
-            primeTotalPrice += orderDetailResponseDTO.getPrimePrice();
+            primeTotalPrice += orderDetailResponseDTO.getPrimePrice() * orderDetailResponseDTO.getQuantity();
             discountPrice += orderDetailResponseDTO.getDiscountPrice();
         }
 

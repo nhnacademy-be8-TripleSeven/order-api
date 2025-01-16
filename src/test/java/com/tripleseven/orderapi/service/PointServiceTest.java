@@ -1,6 +1,7 @@
 package com.tripleseven.orderapi.service;
 
 import com.tripleseven.orderapi.business.point.PointServiceImpl;
+import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
 import com.tripleseven.orderapi.entity.defaultpointpolicy.PointPolicyType;
@@ -50,6 +51,9 @@ class PointServiceTest {
     @Mock
     private DefaultPointPolicyRepository defaultPointPolicyRepository;
 
+    @Mock
+    private MemberApiClient memberApiClient;
+
     @InjectMocks
     private PointServiceImpl pointService;
 
@@ -63,14 +67,12 @@ class PointServiceTest {
         ReflectionTestUtils.setField(pointHistory, "id", 100L);
 
         when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
-        when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(new OrderGroup()));
 
         PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentSpend(memberId, usePoint, orderGroupId);
 
         assertNotNull(result);
         assertEquals(-usePoint, result.getAmount());
         verify(pointHistoryRepository, times(1)).save(any(PointHistory.class));
-        verify(orderGroupRepository, times(1)).findById(orderGroupId);
     }
 
     @Test
@@ -91,12 +93,12 @@ class PointServiceTest {
 
         when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
         when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(new OrderGroup()));
-
+        when(memberApiClient.getGradePoint(anyLong())).thenReturn(100);
         PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentEarn(memberId, usedMoney, orderGroupId);
 
         assertNotNull(result);
         assertEquals(100, result.getAmount());
-        verify(pointHistoryRepository, times(1)).save(any(PointHistory.class));
+        verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
         verify(orderGroupRepository, times(1)).findById(orderGroupId);
     }
 
@@ -138,22 +140,5 @@ class PointServiceTest {
 
         verify(pointHistoryRepository, times(1)).findPointHistoryByComment(memberId, "회원 가입 적립");
         verify(pointHistoryRepository, never()).save(any(PointHistory.class));
-    }
-
-    @Test
-    void testSaveOrderGroupHistory_OrderGroupNotFound() {
-        Long orderGroupId = 10L;
-        PointHistory pointHistory = new PointHistory(HistoryTypes.EARN, 100, LocalDateTime.now(), "Earn Points", 1L);
-
-        when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.empty());
-
-        assertThrows(CustomException.class, () -> ReflectionTestUtils.invokeMethod(
-                pointService,
-                "saveOrderGroupHistory",
-                orderGroupId,
-                pointHistory
-        ));
-
-        verify(orderGroupRepository, times(1)).findById(orderGroupId);
     }
 }

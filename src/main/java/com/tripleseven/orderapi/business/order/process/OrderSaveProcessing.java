@@ -1,8 +1,8 @@
 package com.tripleseven.orderapi.business.order.process;
 
 import com.tripleseven.orderapi.business.point.PointService;
+import com.tripleseven.orderapi.client.BookCouponApiClient;
 import com.tripleseven.orderapi.dto.CombinedMessageDTO;
-import com.tripleseven.orderapi.dto.defaultdeliverypolicy.DefaultDeliveryPolicyDTO;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.order.AddressInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
@@ -15,7 +15,6 @@ import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
-import com.tripleseven.orderapi.service.defaultdeliverypolicy.DefaultDeliveryPolicyService;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,7 +39,7 @@ public class OrderSaveProcessing implements OrderProcessing {
     private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
 
     private static final String CART_ROUTING_KEY = "cart.routing.key";
-    private static final String COUPON_ROUTING_KEY = "coupon.routing.key";
+    private static final String POINT_ROUTING_KEY = "point.routing.key";
 
     public static final Long GUEST_USER_ID = -1L;
 
@@ -49,9 +47,10 @@ public class OrderSaveProcessing implements OrderProcessing {
     private final OrderGroupService orderGroupService;
     private final OrderDetailService orderDetailService;
     private final DeliveryInfoService deliveryInfoService;
-    private final DefaultDeliveryPolicyService defaultDeliveryPolicyService;
     private final PointService pointService;
     private final PayService payService;
+
+    private final BookCouponApiClient bookCouponApiClient;
 
     private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -69,12 +68,34 @@ public class OrderSaveProcessing implements OrderProcessing {
 
         PayInfoDTO payInfo = payHash.get(guestId, "PayInfo");
 
+        OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
+
+        // OrderGroup 생성
+        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(GUEST_USER_ID, request);
+        Long orderGroupId = orderGroupResponseDTO.getId();
+
+        // DeliveryInfo 생성
+        deliveryInfoService.createDeliveryInfo(
+                new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
+        );
+
+        // OrderDetail 저장
         List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
-
-        Long orderGroupId = orderProcessing(GUEST_USER_ID, payInfo);
-
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
+                    = new OrderDetailCreateRequestDTO(
+                    bookInfo.getBookId(),
+                    bookInfo.getQuantity(),
+                    bookInfo.getPrice(),
+                    bookInfo.getCouponSalePrice(),
+                    orderGroupId
+            );
+            orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+        }
+        // TODO 결제 정보 저장
+        //  orderId랑 같이 저장
         payService.createPay(paymentDTO, orderGroupId);
-
+        
         cartProcessing(guestId, bookInfos);
 
         log.info("Successfully processed non-member order");
@@ -92,55 +113,11 @@ public class OrderSaveProcessing implements OrderProcessing {
 
         PayInfoDTO payInfo = payHash.get(memberId.toString(), "PayInfo");
 
-        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
-
-
-        Long orderGroupId = orderProcessing(memberId, payInfo);
-
-
-        cartProcessing(memberId.toString(), bookInfos);
-
-        // TODO 결제 정보 저장
-        //  orderId랑 같이 저장
-        payService.createPay(paymentDTO, orderGroupId);
-
-        Long point = payInfo.getPoint();
-        Long totalAmount = payInfo.getTotalAmount();
-
-        pointProcessing(memberId, orderGroupId, point, totalAmount);
-
-        couponProcessing(memberId, payInfo.getCouponId());
-
-        log.info("Successfully processed member order");
-    }
-
-    // 주문 저장
-    private Long orderProcessing(Long userId, PayInfoDTO payInfo) {
-
-        DefaultDeliveryPolicyDTO defaultDeliveryPolicy = defaultDeliveryPolicyService.getDefaultDeliveryPolicy(DeliveryPolicyType.DEFAULT);
-        AddressInfoDTO addressInfo = payInfo.getAddressInfo();
-        RecipientInfoDTO recipientInfo = payInfo.getRecipientInfo();
-
-        String address = String.format("%s %s (%s)",
-                addressInfo.getRoadAddress(),
-                addressInfo.getDetailAddress(),
-                addressInfo.getZoneAddress());
-
-        OrderGroupCreateRequestDTO request = new OrderGroupCreateRequestDTO(
-                payInfo.getWrapperId(),
-                payInfo.getOrdererName(),
-                recipientInfo.getRecipientName(),
-                recipientInfo.getRecipientPhone(),
-                recipientInfo.getRecipientLandline(),
-                defaultDeliveryPolicy.getPrice(),
-                address
-        );
+        OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
 
         // OrderGroup 생성
-        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(userId, request);
+        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(memberId, request);
         Long orderGroupId = orderGroupResponseDTO.getId();
-
-
 
         // DeliveryInfo 생성
         deliveryInfoService.createDeliveryInfo(
@@ -161,12 +138,50 @@ public class OrderSaveProcessing implements OrderProcessing {
             orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
         }
 
-        return orderGroupId;
+        // TODO 결제 정보 저장
+        //  orderId랑 같이 저장
+        payService.createPay(paymentDTO, orderGroupId);
+
+        Long couponId = payInfo.getCouponId();
+        Long point = payInfo.getPoint();
+        Long totalAmount = payInfo.getTotalAmount();
+
+        // 쿠폰 사용
+        bookCouponApiClient.updateUseCoupon(couponId);
+
+        // 포인트 사용
+        pointService.createPointHistoryForPaymentSpend(memberId, point, orderGroupId);
+
+        // rabbitMQ 요청
+        cartProcessing(memberId.toString(), bookInfos);
+        pointProcessing(memberId, orderGroupId, totalAmount);
+
+        log.info("Successfully processed member order");
+    }
+
+    private OrderGroupCreateRequestDTO getOrderGroupCreateRequestDTO(PayInfoDTO payInfo) {
+        AddressInfoDTO addressInfo = payInfo.getAddressInfo();
+        RecipientInfoDTO recipientInfo = payInfo.getRecipientInfo();
+
+        String address = String.format("%s %s (%s)",
+                addressInfo.getRoadAddress(),
+                addressInfo.getDetailAddress(),
+                addressInfo.getZoneAddress());
+
+        return new OrderGroupCreateRequestDTO(
+                payInfo.getWrapperId(),
+                payInfo.getOrdererName(),
+                recipientInfo.getRecipientName(),
+                recipientInfo.getRecipientPhone(),
+                recipientInfo.getRecipientLandline(),
+                0, // TODO 배송비 수정
+                address
+        );
     }
 
     // 장바구니 초기화
     private void cartProcessing(String userId, List<OrderBookInfoDTO> bookInfos) {
-        List<Long> bookIds = bookInfos.stream().map(OrderBookInfoDTO::getBookId).collect(Collectors.toList());
+        List<Long> bookIds = bookInfos.stream().map(OrderBookInfoDTO::getBookId).toList();
 
         CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
         cartMessageDTO.addObject("BookIds", bookIds);
@@ -175,24 +190,14 @@ public class OrderSaveProcessing implements OrderProcessing {
         rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
     }
 
-    // 포인트 사용/적립
-    private void pointProcessing(long userId, long orderId, long point, long amount) {
-        int usedPoint = (int) point;
-        int totalAmount = (int) amount;
+    // 포인트 적립
+    private void pointProcessing(long userId, long orderId, long totalAmount) {
+        CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
 
-        if (usedPoint > 0) {
-            pointService.createPointHistoryForPaymentSpend(userId, usedPoint, orderId);
-        }
+        pointMessageDTO.addObject("UserId", userId);
+        pointMessageDTO.addObject("TotalAmount", totalAmount);
+        pointMessageDTO.addObject("OrderId", orderId);
 
-        pointService.createPointHistoryForPaymentEarn(userId, totalAmount, orderId);
-    }
-
-    // 쿠폰 사용
-    private void couponProcessing(Long memberId, Long couponId) {
-        CombinedMessageDTO couponMessageDTO = new CombinedMessageDTO();
-        couponMessageDTO.addObject("couponId", couponId);
-        couponMessageDTO.addObject("userId", memberId);
-
-        rabbitTemplate.convertAndSend(EXCHANGE_NAME, COUPON_ROUTING_KEY, couponMessageDTO);
+        rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
     }
 }
