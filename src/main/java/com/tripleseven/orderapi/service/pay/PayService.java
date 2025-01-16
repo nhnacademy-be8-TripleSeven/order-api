@@ -7,12 +7,11 @@ import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
 import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 import jakarta.servlet.http.HttpServletRequest;
-import org.json.simple.JSONObject;
 
 import java.io.IOException;
 
 public interface PayService {
-    void createPay(Long userId, JSONObject response);
+    void createPay(PaymentDTO response, Long orderGroupId);
 
     Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException;
 

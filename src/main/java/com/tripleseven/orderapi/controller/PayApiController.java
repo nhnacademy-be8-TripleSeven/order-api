@@ -1,10 +1,7 @@
 package com.tripleseven.orderapi.controller;
 
 import com.tripleseven.orderapi.business.order.process.OrderProcessing;
-import com.tripleseven.orderapi.dto.pay.ErrorDTO;
-import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
-import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
-import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
+import com.tripleseven.orderapi.dto.pay.*;
 import com.tripleseven.orderapi.dto.properties.ApiProperties;
 import com.tripleseven.orderapi.service.pay.PayService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
@@ -53,7 +50,7 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 승인 실패")
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
-    public ResponseEntity<?> confirmPayment(HttpServletRequest request,
+    public ResponseEntity<Object> confirmPayment(HttpServletRequest request,
                                                      @RequestHeader(value = "X-USER", required = false) Long userId,
                                                      @CookieValue(value = "GUEST-ID") String guestId,
                                                      @RequestBody String jsonBody) throws Exception {
@@ -65,9 +62,9 @@ public class PayApiController {
             return ResponseEntity.badRequest().body(response);
 
         if (userId != null) {
-            orderProcessing.processMemberOrder(userId);
+            orderProcessing.processMemberOrder(userId, (PaymentDTO) response);
         } else {
-            orderProcessing.processNonMemberOrder(guestId);
+            orderProcessing.processNonMemberOrder(guestId, (PaymentDTO) response);
         }
 
         return ResponseEntity.ok(response);
@@ -80,7 +77,7 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 취소 실패")
     })
     @PostMapping("/payments/{paymentKey}/cancel")
-    public ResponseEntity<?> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
+    public ResponseEntity<Object> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
         Object response = payService.cancelRequest(paymentKey,request);
 
         if(response.getClass().isAssignableFrom(ErrorDTO.class))
@@ -95,7 +92,7 @@ public class PayApiController {
             @ApiResponse(responseCode = "400", description = "결제 조회 실패")
     })
     @GetMapping("/payments/{paymentKey}")
-    public ResponseEntity<?> getPayment(@PathVariable("paymentKey") String paymentKey) throws Exception {
+    public ResponseEntity<Object> getPayment(@PathVariable("paymentKey") String paymentKey) throws Exception {
         Object response = payService.getPaymentInfo(paymentKey);
 
         if(response.getClass().isAssignableFrom(ErrorDTO.class))

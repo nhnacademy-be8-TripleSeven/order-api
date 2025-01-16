@@ -41,12 +41,13 @@ public class Pay {
 
 
     // 결제 정보 생성 메서드
-    public void ofCreate(PaymentDTO response) {
+    public void ofCreate(PaymentDTO response, OrderGroup orderGroup) {
         this.orderId = response.getOrderId();
         this.requestedAt = response.getRequestedAt();
         this.price = response.getBalanceAmount();
         this.status = PaymentStatus.valueOf(response.getStatus().name());
         this.paymentKey = response.getPaymentKey();
+        this.orderGroup = orderGroup;
     }
 
     // 결제 정보 갱신 메서드

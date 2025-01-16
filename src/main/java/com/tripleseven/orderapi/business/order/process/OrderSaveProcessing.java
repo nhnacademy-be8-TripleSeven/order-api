@@ -11,6 +11,7 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
@@ -56,7 +57,7 @@ public class OrderSaveProcessing implements OrderProcessing {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public void processNonMemberOrder(String guestId) {
+    public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
         // TODO Redis 저장 키 고민
         log.info("processNonMemberOrder guestId={}", guestId);
 
@@ -70,7 +71,9 @@ public class OrderSaveProcessing implements OrderProcessing {
 
         List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
 
-        orderProcessing(GUEST_USER_ID, payInfo);
+        Long orderGroupId = orderProcessing(GUEST_USER_ID, payInfo);
+
+        payService.createPay(paymentDTO, orderGroupId);
 
         cartProcessing(guestId, bookInfos);
 
@@ -78,7 +81,7 @@ public class OrderSaveProcessing implements OrderProcessing {
     }
 
     @Override
-    public void processMemberOrder(Long memberId) {
+    public void processMemberOrder(Long memberId, PaymentDTO paymentDTO) {
         log.info("processMemberOrder memberId={}", memberId);
 
         HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
@@ -99,11 +102,12 @@ public class OrderSaveProcessing implements OrderProcessing {
 
         // TODO 결제 정보 저장
         //  orderId랑 같이 저장
+        payService.createPay(paymentDTO, orderGroupId);
 
         Long point = payInfo.getPoint();
         Long totalAmount = payInfo.getTotalAmount();
 
-//        pointProcessing(memberId, orderGroupId, point, totalAmount); 포인트 정책 db에 데이터가 없어서 문제 발생 임시로 주석
+        pointProcessing(memberId, orderGroupId, point, totalAmount);
 
         couponProcessing(memberId, payInfo.getCouponId());
 
