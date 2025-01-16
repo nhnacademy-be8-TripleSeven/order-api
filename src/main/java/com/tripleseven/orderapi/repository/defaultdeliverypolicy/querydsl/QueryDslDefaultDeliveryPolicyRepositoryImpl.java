@@ -32,6 +32,7 @@ public class QueryDslDefaultDeliveryPolicyRepositoryImpl extends QuerydslReposit
                 .select(Projections.constructor(DefaultDeliveryPolicyDTO.class,
                         deliveryPolicy.id.as("id"),
                         deliveryPolicy.name.as("name"),
+                        deliveryPolicy.minPrice.as("minPrice"),
                         deliveryPolicy.price.as("price"),
                         defaultDeliveryPolicy.deliveryPolicyType.as("type")))
                 .from(defaultDeliveryPolicy)

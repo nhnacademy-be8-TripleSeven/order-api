@@ -1,0 +1,10 @@
+app:
+  initialize: false
+
+api:
+  tracking:
+    key: test-tracking-key
+payment:
+  toss:
+    test_widget_api_key: test-widget-key
+    test_secret_api_key: test-secret-key

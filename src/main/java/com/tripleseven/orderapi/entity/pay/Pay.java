@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.entity.pay;
 
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.paytype.PayType;
 import jakarta.persistence.*;
@@ -22,9 +23,10 @@ public class Pay {
 
     private LocalDate requestedAt;
 
-    private int price;
+    private long price;
 
-    private String status; //결제 상태
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status; //결제 상태
 
     private String paymentKey;  //결제의 키 값, 결제 데이터 관리를 위해 반드시 저장해야함
 
@@ -37,20 +39,23 @@ public class Pay {
     private OrderGroup orderGroup;
 
 
-    public void ofCreate(JSONObject response){
-        orderId = Long.valueOf(response.get("orderId").toString());
-        requestedAt = OffsetDateTime.parse(response.get("approvedAt").toString()).toLocalDate();
-        price = Integer.parseInt(response.get("balanceAmount").toString());
-        status = response.get("status").toString();
-        paymentKey = response.get("paymentKey").toString();
+
+    // 결제 정보 생성 메서드
+    public void ofCreate(PaymentDTO response) {
+        this.orderId = response.getOrderId();
+        this.requestedAt = response.getRequestedAt();
+        this.price = response.getBalanceAmount();
+        this.status = PaymentStatus.valueOf(response.getStatus().name());
+        this.paymentKey = response.getPaymentKey();
     }
 
-    public void ofUpdate(JSONObject response){
-        orderId = Long.valueOf(response.get("orderId").toString());
-        requestedAt = OffsetDateTime.parse(response.get("approvedAt").toString()).toLocalDate();
-        price = Integer.parseInt(response.get("balanceAmount").toString());
-        status = response.get("status").toString();
-        paymentKey = response.get("paymentKey").toString();
+    // 결제 정보 갱신 메서드
+    public void ofUpdate(PaymentDTO response) {
+        this.orderId = response.getOrderId();
+        this.requestedAt = response.getRequestedAt();
+        this.price = response.getBalanceAmount();
+        this.status = PaymentStatus.valueOf(response.getStatus().name());
+        this.paymentKey = response.getPaymentKey();
     }
 
 

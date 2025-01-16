@@ -45,11 +45,11 @@ class DeliveryPolicyControllerTest {
     @BeforeEach
     void setUp() {
         deliveryPolicy1 = new DeliveryPolicy();
-        deliveryPolicy1.ofCreate("Express", 10000);
+        deliveryPolicy1.ofCreate("Express", 10000, 1000);
         ReflectionTestUtils.setField(deliveryPolicy1, "id", 1L);
 
         deliveryPolicy2 = new DeliveryPolicy();
-        deliveryPolicy2.ofCreate("Standard", 5000);
+        deliveryPolicy2.ofCreate("Standard", 50000, 5000);
         ReflectionTestUtils.setField(deliveryPolicy2, "id", 2L);
     }
 
@@ -65,7 +65,7 @@ class DeliveryPolicyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(deliveryPolicyId))
                 .andExpect(jsonPath("$.name").value("Express"))
-                .andExpect(jsonPath("$.price").value(10000));
+                .andExpect(jsonPath("$.price").value(1000));
     }
 
     @Test
@@ -82,7 +82,7 @@ class DeliveryPolicyControllerTest {
 
     @Test
     void testCreateDeliveryPolicy_Success() throws Exception {
-        DeliveryPolicyCreateRequestDTO request = new DeliveryPolicyCreateRequestDTO("Express", 10000);
+        DeliveryPolicyCreateRequestDTO request = new DeliveryPolicyCreateRequestDTO("Express", 10000, 1000);
         DeliveryPolicyResponseDTO mockResponse = DeliveryPolicyResponseDTO.fromEntity(deliveryPolicy1);
 
         Mockito.when(deliveryPolicyService.createDeliveryPolicy(any(DeliveryPolicyCreateRequestDTO.class))).thenReturn(mockResponse);
@@ -93,17 +93,17 @@ class DeliveryPolicyControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Express"))
-                .andExpect(jsonPath("$.price").value(10000));
+                .andExpect(jsonPath("$.price").value(1000));
     }
 
     @Test
     void testUpdateDeliveryPolicy_Success() throws Exception {
         Long deliveryPolicyId = 1L;
 
-        DeliveryPolicyUpdateRequestDTO request = new DeliveryPolicyUpdateRequestDTO("Updated Express", 15000);
+        DeliveryPolicyUpdateRequestDTO request = new DeliveryPolicyUpdateRequestDTO("Updated Express", 15000, 1500);
 
         DeliveryPolicy updateDeliveryPolicy = new DeliveryPolicy();
-        updateDeliveryPolicy.ofCreate("Updated Express", 15000);
+        updateDeliveryPolicy.ofCreate("Updated Express", 15000, 1500);
         ReflectionTestUtils.setField(updateDeliveryPolicy, "id", 1L);
 
         DeliveryPolicyResponseDTO mockResponse = DeliveryPolicyResponseDTO.fromEntity(updateDeliveryPolicy);
@@ -117,7 +117,7 @@ class DeliveryPolicyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(deliveryPolicyId))
                 .andExpect(jsonPath("$.name").value("Updated Express"))
-                .andExpect(jsonPath("$.price").value(15000));
+                .andExpect(jsonPath("$.price").value(1500));
     }
 
     @Test
@@ -146,7 +146,7 @@ class DeliveryPolicyControllerTest {
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].name").value("Express"))
-                .andExpect(jsonPath("$[0].price").value(10000))
+                .andExpect(jsonPath("$[0].price").value(1000))
                 .andExpect(jsonPath("$[1].id").value(2L))
                 .andExpect(jsonPath("$[1].name").value("Standard"))
                 .andExpect(jsonPath("$[1].price").value(5000));

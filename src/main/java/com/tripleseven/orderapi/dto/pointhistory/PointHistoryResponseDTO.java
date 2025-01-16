@@ -17,14 +17,14 @@ public class PointHistoryResponseDTO {
     @Enumerated(EnumType.STRING)
     private final HistoryTypes types;
 
-    private final int amount;
+    private final long amount;
 
     private final LocalDateTime changedAt;
 
     private final String comment;
 
     @Builder
-    public PointHistoryResponseDTO(Long id, HistoryTypes types, int amount, LocalDateTime changedAt, String comment) {
+    public PointHistoryResponseDTO(Long id, HistoryTypes types, long amount, LocalDateTime changedAt, String comment) {
         // Validate input parameters using Objects.isNull()
         if (Objects.isNull(id)) {
             throw new IllegalArgumentException("ID cannot be null");

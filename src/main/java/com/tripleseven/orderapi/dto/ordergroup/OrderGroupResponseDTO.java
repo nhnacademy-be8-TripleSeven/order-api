@@ -1,9 +1,11 @@
 package com.tripleseven.orderapi.dto.ordergroup;
 
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -50,17 +52,34 @@ public class OrderGroupResponseDTO {
     }
 
     public static OrderGroupResponseDTO fromEntity(OrderGroup orderGroup) {
-        return OrderGroupResponseDTO.builder()
-                .id(orderGroup.getId())
-                .userId(orderGroup.getUserId())
-                .orderedName(orderGroup.getOrderedName())
-                .orderedAt(orderGroup.getOrderedAt())
-                .recipientName(orderGroup.getRecipientName())
-                .recipientPhone(orderGroup.getRecipientPhone())
-                .recipientHomePhone(orderGroup.getRecipientHomePhone())
-                .deliveryPrice(orderGroup.getDeliveryPrice())
-                .address(orderGroup.getAddress())
-                .wrappingId(orderGroup.getWrapping().getId())
-                .build();
+        Wrapping wrapping = orderGroup.getWrapping();
+        if (Objects.nonNull(wrapping)) {
+            return OrderGroupResponseDTO.builder()
+                    .id(orderGroup.getId())
+                    .userId(orderGroup.getUserId())
+                    .orderedName(orderGroup.getOrderedName())
+                    .orderedAt(orderGroup.getOrderedAt())
+                    .recipientName(orderGroup.getRecipientName())
+                    .recipientPhone(orderGroup.getRecipientPhone())
+                    .recipientHomePhone(orderGroup.getRecipientHomePhone())
+                    .deliveryPrice(orderGroup.getDeliveryPrice())
+                    .address(orderGroup.getAddress())
+                    .wrappingId(orderGroup.getWrapping().getId())
+                    .build();
+        } else {
+            return OrderGroupResponseDTO.builder()
+                    .id(orderGroup.getId())
+                    .userId(orderGroup.getUserId())
+                    .orderedName(orderGroup.getOrderedName())
+                    .orderedAt(orderGroup.getOrderedAt())
+                    .recipientName(orderGroup.getRecipientName())
+                    .recipientPhone(orderGroup.getRecipientPhone())
+                    .recipientHomePhone(orderGroup.getRecipientHomePhone())
+                    .deliveryPrice(orderGroup.getDeliveryPrice())
+                    .address(orderGroup.getAddress())
+                    .build();
+        }
+
+
     }
 }

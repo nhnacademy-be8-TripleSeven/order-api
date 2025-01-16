@@ -109,8 +109,8 @@ class OrderServiceTest {
         WrappingResponseDTO wrappingResponse = WrappingResponseDTO.fromEntity(wrapping);
         when(wrappingService.getWrappingById(1L)).thenReturn(wrappingResponse);
 
-        when(orderGroupPointHistoryService.getUsedPoint(orderGroupId)).thenReturn(1000);
-        when(orderGroupPointHistoryService.getEarnedPoint(orderGroupId)).thenReturn(500);
+        when(orderGroupPointHistoryService.getUsedPoint(orderGroupId)).thenReturn(1000L);
+        when(orderGroupPointHistoryService.getEarnedPoint(orderGroupId)).thenReturn(500L);
 
         DeliveryInfoDTO deliveryInfo = new DeliveryInfoDTO(
                 "DeliveryInfo 1",

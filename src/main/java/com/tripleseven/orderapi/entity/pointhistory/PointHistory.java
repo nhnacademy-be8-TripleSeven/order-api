@@ -21,7 +21,7 @@ public class PointHistory {
     @Enumerated(EnumType.STRING)
     private HistoryTypes types;
 
-    private int amount; // 도서 구매금액 또는 포인트 사용금액
+    private long amount; // 도서 구매금액 또는 포인트 사용금액
 
     private LocalDateTime changedAt; // 포인트 변경 시간
 
@@ -32,7 +32,7 @@ public class PointHistory {
     @OneToMany(mappedBy = "pointHistory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderGroupPointHistory> orderGroupPointHistories = new ArrayList<>();
 
-    public PointHistory(HistoryTypes types, int amount, LocalDateTime changedAt, String comment, Long memberId) {
+    public PointHistory(HistoryTypes types, long amount, LocalDateTime changedAt, String comment, Long memberId) {
         this.types = types;
         this.amount = amount;
         this.changedAt = changedAt;
@@ -40,11 +40,11 @@ public class PointHistory {
         this.memberId = memberId;
     }
 
-    public static PointHistory ofCreate(HistoryTypes types, int amount, String comment, Long memberId) {
+    public static PointHistory ofCreate(HistoryTypes types, long amount, String comment, Long memberId) {
         return new PointHistory(types, amount, LocalDateTime.now(), comment, memberId);
     }
 
-    public void ofUpdate(HistoryTypes types, int amount, String comment) {
+    public void ofUpdate(HistoryTypes types, long amount, String comment) {
         this.types = types;
         this.amount = amount;
         this.comment = comment;

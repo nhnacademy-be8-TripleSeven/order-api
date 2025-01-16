@@ -72,6 +72,7 @@ class QueryDslOrderDetailTest {
 
     @Test
     void testFindAllByPeriodAndUserId() {
+
         List<OrderViewDTO> results = queryDslOrderDetailRepository.findAllByPeriodAndUserId(
                 1L,
                 LocalDate.now().minusDays(5),

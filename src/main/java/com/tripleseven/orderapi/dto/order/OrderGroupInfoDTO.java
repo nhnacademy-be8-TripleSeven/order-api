@@ -12,6 +12,6 @@ public class OrderGroupInfoDTO {
     String wrappingName;
     int wrappingPrice;
     int totalPrice;
-    int usedPoint;
-    int earnedPoint;
+    long usedPoint;
+    long earnedPoint;
 }

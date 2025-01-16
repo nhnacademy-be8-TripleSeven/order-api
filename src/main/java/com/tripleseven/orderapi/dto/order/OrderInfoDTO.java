@@ -11,6 +11,6 @@ public class OrderInfoDTO {
     OrderStatus orderStatus;
     String bookName;
     int amount;
-    int discountPrice;
-    int primePrice;
+    long discountPrice;
+    long primePrice;
 }

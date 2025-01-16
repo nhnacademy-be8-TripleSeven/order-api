@@ -23,7 +23,7 @@ class DeliveryPolicyRepositoryTest {
     @BeforeEach
     void setUp() {
         deliveryPolicy = new DeliveryPolicy();
-        deliveryPolicy.ofCreate("Test DeliveryPolicy", 1000);
+        deliveryPolicy.ofCreate("Test DeliveryPolicy", 10000, 1000);
         savedDeliveryPolicy = deliveryPolicyRepository.save(deliveryPolicy);
 
     }

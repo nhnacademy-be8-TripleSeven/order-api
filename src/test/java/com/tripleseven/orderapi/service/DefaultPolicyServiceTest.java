@@ -31,8 +31,8 @@ class DefaultPolicyServiceTest {
 
     @Test
     void testGetDefaultPolicies_Success() {
-        DefaultDeliveryPolicyDTO deliveryPolicy1 = new DefaultDeliveryPolicyDTO(1L, "Express", 3000, null);
-        DefaultDeliveryPolicyDTO deliveryPolicy2 = new DefaultDeliveryPolicyDTO(2L, "Standard", 1500, null);
+        DefaultDeliveryPolicyDTO deliveryPolicy1 = new DefaultDeliveryPolicyDTO(1L, "Express", 30000, 3000, null);
+        DefaultDeliveryPolicyDTO deliveryPolicy2 = new DefaultDeliveryPolicyDTO(2L, "Standard", 15000, 1500, null);
         List<DefaultDeliveryPolicyDTO> deliveryPolicies = List.of(deliveryPolicy1, deliveryPolicy2);
 
         DefaultPointPolicyDTO pointPolicy1 = new DefaultPointPolicyDTO(1L, null, 1L, "Point Policy 1", 100, null);

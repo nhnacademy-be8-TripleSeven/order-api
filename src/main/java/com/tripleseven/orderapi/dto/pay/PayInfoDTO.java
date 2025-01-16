@@ -25,8 +25,12 @@ public class PayInfoDTO implements Serializable {
 
     private LocalDate deliveryDate; //배송 날짜
 
-    private long wrapperId; //포장지 아이디
-    private long couponId; //쿠폰 아이디
+    private Long wrapperId; //포장지 아이디
+    private Long couponId; //쿠폰 아이디
+
+    private String ordererName;
+
+    private String payType;
 
     private long point; //사용하는 포인트
     private long totalAmount; //총 가격
@@ -39,6 +43,8 @@ public class PayInfoDTO implements Serializable {
         this.deliveryDate = payInfoRequestDTO.getDeliveryDate();
         this.wrapperId = payInfoRequestDTO.getWrapperId();
         this.couponId = payInfoRequestDTO.getCouponId();
+        this.ordererName = payInfoRequestDTO.getOrdererName();
+        this.payType = payInfoRequestDTO.getPayType();
         this.point = payInfoRequestDTO.getPoint();
         this.totalAmount = payInfoRequestDTO.getTotalAmount();
     }

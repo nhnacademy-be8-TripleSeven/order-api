@@ -1,13 +1,14 @@
 package com.tripleseven.orderapi.service.pay;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
+import com.tripleseven.orderapi.dto.cartitem.OrderItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
+import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
-import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
-import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
-import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
+import com.tripleseven.orderapi.dto.pay.*;
+import com.tripleseven.orderapi.dto.properties.ApiProperties;
 import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
@@ -15,23 +16,28 @@ import com.tripleseven.orderapi.repository.pay.PayRepository;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PayServiceImpl implements PayService {
+    private final ApiProperties apiProperties;
     private final PayRepository payRepository;
     private final OrderGroupService orderGroupService;
     private final PointHistoryService pointHistoryService;
@@ -41,27 +47,28 @@ public class PayServiceImpl implements PayService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // TODO save 해서 반환받아야할 경우가 있는지 확인
-    //  저장되는 값 더 추가해야됨
+    // TODO save 해서 반환해야될 경우가 있는지 확인(void 타입)
     @Override
     public void createPay(Long userId, JSONObject jsonObject) {
         Pay pay = new Pay();
-        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "OrderInfo");
+        PayInfoDTO infoDto = (PayInfoDTO) redisTemplate.opsForHash().get(userId.toString(), "PayInfo");
         //infoDTO를 각 db에 저장해야함
 
-        pay.ofCreate(jsonObject);
         payRepository.save(pay);
     }
 
     @Override
-    public void cancelPay(JSONObject response) {
-        Pay pay = payRepository.findByPaymentKey(response.get("paymentKey").toString());
+    public Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException {
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
+        JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getSecretApiKey(), url);
 
-        if (Objects.isNull(pay)) {
-            throw new CustomException(ErrorCode.PAY_NOT_FOUND);
+        if (response.containsKey("error")) {
+            // Error 객체 반환
+            return ErrorDTO.fromJson(response);
         }
 
-        pay.ofUpdate(response);
+        // 정상 응답 DTO 반환
+        return PaymentDTO.fromJson(response);
     }
 
     @Override
@@ -70,59 +77,77 @@ public class PayServiceImpl implements PayService {
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
-//        checkValid(userId, payInfoDTO);
+        checkValid(userId, payInfoDTO);
 
-        // TODO 검증 후 저장 (수정 해야됨)
-        if(Objects.nonNull(userId)){
+        if (Objects.nonNull(userId)) {
             redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
-        }
-        else{
+        } else {
             redisTemplate.opsForHash().put(guestId, "PayInfo", payInfoDTO);
         }
         return new PayInfoResponseDTO(orderId, request.getTotalAmount());
     }
 
+    @Override
     public OrderPayInfoDTO getOrderPayInfo(Long orderId) {
 
         return payRepository.getDTOByOrderGroupId(orderId);
     }
 
+    @Override
+    public Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException {
+        String secretKey = request.getRequestURI().contains("/confirm/payment") ? apiProperties.getSecretApiKey() : apiProperties.getWidgetApiKey();
+
+        JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
+
+        if (response.containsKey("error")) {
+            // Error 객체 반환
+            return ErrorDTO.fromJson(response);
+        }
+
+        // 정상 응답 DTO 반환
+        return PaymentDTO.fromJson(response);
+    }
+
+
     private void checkValid(Long userId, PayInfoDTO payInfo) {
-        List<CartItemDTO> cartItems = (List<CartItemDTO>) redisTemplate.opsForHash().get(userId.toString(), "CartItems");
+        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
         Long couponId = payInfo.getCouponId();
         Long usePoint = payInfo.getPoint();
         Long totalAmount = payInfo.getTotalAmount();
 
+
+        Map<Long, Integer> bookAmounts = new HashMap<>();
         List<Long> bookIds = new ArrayList<>();
 
-        for (CartItemDTO cartItem : cartItems) {
-            bookIds.add(cartItem.getBookId());
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            bookIds.add(bookInfo.getBookId());
+            bookAmounts.put(bookInfo.getBookId(), bookInfo.getQuantity());
         }
 
+        List<OrderItemDTO> realItems = bookCouponApiClient.getOrderItems(bookIds);
+
         // 재고 검증
-        checkAmount(bookIds);
+        checkAmount(bookAmounts, realItems);
 
         // 쿠폰 검증
-        checkCoupon(couponId, totalAmount, 0L);
+        checkCoupon(couponId, bookInfos);
 
         // 포인트 검증
         checkPoint(userId, totalAmount, usePoint);
     }
 
-    private void checkAmount(List<Long> bookIds) {
-        // 재고 확인
-        List<CartItemDTO> realItems = bookCouponApiClient.getCartItems(bookIds);
+    private void checkAmount(Map<Long, Integer> bookAmounts, List<OrderItemDTO> realItems) {
+        for (OrderItemDTO realItem : realItems) {
+            int amount = bookAmounts.get(realItem.getBookId());
 
-        for (CartItemDTO cartItem : realItems) {
-            // 재고 비교
-            cartItem.getQuantity();
+            if (realItem.getAmount() > amount) {
+                throw new CustomException(ErrorCode.AMOUNT_FAILED_CONFLICT);
+            }
         }
-
     }
 
-    private void checkCoupon(Long couponId, Long totalAmount, Long discountAmount) {
-        CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
-        Long discount = bookCouponApiClient.applyCoupon(couponId, totalAmount);
+    private void checkCoupon(Long totalAmount, List<OrderBookInfoDTO> bookInfos) {
+        CouponDTO coupon = bookCouponApiClient.getCoupon(1L);
 
         // 쿠폰 존재 검증
         if (Objects.isNull(coupon)) {
@@ -139,9 +164,17 @@ public class PayServiceImpl implements PayService {
             throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
         }
 
-        // 계산된 할인 금액과 맞지 않음
-        if(!discountAmount.equals(discount)) {
-            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+        for (OrderBookInfoDTO bookInfo : bookInfos) {
+            if (bookInfo.getCouponId() != null) {
+                // 계산 재확인
+                Long realDiscount = bookCouponApiClient.applyCoupon(bookInfo.getCouponId(), bookInfo.getPrice());
+
+                // 계산된 할인 금액과 맞지 않음
+                if (bookInfo.getCouponSalePrice() != realDiscount) {
+                    throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+
+                }
+            }
         }
 
     }
@@ -160,6 +193,59 @@ public class PayServiceImpl implements PayService {
         }
 
         return point;
+    }
+
+    private JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
+        // GET 요청의 경우 requestData를 보내지 않음
+        HttpURLConnection connection;
+        if (requestData.isEmpty()) {
+            connection = createConnection(secretKey, urlString, "GET");
+        } else {
+            connection = createConnection(secretKey, urlString, "POST");
+            // POST 요청 시에는 requestData를 본문에 포함
+            try (OutputStream os = connection.getOutputStream()) {
+                os.write(requestData.toString().getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
+        try (InputStream responseStream = connection.getResponseCode() == 200 ? connection.getInputStream() : connection.getErrorStream();
+             Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
+            return (JSONObject) new JSONParser().parse(reader);
+        } catch (Exception e) {
+            JSONObject errorResponse = new JSONObject();
+            errorResponse.put("error", "Error reading response");
+            return errorResponse;
+        }
+    }
+
+    private HttpURLConnection createConnection(String secretKey, String urlString, String requestMethod) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8)));
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestMethod(requestMethod);
+        connection.setDoOutput(true);
+        return connection;
+    }
+
+
+    private JSONObject parseRequestData(String jsonBody) {
+        try {
+            return (JSONObject) new JSONParser().parse(jsonBody);
+        } catch (ParseException e) {
+            return new JSONObject();
+        }
+    }
+
+    private JSONObject convertToJSONObject(PayCancelRequestDTO request) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(request);
+            return parseRequestData(jsonString);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JSONObject();
+        }
     }
 }
 

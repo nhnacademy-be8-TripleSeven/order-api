@@ -36,7 +36,7 @@ class DeliveryPolicyServiceTest {
     void setUp() {
         deliveryPolicy = new DeliveryPolicy();
         ReflectionTestUtils.setField(deliveryPolicy, "id", 1L);
-        deliveryPolicy.ofCreate("Test DeliveryPolicy", 1000);
+        deliveryPolicy.ofCreate("Test DeliveryPolicy", 10000, 1000);
     }
 
     @Test
@@ -68,6 +68,7 @@ class DeliveryPolicyServiceTest {
         DeliveryPolicyResponseDTO response = deliveryPolicyService.createDeliveryPolicy(
                 new DeliveryPolicyCreateRequestDTO(
                         deliveryPolicy.getName(),
+                        deliveryPolicy.getMinPrice(),
                         deliveryPolicy.getPrice()
                 ));
 
@@ -86,7 +87,7 @@ class DeliveryPolicyServiceTest {
 
     @Test
     void testCreateDeliveryPolicy_Fail() {
-        DeliveryPolicyCreateRequestDTO requestDTO = new DeliveryPolicyCreateRequestDTO(null, -1);
+        DeliveryPolicyCreateRequestDTO requestDTO = new DeliveryPolicyCreateRequestDTO(null, -1, -1);
 
         NullPointerException exception = assertThrows(NullPointerException.class,
                 () -> deliveryPolicyService.createDeliveryPolicy(requestDTO));
@@ -96,7 +97,7 @@ class DeliveryPolicyServiceTest {
 
     @Test
     void testUpdateDeliveryPolicy_Success() {
-        DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
+        DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 15000, 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.of(deliveryPolicy));
 
         DeliveryPolicyResponseDTO response = deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest);
@@ -109,7 +110,7 @@ class DeliveryPolicyServiceTest {
 
     @Test
     void testUpdateDeliveryPolicy_Fail() {
-        DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 1500);
+        DeliveryPolicyUpdateRequestDTO updateRequest = new DeliveryPolicyUpdateRequestDTO("Updated DeliveryPolicy", 15000, 1500);
         when(deliveryPolicyRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(CustomException.class, () -> deliveryPolicyService.updateDeliveryPolicy(1L, updateRequest));

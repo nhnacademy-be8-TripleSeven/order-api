@@ -72,7 +72,7 @@ class QueryDslOrderGroupPointHistoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        Integer totalAmount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(savedOrderGroup.getId(), HistoryTypes.EARN);
+        Long totalAmount = queryDslOrderGroupPointHistoryRepository.findTotalAmountByOrderGroupId(savedOrderGroup.getId(), HistoryTypes.EARN);
 
         assertNotNull(totalAmount);
         assertEquals(800, totalAmount);
