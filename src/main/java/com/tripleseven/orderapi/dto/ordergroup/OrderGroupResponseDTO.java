@@ -29,12 +29,12 @@ public class OrderGroupResponseDTO {
 
     private final String recipientHomePhone;
 
-    private final int deliveryPrice;
+    private final long deliveryPrice;
 
     private final String address;
 
     @Builder
-    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, LocalDate orderedAt, String recipientName, String recipientPhone, String recipientHomePhone, int deliveryPrice, String address) {
+    private OrderGroupResponseDTO(Long id, Long userId, Long wrappingId, String orderedName, LocalDate orderedAt, String recipientName, String recipientPhone, String recipientHomePhone, long deliveryPrice, String address) {
         if (Objects.isNull(id)) {
             log.error("OrderGroup id cannot be null");
             throw new IllegalArgumentException("id cannot be null");

@@ -89,9 +89,9 @@ public class OrderServiceImpl implements OrderService {
         long usedPoint = orderGroupPointHistoryService.getUsedPoint(orderGroupId);
         long earnedPoint = orderGroupPointHistoryService.getEarnedPoint(orderGroupId);
         // 판매가 총합
-        int primeTotalPrice = 0;
+        long primeTotalPrice = 0;
         // 할인 금액
-        int discountPrice = 0;
+        long discountPrice = 0;
 
         for (OrderDetailResponseDTO orderDetailResponseDTO : orderDetailResponseList) {
             primeTotalPrice += orderDetailResponseDTO.getPrimePrice() * orderDetailResponseDTO.getQuantity();
@@ -99,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 총 계산된 금액
-        int totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
+        long totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
 
         return new OrderGroupInfoDTO(
                 primeTotalPrice,
