@@ -1,5 +1,8 @@
 package com.tripleseven.orderapi.entity.pay;
 
+import lombok.Getter;
+
+@Getter
 public enum PaymentStatus {
     READY("READY"), // 초기 상태
     IN_PROGRESS("IN_PROGRESS"), // 인증 완료 상태
@@ -14,10 +17,6 @@ public enum PaymentStatus {
 
     PaymentStatus(String status) {
         this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
     }
 
     public static PaymentStatus fromString(String status) {

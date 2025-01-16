@@ -50,13 +50,13 @@ public class PaymentListener {
         try {
             log.info("Clearing Cart...");
 
-            List<String> bookIdsS = (List<String>) messageDTO.getObject("BookIds");
-            Long userId = (Long) messageDTO.getObject("UserId");
+            List<Long> bookIdsS = (List<Long>) messageDTO.getObject("BookIds");
+            String userId = (String) messageDTO.getObject("UserId");
 
             // 여러번 호출
             bookIdsS.stream()
                     .map(Long::valueOf)
-                    .forEach(bookId -> memberApiClient.deleteCart(userId, bookId));
+                    .forEach(bookId -> memberApiClient.deleteCart(Long.valueOf(userId), bookId));
 
             log.info("Completed Clearing Cart!!");
 
