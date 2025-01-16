@@ -144,16 +144,21 @@ public class OrderSaveProcessing implements OrderProcessing {
         Long totalAmount = payInfo.getTotalAmount();
 
         // 쿠폰 사용
-        bookCouponApiClient.updateUseCoupon(couponId);
+        if (couponId != null) {
+            bookCouponApiClient.updateUseCoupon(couponId);
+        }
 
         // 포인트 사용
-        pointService.createPointHistoryForPaymentSpend(memberId, point, orderGroupId);
+        if (point > 0) {
+            pointService.createPointHistoryForPaymentSpend(memberId, point, orderGroupId);
+        }
 
+        log.info("Successfully processed member order");
         // rabbitMQ 요청
         cartProcessing(memberId.toString(), bookInfos);
         pointProcessing(memberId, orderGroupId, totalAmount);
 
-        log.info("Successfully processed member order");
+        log.info("Successfully processed RabbitMQ member order");
     }
 
     private OrderGroupCreateRequestDTO getOrderGroupCreateRequestDTO(PayInfoDTO payInfo) {
@@ -161,9 +166,9 @@ public class OrderSaveProcessing implements OrderProcessing {
         RecipientInfoDTO recipientInfo = payInfo.getRecipientInfo();
 
         String address = String.format("%s %s (%s)",
-                addressInfo.getRoadAddress(),
-                addressInfo.getDetailAddress(),
-                addressInfo.getZoneAddress());
+                addressInfo.getRoadAddress().trim(),
+                addressInfo.getDetailAddress().trim(),
+                addressInfo.getZoneAddress()).trim();
 
         return new OrderGroupCreateRequestDTO(
                 payInfo.getWrapperId(),

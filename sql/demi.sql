@@ -24,10 +24,13 @@ FROM delivery_policy dp
 LIMIT 3;
 
 -- PayType 데이터 생성 (5~10개)
-INSERT INTO pay_type (name)
-SELECT CONCAT('Pay Type ', seq)
-FROM (SELECT 1 AS seq UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10) t
-LIMIT 5;
+INSERT INTO pay_type (name) VALUES
+                                ('토스페이'),
+                                ('네이버페이'),
+                                ('카카오페이'),
+                                ('신용카드'),
+                                ('계좌 이체'),
+                                ('무통장 입금');
 
 -- PointPolicy 데이터 생성 (5~10개)
 INSERT INTO point_policy (amount, name, rate)
