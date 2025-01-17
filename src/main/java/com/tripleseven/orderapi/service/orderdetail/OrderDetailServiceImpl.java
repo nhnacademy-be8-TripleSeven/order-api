@@ -63,6 +63,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderDetailCreateRequestDTO.getDiscountPrice(),
                 orderGroup);
 
+
         OrderDetail savedOrderDetail = orderDetailRepository.save(orderDetail);
 
         return OrderDetailResponseDTO.fromEntity(savedOrderDetail);
@@ -134,6 +135,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
+        } else {
+            throw new CustomException(ErrorCode.BAD_REQUEST);
         }
         return orderDetailResponses;
     }

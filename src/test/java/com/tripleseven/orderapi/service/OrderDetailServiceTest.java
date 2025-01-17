@@ -167,13 +167,10 @@ class OrderDetailServiceTest {
         List<Long> orderIds = List.of(1L);
         OrderStatus status = OrderStatus.PAYMENT_COMPLETED;
 
-        when(orderDetailRepository.findById(anyLong())).thenReturn(Optional.empty());
-
         CustomException exception = assertThrows(CustomException.class,
                 () -> orderDetailService.updateOrderDetailStatus(orderIds, status));
 
         assertNotNull(exception);
-        verify(orderDetailRepository, times(1)).findById(1L);
     }
 
     @Test

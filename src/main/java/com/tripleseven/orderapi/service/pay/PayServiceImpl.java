@@ -139,26 +139,11 @@ public class PayServiceImpl implements PayService {
             bookAmounts.put(bookInfo.getBookId(), bookInfo.getQuantity());
         }
 
-        List<OrderItemDTO> realItems = bookCouponApiClient.getOrderItems(bookIds);
-
-        // 재고 검증
-        checkAmount(bookAmounts, realItems);
-
         // 쿠폰 검증
         checkCoupon(couponId, bookInfos);
 
         // 포인트 검증
         checkPoint(userId, totalAmount, usePoint);
-    }
-
-    private void checkAmount(Map<Long, Integer> bookAmounts, List<OrderItemDTO> realItems) {
-        for (OrderItemDTO realItem : realItems) {
-            int amount = bookAmounts.get(realItem.getBookId());
-
-            if (realItem.getAmount() > amount) {
-                throw new CustomException(ErrorCode.AMOUNT_FAILED_CONFLICT);
-            }
-        }
     }
 
     private void checkCoupon(Long totalAmount, List<OrderBookInfoDTO> bookInfos) {
