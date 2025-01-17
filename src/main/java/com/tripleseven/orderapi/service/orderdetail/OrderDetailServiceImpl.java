@@ -63,6 +63,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderDetailCreateRequestDTO.getDiscountPrice(),
                 orderGroup);
 
+
         OrderDetail savedOrderDetail = orderDetailRepository.save(orderDetail);
 
         return OrderDetailResponseDTO.fromEntity(savedOrderDetail);
@@ -86,9 +87,24 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 }
                 orderDetail.ofUpdateStatus(orderStatus);
 
+                String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
+
+                String comment = String.format("%s %s", bookName, orderStatus.getKorean());
+
+                long refund = orderDetail.getPrimePrice() * orderDetail.getAmount() - orderDetail.getDiscountPrice();
+                PointHistory pointHistory = PointHistory.ofCreate(
+                        HistoryTypes.EARN,
+                        refund,
+                        comment,
+                        orderDetail.getOrderGroup().getUserId()
+                );
+                pointHistoryRepository.save(pointHistory);
+
+                //
+                orderDetail.ofZeroPrice();
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
-        } else {
+        } else if (orderStatus.equals(OrderStatus.RETURNED_PENDING)) { // 반품 요청
             for (Long id : ids) {
                 OrderDetail orderDetail = orderDetailRepository.findById(id)
                         .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
@@ -119,10 +135,13 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
+        } else {
+            throw new CustomException(ErrorCode.BAD_REQUEST);
         }
         return orderDetailResponses;
     }
 
+    // 주문 상태 변경 (환불 처리 등)
     @Override
     @Transactional
     public List<OrderDetailResponseDTO> updateAdminOrderDetailStatus(List<Long> ids, OrderStatus orderStatus) {
@@ -141,7 +160,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 Long userId = orderGroup.getUserId();
 
                 // 환불 금액 (쿠폰은 재발급 x)
-                long refundPrice = orderDetail.getPrimePrice() - orderDetail.getDiscountPrice();
+                long refund = orderDetail.getPrimePrice() * orderDetail.getAmount() - orderDetail.getDiscountPrice();
 
                 String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
 
@@ -156,12 +175,15 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
                 // 출고일 기준 (10일 이후이면 배송비 환불 불가)
                 if (today.isAfter(shippingAt.plusDays(10))) {
-                    refundPrice -= orderGroup.getDeliveryPrice();
+                    refund -= orderGroup.getDeliveryPrice();
                 }
+
+                String comment = String.format("%s %s", bookName, orderStatus.getKorean());
+
                 PointHistory pointHistory = PointHistory.ofCreate(
                         HistoryTypes.EARN,
-                        refundPrice,
-                        String.format("환불: " + bookName),
+                        refund,
+                        comment,
                         userId
                 );
                 PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
@@ -172,6 +194,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 orderGroupId,
                                 savedPointHistory.getId()
                         ));
+
+                orderDetail.ofZeroPrice();
             }
             orderDetail.ofUpdateStatus(orderStatus);
 
@@ -211,7 +235,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate){
+    public Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate) {
         return queryDslOrderDetailRepository.computeNetTotal(userId, startDate, endDate);
     }
 }
