@@ -10,9 +10,9 @@ import com.tripleseven.orderapi.dto.order.RecipientInfoDTO;
 import com.tripleseven.orderapi.dto.orderdetail.OrderDetailCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
+import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PaymentDTO;
-import com.tripleseven.orderapi.entity.defaultdeliverypolicy.DeliveryPolicyType;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,107 +59,129 @@ public class OrderSaveProcessing implements OrderProcessing {
     @Override
     public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
         // TODO Redis 저장 키 고민
-        log.info("processNonMemberOrder guestId={}", guestId);
+        try {
 
-        HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
+            log.info("processNonMemberOrder guestId={}", guestId);
 
-        if (Objects.isNull(payHash)) {
-            throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
-        }
+            HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
 
-        PayInfoDTO payInfo = payHash.get(guestId, "PayInfo");
+            if (Objects.isNull(payHash)) {
+                throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
+            }
 
-        OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
+            PayInfoDTO payInfo = payHash.get(guestId, "PayInfo");
 
-        // OrderGroup 생성
-        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(GUEST_USER_ID, request);
-        Long orderGroupId = orderGroupResponseDTO.getId();
+            OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
 
-        // DeliveryInfo 생성
-        deliveryInfoService.createDeliveryInfo(
-                new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
-        );
+            // OrderGroup 생성
+            OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(GUEST_USER_ID, request);
+            Long orderGroupId = orderGroupResponseDTO.getId();
 
-        // OrderDetail 저장
-        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
-        for (OrderBookInfoDTO bookInfo : bookInfos) {
-            OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
-                    = new OrderDetailCreateRequestDTO(
-                    bookInfo.getBookId(),
-                    bookInfo.getQuantity(),
-                    bookInfo.getPrice(),
-                    bookInfo.getCouponSalePrice(),
-                    orderGroupId
+            // DeliveryInfo 생성
+            deliveryInfoService.createDeliveryInfo(
+                    new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
             );
-            orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+
+            // OrderDetail 저장
+            List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
+            for (OrderBookInfoDTO bookInfo : bookInfos) {
+                OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
+                        = new OrderDetailCreateRequestDTO(
+                        bookInfo.getBookId(),
+                        bookInfo.getQuantity(),
+                        bookInfo.getPrice(),
+                        bookInfo.getCouponSalePrice(),
+                        orderGroupId
+                );
+                orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+            }
+
+            payService.createPay(paymentDTO, orderGroupId);
+
+            cartProcessing(guestId, bookInfos);
+
+            log.info("Successfully processed non-member order");
+        } catch (Exception e) {
+            PayCancelRequestDTO payCancelRequest = new PayCancelRequestDTO("주문 오류");
+
+            try {
+                payService.cancelRequest(paymentDTO.getPaymentKey(), payCancelRequest);
+            } catch (IOException ioe) {
+                log.error(ioe.getMessage());
+            }
         }
-
-        payService.createPay(paymentDTO, orderGroupId);
-        
-        cartProcessing(guestId, bookInfos);
-
-        log.info("Successfully processed non-member order");
     }
 
     @Override
     public void processMemberOrder(Long memberId, PaymentDTO paymentDTO) {
-        log.info("processMemberOrder memberId={}", memberId);
+        try {
+            log.info("processMemberOrder memberId={}", memberId);
 
-        HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
+            HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
 
-        if (Objects.isNull(payHash)) {
-            throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
-        }
+            if (Objects.isNull(payHash)) {
+                throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
+            }
 
-        PayInfoDTO payInfo = payHash.get(memberId.toString(), "PayInfo");
+            PayInfoDTO payInfo = payHash.get(memberId.toString(), "PayInfo");
 
-        OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
+            OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
 
-        // OrderGroup 생성
-        OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(memberId, request);
-        Long orderGroupId = orderGroupResponseDTO.getId();
+            // OrderGroup 생성
+            OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(memberId, request);
+            Long orderGroupId = orderGroupResponseDTO.getId();
 
-        // DeliveryInfo 생성
-        deliveryInfoService.createDeliveryInfo(
-                new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
-        );
-
-        // OrderDetail 저장
-        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
-        for (OrderBookInfoDTO bookInfo : bookInfos) {
-            OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
-                    = new OrderDetailCreateRequestDTO(
-                    bookInfo.getBookId(),
-                    bookInfo.getQuantity(),
-                    bookInfo.getPrice(),
-                    bookInfo.getCouponSalePrice(),
-                    orderGroupId
+            // DeliveryInfo 생성
+            deliveryInfoService.createDeliveryInfo(
+                    new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
             );
-            orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+
+            // OrderDetail 저장
+            List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
+            for (OrderBookInfoDTO bookInfo : bookInfos) {
+                OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
+                        = new OrderDetailCreateRequestDTO(
+                        bookInfo.getBookId(),
+                        bookInfo.getQuantity(),
+                        bookInfo.getPrice(),
+                        bookInfo.getCouponSalePrice(),
+                        orderGroupId
+                );
+                orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+            }
+
+            payService.createPay(paymentDTO, orderGroupId);
+
+            Long couponId = payInfo.getCouponId();
+            Long point = payInfo.getPoint();
+            Long totalAmount = payInfo.getTotalAmount();
+
+            // 쿠폰 사용
+            if (couponId != null) {
+                bookCouponApiClient.updateUseCoupon(couponId);
+            }
+
+            // 포인트 사용
+            if (point > 0) {
+                pointService.createPointHistoryForPaymentSpend(memberId, point, orderGroupId);
+            }
+
+            log.info("Successfully processed member order");
+            // rabbitMQ 요청
+            cartProcessing(memberId.toString(), bookInfos);
+            pointProcessing(memberId, orderGroupId, totalAmount);
+
+            log.info("Successfully processed RabbitMQ member order");
+
+        } catch (Exception e) {
+            PayCancelRequestDTO payCancelRequest = new PayCancelRequestDTO("주문 오류");
+
+            try {
+                payService.cancelRequest(paymentDTO.getPaymentKey(), payCancelRequest);
+            } catch (IOException ioe) {
+                log.error(ioe.getMessage());
+            }
         }
-
-        payService.createPay(paymentDTO, orderGroupId);
-
-        Long couponId = payInfo.getCouponId();
-        Long point = payInfo.getPoint();
-        Long totalAmount = payInfo.getTotalAmount();
-
-        // 쿠폰 사용
-        if (couponId != null) {
-            bookCouponApiClient.updateUseCoupon(couponId);
-        }
-
-        // 포인트 사용
-        if (point > 0) {
-            pointService.createPointHistoryForPaymentSpend(memberId, point, orderGroupId);
-        }
-
-        log.info("Successfully processed member order");
-        // rabbitMQ 요청
-        cartProcessing(memberId.toString(), bookInfos);
-        pointProcessing(memberId, orderGroupId, totalAmount);
-
-        log.info("Successfully processed RabbitMQ member order");
     }
 
     private OrderGroupCreateRequestDTO getOrderGroupCreateRequestDTO(PayInfoDTO payInfo) {
