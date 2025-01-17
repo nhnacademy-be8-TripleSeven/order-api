@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 public interface PayService {
-    void createPay(PaymentDTO response, Long orderGroupId);
+    void createPay(PaymentDTO response, Long orderGroupId, String payType);
 
     Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException;
 

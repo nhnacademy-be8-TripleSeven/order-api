@@ -96,7 +96,7 @@ public class OrderSaveProcessing implements OrderProcessing {
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
 
-            payService.createPay(paymentDTO, orderGroupId);
+            payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
             cartProcessing(guestId, bookInfos);
 
@@ -150,7 +150,7 @@ public class OrderSaveProcessing implements OrderProcessing {
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
 
-            payService.createPay(paymentDTO, orderGroupId);
+            payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
             Long couponId = payInfo.getCouponId();
             Long point = payInfo.getPoint();
