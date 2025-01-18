@@ -2,8 +2,7 @@ package com.tripleseven.orderapi.business.order.process;
 
 import com.tripleseven.orderapi.business.feign.BookService;
 import com.tripleseven.orderapi.business.point.PointService;
-import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.dto.CombinedMessageDTO;
+import com.tripleseven.orderapi.business.rabbit.RabbitService;
 import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
 import com.tripleseven.orderapi.dto.order.AddressInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
@@ -22,7 +21,6 @@ import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pay.PayService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -34,17 +32,9 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class OrderSaveProcessing implements OrderProcessing {
-
-    private static final String EXCHANGE_NAME = "nhn24.pay.exchange";
-
-    private static final String CART_ROUTING_KEY = "cart.routing.key";
-    private static final String POINT_ROUTING_KEY = "point.routing.key";
-
     public static final Long GUEST_USER_ID = -1L;
-
 
     private final OrderGroupService orderGroupService;
     private final OrderDetailService orderDetailService;
@@ -52,14 +42,14 @@ public class OrderSaveProcessing implements OrderProcessing {
     private final PointService pointService;
     private final PayService payService;
     private final BookService bookService;
+    private final RabbitService rabbitService;
 
-    private final RabbitTemplate rabbitTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
+    @Transactional
     public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
         // TODO Redis 저장 키 고민
-
         log.info("processNonMemberOrder guestId={}", guestId);
 
         HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
@@ -97,7 +87,7 @@ public class OrderSaveProcessing implements OrderProcessing {
 
             payService.createPay(paymentDTO, orderGroupId);
 
-            processCart(guestId, bookInfos);
+            rabbitService.sendCartMessage(guestId, bookInfos);
 
             log.info("Successfully processed non-member order");
         } catch (Exception e) {
@@ -107,6 +97,7 @@ public class OrderSaveProcessing implements OrderProcessing {
 
     }
 
+    @Override
     @Transactional
     public void processMemberOrder(Long memberId, PaymentDTO paymentDTO) {
         log.info("processMemberOrder memberId={}", memberId);
@@ -159,11 +150,11 @@ public class OrderSaveProcessing implements OrderProcessing {
                 pointService.createPointHistoryForPaymentSpend(memberId, payInfo.getPoint(), orderGroupId);
             }
 
-            // RabbitMQ 처리
-            processCart(memberId.toString(), bookInfos);
-            processPoint(memberId, orderGroupId, payInfo.getTotalAmount());
-
             log.info("Successfully processed member order");
+
+            // RabbitMQ 처리
+            rabbitService.sendCartMessage(memberId.toString(), bookInfos);
+            rabbitService.sendPointMessage(memberId, orderGroupId, payInfo.getTotalAmount());
 
         } catch (Exception e) {
             handlePaymentCancellation(paymentDTO, "주문 오류");
@@ -179,6 +170,7 @@ public class OrderSaveProcessing implements OrderProcessing {
             log.info("Payment cancellation request completed.");
         } catch (IOException ioe) {
             log.error("Failed to process payment cancellation: {}", ioe.getMessage());
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -200,36 +192,5 @@ public class OrderSaveProcessing implements OrderProcessing {
                 payInfo.getDeliveryFee(),
                 address
         );
-    }
-
-    // 장바구니 초기화
-    private void processCart(String userId, List<OrderBookInfoDTO> bookInfos) {
-        try {
-            List<Long> bookIds = bookInfos.stream().map(OrderBookInfoDTO::getBookId).toList();
-
-            CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
-            cartMessageDTO.addObject("BookIds", bookIds);
-            cartMessageDTO.addObject("UserId", userId);
-
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
-        } catch (Exception e) {
-            // 예외는 로그만 남기고 무시
-            log.error("Error processing cart: {}", e.getMessage());
-        }
-    }
-
-    // 포인트 적립
-    private void processPoint(Long userId, Long orderId, long totalAmount) {
-        try {
-            CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
-            pointMessageDTO.addObject("UserId", userId);
-            pointMessageDTO.addObject("TotalAmount", totalAmount);
-            pointMessageDTO.addObject("OrderId", orderId);
-
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
-        } catch (Exception e) {
-            // 예외는 로그만 남기고 무시
-            log.error("Error processing point: {}", e.getMessage());
-        }
     }
 }
