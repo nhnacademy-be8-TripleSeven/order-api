@@ -55,9 +55,7 @@ public class PayApiController {
                                                      @CookieValue(value = "GUEST-ID") String guestId,
                                                      @RequestBody String jsonBody) throws Exception {
         Object response = payService.confirmRequest(request,jsonBody);
-        // TODO API 키 서비스에서 관리해서 DTO 만들어서
-        //  서비스 로직으로 DTO 생성하여 후
-        //  OrderProcessing 보내서 서비스 호출
+
         if(response.getClass().isAssignableFrom(ErrorDTO.class))
             return ResponseEntity.badRequest().body(response);
 
