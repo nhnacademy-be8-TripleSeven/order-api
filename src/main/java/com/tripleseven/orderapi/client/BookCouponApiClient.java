@@ -1,6 +1,5 @@
 package com.tripleseven.orderapi.client;
 
-import com.tripleseven.orderapi.dto.cartitem.CartItemDTO;
 import com.tripleseven.orderapi.dto.cartitem.OrderItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import org.springframework.cloud.openfeign.FeignClient;
