@@ -1,7 +1,9 @@
 package com.tripleseven.orderapi.business.order.process;
 
-public interface OrderProcessing {
-    void processNonMemberOrder(String guestId);
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 
-    void processMemberOrder(Long memberId);
+public interface OrderProcessing {
+    void processNonMemberOrder(String guestId, PaymentDTO paymentDTO);
+
+    void processMemberOrder(Long memberId, PaymentDTO paymentDTO);
 }

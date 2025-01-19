@@ -6,12 +6,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class OrderGroupInfoDTO {
-    int primeTotalPrice;
-    int discountedPrice;
-    int deliveryPrice;
+    long primeTotalPrice;
+    long discountedPrice;
+    long deliveryPrice;
     String wrappingName;
-    int wrappingPrice;
-    int totalPrice;
+    long wrappingPrice;
+    long totalPrice;
     long usedPoint;
     long earnedPoint;
 }

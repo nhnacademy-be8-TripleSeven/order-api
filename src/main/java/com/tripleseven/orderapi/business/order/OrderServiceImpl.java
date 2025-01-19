@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderPayDetailDTO getOrderPayDetail(Long userId, Long orderGroupId) {
         OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(orderGroupId);
 
-        if (response.getUserId() != userId) {
+        if (!response.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -58,6 +59,16 @@ public class OrderServiceImpl implements OrderService {
                 this.getOrderPayInfo(orderGroupId)
         );
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getThreeMonthsNetAmount(Long userId) {
+        LocalDate today = LocalDate.now();
+        LocalDate threeMonthsAgo = today.minusMonths(3);
+        Long netAmount = orderDetailService.getNetTotalByPeriod(userId, threeMonthsAgo, today);
+        return netAmount;
+    }
+
 
     private List<OrderInfoDTO> getOrderInfos(Long orderGroupId) {
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
@@ -89,17 +100,17 @@ public class OrderServiceImpl implements OrderService {
         long usedPoint = orderGroupPointHistoryService.getUsedPoint(orderGroupId);
         long earnedPoint = orderGroupPointHistoryService.getEarnedPoint(orderGroupId);
         // 판매가 총합
-        int primeTotalPrice = 0;
+        long primeTotalPrice = 0;
         // 할인 금액
-        int discountPrice = 0;
+        long discountPrice = 0;
 
         for (OrderDetailResponseDTO orderDetailResponseDTO : orderDetailResponseList) {
-            primeTotalPrice += orderDetailResponseDTO.getPrimePrice();
+            primeTotalPrice += orderDetailResponseDTO.getPrimePrice() * orderDetailResponseDTO.getQuantity();
             discountPrice += orderDetailResponseDTO.getDiscountPrice();
         }
 
         // 총 계산된 금액
-        int totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
+        long totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
 
         return new OrderGroupInfoDTO(
                 primeTotalPrice,

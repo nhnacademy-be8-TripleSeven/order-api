@@ -1,25 +1,20 @@
 package com.tripleseven.orderapi.controller;
 
-import com.tripleseven.orderapi.business.order.process.OrderProcessing;
+import com.tripleseven.orderapi.business.order.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
-    private final OrderProcessing orderProcessing;
+    private final OrderService orderService;
 
-    @PostMapping("/api/orders/process")
-    public ResponseEntity<Void> saveOrderHistory(
-            @RequestHeader(value = "X-USER", required = false) Long userId,
-            @CookieValue("GUEST-ID") String guestId
-    ) {
-        if (userId != null) {
-            orderProcessing.processMemberOrder(userId);
-        } else {
-            orderProcessing.processNonMemberOrder(guestId);
-        }
-        return ResponseEntity.ok().build();
+    @GetMapping("/orders/amount/net")
+    public ResponseEntity<Long> getNetAmount(@RequestParam Long userId) {
+        Long amount = orderService.getThreeMonthsNetAmount(userId);
+        return ResponseEntity.ok(amount);
     }
 }

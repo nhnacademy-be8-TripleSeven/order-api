@@ -47,4 +47,9 @@ public class OrderDetail {
         this.orderStatus = orderStatus;
     }
 
+    public void ofZeroPrice() {
+        this.primePrice = 0;
+        this.discountPrice = 0;
+    }
+
 }

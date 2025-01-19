@@ -17,4 +17,6 @@ public interface QueryDslOrderDetailRepository {
     List<OrderViewDTO> findAllByPeriod(LocalDate startTime,
                                        LocalDate endTime,
                                        OrderStatus orderStatus);
+
+    Long computeNetTotal(Long userId, LocalDate startDate, LocalDate endDate);
 }

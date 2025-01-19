@@ -5,13 +5,13 @@ import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoResponseDTO;
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
 import jakarta.servlet.http.HttpServletRequest;
-import org.json.simple.JSONObject;
 
 import java.io.IOException;
 
 public interface PayService {
-    void createPay(Long userId, JSONObject response);
+    void createPay(PaymentDTO response, Long orderGroupId);
 
     Object cancelRequest(String paymentKey, PayCancelRequestDTO request) throws IOException;
 
@@ -21,5 +21,5 @@ public interface PayService {
 
     Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException;
 
-
+    Object getPaymentInfo(String paymentKey) throws IOException;
 }
