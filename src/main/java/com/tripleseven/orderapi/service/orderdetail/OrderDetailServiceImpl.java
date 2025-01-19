@@ -251,7 +251,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Transactional
     public void completeOverdueShipments(Duration duration) {
         // 기준 시간이 현재 시간보다 오래된 경우 조회
-        LocalDate cutoffTime = LocalDate.now().minus(duration);
+        LocalDate cutoffTime = LocalDate.now().minusDays(duration.toDays());
 
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderStatusAndUpdateDateBefore(OrderStatus.SHIPPING, cutoffTime);
 
