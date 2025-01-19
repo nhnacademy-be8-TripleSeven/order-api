@@ -42,7 +42,7 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
 
 
         DeliveryInfo deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate(orderGroup);
+        deliveryInfo.ofCreate(orderGroup,deliveryInfoCreateRequestDTO.getArrivedAt());
 
         DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
 
