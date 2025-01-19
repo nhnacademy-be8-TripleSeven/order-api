@@ -93,7 +93,7 @@ class PointServiceTest {
 
         when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
         when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(new OrderGroup()));
-        when(memberApiClient.getGradePoint(anyLong())).thenReturn(100);
+        when(memberApiClient.getGradePoint(anyLong(), anyLong())).thenReturn(100L);
         PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentEarn(memberId, usedMoney, orderGroupId);
 
         assertNotNull(result);

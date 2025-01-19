@@ -11,8 +11,10 @@ import com.tripleseven.orderapi.entity.pointhistory.HistoryTypes;
 import com.tripleseven.orderapi.entity.pointhistory.PointHistory;
 import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.deliveryinfo.DeliveryInfoRepository;
 import com.tripleseven.orderapi.repository.orderdetail.OrderDetailRepository;
+import com.tripleseven.orderapi.repository.orderdetail.querydsl.QueryDslOrderDetailRepository;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailServiceImpl;
@@ -25,6 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +56,9 @@ class OrderDetailServiceTest {
     @Mock
     private OrderGroupPointHistoryService orderGroupPointHistoryService;
 
+    @Mock
+    private QueryDslOrderDetailRepository queryDslOrderDetailRepository;
+
     @InjectMocks
     private OrderDetailServiceImpl orderDetailService;
 
@@ -59,6 +67,8 @@ class OrderDetailServiceTest {
     private OrderGroup orderGroup;
 
     private OrderDetail orderDetail;
+
+    private PointHistory pointHistory;
 
     @BeforeEach
     void setUp() {
@@ -74,6 +84,14 @@ class OrderDetailServiceTest {
         orderDetail = new OrderDetail();
         ReflectionTestUtils.setField(orderDetail, "id", 1L);
         orderDetail.ofCreate(1L, 3, 10000, 9000, orderGroup);
+
+        pointHistory = PointHistory.ofCreate(
+                HistoryTypes.EARN,
+                10,
+                "",
+                1L
+        );
+        ReflectionTestUtils.setField(pointHistory, "id", 1L);
     }
 
     @Test
@@ -149,8 +167,19 @@ class OrderDetailServiceTest {
         orderDetail2.ofUpdateStatus(OrderStatus.PAYMENT_PENDING);
 
         List<Long> ids = List.of(1L, 2L);
+
+        PointHistory pointHistory = PointHistory.ofCreate(
+                HistoryTypes.EARN,
+                1000,
+                "",
+                1L
+        );
+
+        ReflectionTestUtils.setField(pointHistory, "id", 1L);
+
         when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail1));
         when(orderDetailRepository.findById(2L)).thenReturn(Optional.of(orderDetail2));
+        when(pointHistoryRepository.save(any())).thenReturn(pointHistory);
 
         List<OrderDetailResponseDTO> response = orderDetailService.updateOrderDetailStatus(ids, OrderStatus.ORDER_CANCELED);
 
@@ -171,6 +200,109 @@ class OrderDetailServiceTest {
                 () -> orderDetailService.updateOrderDetailStatus(orderIds, status));
 
         assertNotNull(exception);
+    }
+
+    @Test
+    void testUpdateOrderDetailStatus_WithInvalidStatus() {
+        OrderDetail orderDetail = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail, "id", 1L);
+        orderDetail.ofCreate(1L, 2, 5000, 4500, orderGroup);
+        orderDetail.ofUpdateStatus(OrderStatus.SHIPPING);
+
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail));
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.updateOrderDetailStatus(List.of(1L), OrderStatus.ORDER_CANCELED));
+
+        assertNotNull(exception);
+        assertEquals(ErrorCode.CANCEL_BAD_REQUEST, exception.getErrorCode());
+        verify(orderDetailRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testUpdateOrderDetailStatus_WithExpiredReturn() {
+        OrderDetail orderDetail = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail, "id", 1L);
+        orderDetail.ofCreate(1L, 2, 5000, 4500, orderGroup);
+        orderDetail.ofUpdateStatus(OrderStatus.DELIVERED);
+
+        DeliveryInfo deliveryInfo = new DeliveryInfo();
+        ReflectionTestUtils.setField(deliveryInfo, "orderGroup", orderGroup);
+        deliveryInfo.ofShippingUpdate(LocalDate.now().minusDays(40));
+
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail));
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.updateOrderDetailStatus(List.of(1L), OrderStatus.RETURNED_PENDING));
+
+        assertNotNull(exception);
+        assertEquals(ErrorCode.ID_NOT_FOUND, exception.getErrorCode());
+        verify(orderDetailRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testUpdateOrderDetailStatus_WithPartialValidOrders() {
+        OrderDetail validOrderDetail = new OrderDetail();
+        ReflectionTestUtils.setField(validOrderDetail, "id", 1L);
+        validOrderDetail.ofCreate(1L, 2, 5000, 4500, orderGroup);
+        validOrderDetail.ofUpdateStatus(OrderStatus.PAYMENT_PENDING);
+
+        OrderDetail invalidOrderDetail = new OrderDetail();
+        ReflectionTestUtils.setField(invalidOrderDetail, "id", 2L);
+        invalidOrderDetail.ofCreate(2L, 1, 3000, 2800, orderGroup);
+        invalidOrderDetail.ofUpdateStatus(OrderStatus.SHIPPING);
+
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(validOrderDetail));
+        when(orderDetailRepository.findById(2L)).thenReturn(Optional.of(invalidOrderDetail));
+        when(pointHistoryRepository.save(any())).thenReturn(pointHistory);
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.updateOrderDetailStatus(List.of(1L, 2L), OrderStatus.ORDER_CANCELED));
+
+        assertNotNull(exception);
+        assertEquals(ErrorCode.CANCEL_BAD_REQUEST, exception.getErrorCode());
+        verify(orderDetailRepository, times(2)).findById(anyLong());
+    }
+
+    @Test
+    void testUpdateOrderDetailStatus_MultipleSuccess() {
+        OrderDetail orderDetail1 = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail1, "id", 1L);
+        orderDetail1.ofCreate(1L, 2, 5000, 4500, orderGroup);
+        orderDetail1.ofUpdateStatus(OrderStatus.PAYMENT_PENDING);
+
+        OrderDetail orderDetail2 = new OrderDetail();
+        ReflectionTestUtils.setField(orderDetail2, "id", 2L);
+        orderDetail2.ofCreate(2L, 1, 3000, 2800, orderGroup);
+        orderDetail2.ofUpdateStatus(OrderStatus.PAYMENT_COMPLETED);
+
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail1));
+        when(orderDetailRepository.findById(2L)).thenReturn(Optional.of(orderDetail2));
+
+        PointHistory pointHistory = PointHistory.ofCreate(HistoryTypes.EARN, 4500, "Test Refund", 1L);
+        when(pointHistoryRepository.save(any())).thenReturn(pointHistory);
+
+        List<OrderDetailResponseDTO> response = orderDetailService.updateOrderDetailStatus(
+                List.of(1L, 2L), OrderStatus.ORDER_CANCELED);
+
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        assertEquals(OrderStatus.ORDER_CANCELED, response.get(0).getOrderStatus());
+        assertEquals(OrderStatus.ORDER_CANCELED, response.get(1).getOrderStatus());
+        verify(orderDetailRepository, times(2)).findById(anyLong());
+        verify(pointHistoryRepository, times(2)).save(any());
+    }
+
+    @Test
+    void testUpdateOrderDetailStatus_NoOrdersFound() {
+        when(orderDetailRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderDetailService.updateOrderDetailStatus(List.of(1L), OrderStatus.ORDER_CANCELED));
+
+        assertNotNull(exception);
+        assertEquals(ErrorCode.ID_NOT_FOUND, exception.getErrorCode());
+        verify(orderDetailRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -276,5 +408,65 @@ class OrderDetailServiceTest {
         assertFalse(result);
         verify(orderDetailRepository, times(1))
                 .existsByOrderGroupUserIdAndBookId(1L, 1L);
+    }
+
+
+    @Test
+    void testGetNetTotalByPeriod_Success() {
+        when(queryDslOrderDetailRepository.computeNetTotal(anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(5000L);
+
+        Long netTotal = orderDetailService.getNetTotalByPeriod(1L, LocalDate.now().minusDays(10), LocalDate.now());
+
+        assertNotNull(netTotal);
+        assertEquals(5000L, netTotal);
+
+        verify(queryDslOrderDetailRepository, times(1))
+                .computeNetTotal(eq(1L), any(LocalDate.class), any(LocalDate.class));
+    }
+
+    @Test
+    void testGetNetTotalByPeriod_Fail() {
+        when(queryDslOrderDetailRepository.computeNetTotal(anyLong(), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(0L);
+
+        Long netTotal = orderDetailService.getNetTotalByPeriod(1L, LocalDate.now().minusDays(10), LocalDate.now());
+
+        assertNotNull(netTotal);
+        assertEquals(0L, netTotal); // Null 대신 기본값 반환하도록 설정된 경우
+
+        verify(queryDslOrderDetailRepository, times(1))
+                .computeNetTotal(eq(1L), any(LocalDate.class), any(LocalDate.class));
+    }
+
+    @Test
+    void testCompleteOverdueShipments_Success() {
+        List<OrderDetail> overdueOrderDetails = List.of(
+                orderDetail,
+                orderDetail
+        );
+
+        when(orderDetailRepository.findByOrderStatusAndUpdateDateBefore(eq(OrderStatus.SHIPPING), any(LocalDate.class)))
+                .thenReturn(overdueOrderDetails);
+
+        orderDetailService.completeOverdueShipments(Duration.ofDays(2));
+
+        for (OrderDetail orderDetail : overdueOrderDetails) {
+            assertEquals(OrderStatus.DELIVERED, orderDetail.getOrderStatus());
+        }
+
+        verify(orderDetailRepository, times(1))
+                .findByOrderStatusAndUpdateDateBefore(eq(OrderStatus.SHIPPING), any(LocalDate.class));
+    }
+
+    @Test
+    void testCompleteOverdueShipments_NoOverdueOrders() {
+        when(orderDetailRepository.findByOrderStatusAndUpdateDateBefore(eq(OrderStatus.SHIPPING), any(LocalDate.class)))
+                .thenReturn(List.of());
+
+        orderDetailService.completeOverdueShipments(Duration.ofHours(2));
+
+        verify(orderDetailRepository, times(1))
+                .findByOrderStatusAndUpdateDateBefore(eq(OrderStatus.SHIPPING), any(LocalDate.class));
     }
 }

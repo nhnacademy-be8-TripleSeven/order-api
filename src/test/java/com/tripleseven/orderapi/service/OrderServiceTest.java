@@ -162,4 +162,91 @@ class OrderServiceTest {
         verify(deliveryInfoService, never()).getDeliveryInfoDTO(anyLong());
         verify(payService, never()).getOrderPayInfo(anyLong());
     }
+
+    @Test
+    void testGetOrderPayDetailAdmin_Success() {
+        Long orderGroupId = 1L;
+
+        List<OrderDetailResponseDTO> orderDetailResponses = List.of(
+                OrderDetailResponseDTO.fromEntity(orderDetail)
+        );
+
+        when(orderDetailService.getOrderDetailsToList(orderGroupId)).thenReturn(orderDetailResponses);
+
+        OrderGroupResponseDTO orderGroupResponse = OrderGroupResponseDTO.fromEntity(orderGroup);
+        when(orderGroupService.getOrderGroupById(orderGroupId)).thenReturn(orderGroupResponse);
+
+        WrappingResponseDTO wrappingResponse = WrappingResponseDTO.fromEntity(wrapping);
+        when(wrappingService.getWrappingById(1L)).thenReturn(wrappingResponse);
+
+        when(orderGroupPointHistoryService.getUsedPoint(orderGroupId)).thenReturn(1000L);
+        when(orderGroupPointHistoryService.getEarnedPoint(orderGroupId)).thenReturn(500L);
+
+        DeliveryInfoDTO deliveryInfo = new DeliveryInfoDTO(
+                "DeliveryInfo 1",
+                12345678,
+                LocalDate.now(),
+                orderGroupId,
+                LocalDate.now(),
+                "John Doe",
+                "Jane Doe",
+                "010-1234-5678",
+                "2023-01-01",
+                LocalDate.now()
+        );
+        when(deliveryInfoService.getDeliveryInfoDTO(orderGroupId)).thenReturn(deliveryInfo);
+
+        OrderPayInfoDTO payInfo = new OrderPayInfoDTO(30000, "T1234", "Toss", LocalDate.now());
+        when(payService.getOrderPayInfo(orderGroupId)).thenReturn(payInfo);
+
+        OrderPayDetailDTO result = orderService.getOrderPayDetailAdmin(orderGroupId);
+
+        assertNotNull(result);
+        assertEquals(1, result.getOrderInfos().size());
+        assertEquals("Gift Wrap", result.getOrderGroupInfoDTO().getWrappingName());
+        assertEquals("Jane Doe", result.getDeliveryInfo().getRecipientName());
+        assertEquals("Toss", result.getOrderPayInfoDTO().getPaymentName());
+
+        verify(orderDetailService, times(2)).getOrderDetailsToList(orderGroupId);
+        verify(orderGroupService, times(1)).getOrderGroupById(orderGroupId);
+        verify(wrappingService, times(1)).getWrappingById(1L);
+        verify(orderGroupPointHistoryService, times(1)).getUsedPoint(orderGroupId);
+        verify(orderGroupPointHistoryService, times(1)).getEarnedPoint(orderGroupId);
+        verify(deliveryInfoService, times(1)).getDeliveryInfoDTO(orderGroupId);
+        verify(payService, times(1)).getOrderPayInfo(orderGroupId);
+    }
+
+    @Test
+    void testGetThreeMonthsNetAmount_Success() {
+        Long userId = 1L;
+
+        LocalDate today = LocalDate.now();
+        LocalDate threeMonthsAgo = today.minusMonths(3);
+
+        when(orderDetailService.getNetTotalByPeriod(userId, threeMonthsAgo, today)).thenReturn(15000L);
+
+        Long netAmount = orderService.getThreeMonthsNetAmount(userId);
+
+        assertNotNull(netAmount);
+        assertEquals(15000L, (long) netAmount);
+
+        verify(orderDetailService, times(1)).getNetTotalByPeriod(userId, threeMonthsAgo, today);
+    }
+
+    @Test
+    void testGetThreeMonthsNetAmount_NoTransactions() {
+        Long userId = 1L;
+
+        LocalDate today = LocalDate.now();
+        LocalDate threeMonthsAgo = today.minusMonths(3);
+
+        when(orderDetailService.getNetTotalByPeriod(userId, threeMonthsAgo, today)).thenReturn(0L);
+
+        Long netAmount = orderService.getThreeMonthsNetAmount(userId);
+
+        assertNotNull(netAmount);
+        assertEquals(0L, (long) netAmount);
+
+        verify(orderDetailService, times(1)).getNetTotalByPeriod(userId, threeMonthsAgo, today);
+    }
 }

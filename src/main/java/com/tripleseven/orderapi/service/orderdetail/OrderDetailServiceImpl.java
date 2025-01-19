@@ -19,14 +19,17 @@ import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderDetailServiceImpl implements OrderDetailService {
@@ -98,9 +101,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                         comment,
                         orderDetail.getOrderGroup().getUserId()
                 );
-                pointHistoryRepository.save(pointHistory);
+                PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
 
-                //
+                orderGroupPointHistoryService.createOrderGroupPointHistory(
+                        new OrderGroupPointHistoryRequestDTO(
+                                orderDetail.getOrderGroup().getId(),
+                                savedPointHistory.getId()
+                        ));
+
                 orderDetail.ofZeroPrice();
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
@@ -130,8 +138,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     if (today.isAfter(deliveryInfo.getShippingAt().plusDays(30))) {
                         throw new CustomException(ErrorCode.RETURN_EXPIRED_UNPROCESSABLE_ENTITY);
                     }
-                    orderDetail.ofUpdateStatus(orderStatus);
                 }
+                orderDetail.ofUpdateStatus(orderStatus);
 
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
@@ -237,5 +245,20 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Transactional(readOnly = true)
     public Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate) {
         return queryDslOrderDetailRepository.computeNetTotal(userId, startDate, endDate);
+    }
+
+    @Override
+    @Transactional
+    public void completeOverdueShipments(Duration duration) {
+        // 기준 시간이 현재 시간보다 오래된 경우 조회
+        LocalDate cutoffTime = LocalDate.now().minusDays(duration.toDays());
+
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderStatusAndUpdateDateBefore(OrderStatus.SHIPPING, cutoffTime);
+
+        for (OrderDetail orderDetail : orderDetails) {
+            orderDetail.ofUpdateStatus(OrderStatus.DELIVERED);
+        }
+
+        log.info("Completed overdue shipments: {}", orderDetails.size());
     }
 }
