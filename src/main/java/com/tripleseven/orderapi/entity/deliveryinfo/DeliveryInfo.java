@@ -25,8 +25,9 @@ public class DeliveryInfo {
     @JoinColumn(name = "order_group_id")
     private OrderGroup orderGroup;
 
-    public void ofCreate(OrderGroup orderGroup) {
+    public void ofCreate(OrderGroup orderGroup, LocalDate arrivedAt) {
         this.orderGroup = orderGroup;
+        this.arrivedAt = arrivedAt;
     }
 
     public void ofUpdate(String name, int invoiceNumber, LocalDate arrivedAt) {
