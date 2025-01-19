@@ -149,8 +149,19 @@ class OrderDetailServiceTest {
         orderDetail2.ofUpdateStatus(OrderStatus.PAYMENT_PENDING);
 
         List<Long> ids = List.of(1L, 2L);
+
+        PointHistory pointHistory = PointHistory.ofCreate(
+                HistoryTypes.EARN,
+                1000,
+                "",
+                1L
+        );
+
+        ReflectionTestUtils.setField(pointHistory, "id", 1L);
+
         when(orderDetailRepository.findById(1L)).thenReturn(Optional.of(orderDetail1));
         when(orderDetailRepository.findById(2L)).thenReturn(Optional.of(orderDetail2));
+        when(pointHistoryRepository.save(any())).thenReturn(pointHistory);
 
         List<OrderDetailResponseDTO> response = orderDetailService.updateOrderDetailStatus(ids, OrderStatus.ORDER_CANCELED);
 
