@@ -14,5 +14,7 @@ public interface MemberApiClient {
             @RequestParam Long bookId);
 
     @GetMapping("/members/grade/point")
-    Integer getGradePoint(@RequestHeader(value = "X-USER") Long userId);
+    Long getGradePoint(
+            @RequestHeader(value = "X-USER") Long userId,
+            @RequestParam Long amount);
 }
