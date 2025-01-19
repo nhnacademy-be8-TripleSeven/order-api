@@ -100,4 +100,28 @@ class QueryDslOrderDetailTest {
         assertEquals("Recipient 2", results.get(0).getRecipientName());
         assertEquals(1800, results.get(0).getPrice());
     }
+
+    @Test
+    void testComputeNetTotal() {
+        Long userId = 1L;
+        LocalDate startDate = LocalDate.now().minusDays(10);
+        LocalDate endDate = LocalDate.now();
+
+        Long result = queryDslOrderDetailRepository.computeNetTotal(userId, startDate, endDate);
+
+        // 1000 * 100 - 900 + 2000 * 200 - 1800
+        assertEquals(497300, result);
+    }
+
+    @Test
+    void testComputeNetTotal_EmptyResult() {
+        Long userId = 2L; // 존재하지 않는 사용자 ID
+        LocalDate startDate = LocalDate.now().minusDays(10);
+        LocalDate endDate = LocalDate.now();
+
+        Long result = queryDslOrderDetailRepository.computeNetTotal(userId, startDate, endDate);
+
+        // 결과가 없을 경우 0이 반환되어야 함
+        assertEquals(0, result);
+    }
 }
