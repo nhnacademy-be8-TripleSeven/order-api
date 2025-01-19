@@ -49,7 +49,6 @@ public class OrderSaveProcessing implements OrderProcessing {
     @Override
     @Transactional
     public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
-        // TODO Redis 저장 키 고민
         log.info("processNonMemberOrder guestId={}", guestId);
 
         HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
