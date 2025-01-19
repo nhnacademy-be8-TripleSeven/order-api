@@ -65,27 +65,25 @@ SELECT
     (SELECT id FROM wrapping ORDER BY RAND() LIMIT 1)
 FROM (SELECT 1 AS seq UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20) t;
 
--- OrderDetail 데이터 생성 (1~3개 per OrderGroup)
-INSERT INTO order_detail (amount, book_id, discount_price, order_status, prime_price, order_group_id)
+-- OrderDetail 데이터 생성 (각 OrderGroup당 1~3개)
+INSERT INTO order_detail (amount, book_id, discount_price, order_status, prime_price, update_date, order_group_id)
 SELECT
-    FLOOR(RAND() * 5 + 1),
-    FLOOR(RAND() * 50 + 1),
-    FLOOR(RAND() * 500 + 500),
-    CASE FLOOR(RAND() * 8 + 1)
-        WHEN 1 THEN 'DELIVERED'
-        WHEN 2 THEN 'ERROR'
-        WHEN 3 THEN 'ORDER_CANCELED'
-        WHEN 4 THEN 'PAYMENT_COMPLETED'
-        WHEN 5 THEN 'PAYMENT_PENDING'
-        WHEN 6 THEN 'RETURNED'
-        WHEN 7 THEN 'RETURNED_PENDING'
-        WHEN 8 THEN 'SHIPPING'
-        END,
-    FLOOR(RAND() * 10000 + 2000),
-    g.id
+    FLOOR(RAND() * 5 + 1),  -- 주문 수량 (1~5)
+    FLOOR(RAND() * 50 + 1), -- book_id (1~50 랜덤)
+    FLOOR(RAND() * 500 + 500), -- 할인 금액 (500~1000 랜덤)
+    CASE FLOOR(RAND() * 5)
+        WHEN 0 THEN 'PAYMENT_PENDING'
+        WHEN 1 THEN 'PAYMENT_COMPLETED'
+        WHEN 2 THEN 'SHIPPING'
+        WHEN 3 THEN 'DELIVERED'
+        ELSE 'ORDER_CANCELED'
+        END, -- 주문 상태 (랜덤 선택)
+    FLOOR(RAND() * 10000 + 2000), -- 정가 (2000~12000 랜덤)
+    CURDATE() - INTERVAL FLOOR(RAND() * 30) DAY, -- 업데이트 날짜 (최근 30일 내)
+    g.id -- order_group_id (랜덤으로 선택)
 FROM order_group g
-         CROSS JOIN (SELECT 1 AS seq UNION SELECT 2 UNION SELECT 3) t
-WHERE RAND() < 0.5;
+         CROSS JOIN (SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) t
+LIMIT 50;
 
 -- DeliveryInfo 데이터 생성
 INSERT INTO delivery_info (order_group_id, arrived_at, invoice_number, name, shipping_at)

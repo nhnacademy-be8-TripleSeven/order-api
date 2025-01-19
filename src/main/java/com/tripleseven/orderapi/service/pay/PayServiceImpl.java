@@ -2,7 +2,6 @@ package com.tripleseven.orderapi.service.pay;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
-import com.tripleseven.orderapi.dto.cartitem.OrderItemDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponDTO;
 import com.tripleseven.orderapi.dto.coupon.CouponStatus;
 import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
@@ -11,13 +10,13 @@ import com.tripleseven.orderapi.dto.pay.*;
 import com.tripleseven.orderapi.dto.properties.ApiProperties;
 import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pay.Pay;
+import com.tripleseven.orderapi.entity.paytype.PayType;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
-import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.repository.paytypes.PayTypesRepository;
 import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
-import com.tripleseven.orderapi.service.pointpolicy.PointPolicyService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,18 +43,19 @@ public class PayServiceImpl implements PayService {
     private final PointHistoryService pointHistoryService;
     private final BookCouponApiClient bookCouponApiClient;
     private final OrderGroupRepository orderGroupRepository;
-
+    private final PayTypesRepository payTypesRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     // TODO save 해서 반환해야될 경우가 있는지 확인(void 타입)
     @Override
-    public void createPay(PaymentDTO paymentDTO, Long orderGroupId) {
+    public void createPay(PaymentDTO paymentDTO, Long orderGroupId, String payType) {
         Pay pay = new Pay();
         Optional<OrderGroup> orderGroup = orderGroupRepository.findById(orderGroupId);
+        PayType PayType = payTypesRepository.findByName(payType);
         if(orderGroup.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        pay.ofCreate(paymentDTO,orderGroup.get());
+        pay.ofCreate(paymentDTO,orderGroup.get(), PayType);
         payRepository.save(pay);
     }
 
@@ -69,8 +69,12 @@ public class PayServiceImpl implements PayService {
             return ErrorDTO.fromJson(response);
         }
 
+        Pay pay = payRepository.findByPaymentKey(paymentKey);
+        PaymentDTO paymentDTO = PaymentDTO.fromJson(response);
+        pay.ofUpdate(paymentDTO);
+
         // 정상 응답 DTO 반환
-        return PaymentDTO.fromJson(response);
+        return paymentDTO;
     }
 
     @Override
@@ -121,6 +125,12 @@ public class PayServiceImpl implements PayService {
         }
 
         return PaymentDTO.fromJson(response);
+    }
+
+    @Override
+    public Long getOrderId(Long orderId) {
+        Pay pay =  payRepository.findByOrderId(orderId);
+        return pay.getOrderGroup().getId();
     }
 
 

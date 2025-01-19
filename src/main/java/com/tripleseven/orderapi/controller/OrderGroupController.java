@@ -6,6 +6,7 @@ import com.tripleseven.orderapi.dto.order.OrderPayDetailDTO;
 import com.tripleseven.orderapi.dto.order.OrderViewsResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.service.pay.PayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,6 +27,7 @@ public class OrderGroupController {
 
     private final OrderGroupService orderGroupService;
     private final OrderService orderService;
+    private final PayService payService;
 
     // 1. 주문 그룹 단건 조회
     @GetMapping("/order-groups/{id}")
@@ -35,7 +37,8 @@ public class OrderGroupController {
             @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
     })
     public ResponseEntity<OrderGroupResponseDTO> getOrderGroupById(@PathVariable Long id) {
-        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(id);
+        Long orderGroupId = payService.getOrderId(id);
+        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(orderGroupId);
         return ResponseEntity.ok(response); // 반환: 주문 그룹 정보 (OrderGroupResponse)
     }
 

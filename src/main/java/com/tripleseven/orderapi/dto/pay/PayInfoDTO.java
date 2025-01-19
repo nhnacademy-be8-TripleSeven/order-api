@@ -44,7 +44,6 @@ public class PayInfoDTO implements Serializable {
         this.addressInfo = payInfoRequestDTO.getAddressInfo();
         this.deliveryDate = payInfoRequestDTO.getDeliveryDate();
         this.wrapperId = payInfoRequestDTO.getWrapperId();
-        this.couponId = payInfoRequestDTO.getCouponId();
         this.ordererName = payInfoRequestDTO.getOrdererName();
         this.payType = payInfoRequestDTO.getPayType();
         this.deliveryFee = payInfoRequestDTO.getDeliveryFee();
