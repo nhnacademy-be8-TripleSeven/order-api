@@ -85,7 +85,7 @@ public class OrderSaveProcessing implements OrderProcessing {
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
 
-            payService.createPay(paymentDTO, orderGroupId);
+            payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
             rabbitService.sendCartMessage(guestId, bookInfos);
 
@@ -137,8 +137,7 @@ public class OrderSaveProcessing implements OrderProcessing {
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
             }
 
-            // 결제 저장
-            payService.createPay(paymentDTO, orderGroupId);
+            payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
             // 쿠폰 사용
             if (payInfo.getCouponId() != null) {
