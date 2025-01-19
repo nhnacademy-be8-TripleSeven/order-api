@@ -66,7 +66,6 @@ class PointControllerTest {
 
     @Test
     void testCreateRegisterPointHistory_BadRequest_MissingHeader() throws Exception {
-        // When & Then
         mockMvc.perform(post("/points/default-policy/register")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
@@ -74,10 +73,8 @@ class PointControllerTest {
 
     @Test
     void testCreateRegisterPointHistory_Fail_UserNotFound() throws Exception {
-        // Given
         Mockito.doThrow(new CustomException(ErrorCode.ID_NOT_FOUND)).when(pointService).createRegisterPointHistory(anyLong());
 
-        // When & Then
         mockMvc.perform(post("/points/default-policy/register")
                         .header("X-USER", 99L)
                         .contentType(MediaType.APPLICATION_JSON))
