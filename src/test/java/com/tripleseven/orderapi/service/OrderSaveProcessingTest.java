@@ -135,7 +135,6 @@ class OrderSaveProcessingTest {
                         "payType",
                         1000,
                         null,
-                        null,
                         1000,
                         10000
                 )
@@ -154,7 +153,7 @@ class OrderSaveProcessingTest {
 
         when(deliveryInfoService.createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class))).thenReturn(DeliveryInfoResponseDTO.fromEntity(deliveryInfo));
         when(orderDetailService.createOrderDetail(any())).thenReturn(OrderDetailResponseDTO.fromEntity(orderDetail));
-        doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong());
+        doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong(), any());
         doNothing().when(rabbitService).sendCartMessage(anyString(), anyList());
 
         orderSaveProcessing.processNonMemberOrder("guest123", paymentDTO);
@@ -163,7 +162,7 @@ class OrderSaveProcessingTest {
         verify(orderGroupService, times(1)).createOrderGroup(eq(OrderSaveProcessing.GUEST_USER_ID), any(OrderGroupCreateRequestDTO.class));
         verify(deliveryInfoService, times(1)).createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class));
         verify(orderDetailService, times(1)).createOrderDetail(any());
-        verify(payService, times(1)).createPay(paymentDTO, 1L);
+        verify(payService, times(1)).createPay(paymentDTO, 1L, "payType");
         verify(rabbitService, times(1)).sendCartMessage(anyString(), anyList());
     }
 
@@ -184,7 +183,7 @@ class OrderSaveProcessingTest {
 
         when(deliveryInfoService.createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class))).thenReturn(DeliveryInfoResponseDTO.fromEntity(deliveryInfo));
         when(orderDetailService.createOrderDetail(any())).thenReturn(OrderDetailResponseDTO.fromEntity(orderDetail));
-        doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong());
+        doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong(), any());
         doNothing().when(rabbitService).sendCartMessage(anyString(), anyList());
         doNothing().when(rabbitService).sendPointMessage(anyLong(), anyLong(), anyLong());
 
@@ -193,7 +192,7 @@ class OrderSaveProcessingTest {
         verify(orderGroupService, times(1)).createOrderGroup(eq(1L), any(OrderGroupCreateRequestDTO.class));
         verify(deliveryInfoService, times(1)).createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class));
         verify(orderDetailService, times(1)).createOrderDetail(any());
-        verify(payService, times(1)).createPay(paymentDTO, 1L);
+        verify(payService, times(1)).createPay(paymentDTO, 1L, "payType");
         verify(rabbitService, times(1)).sendCartMessage(anyString(), anyList());
         verify(rabbitService, times(1)).sendPointMessage(eq(1L), eq(1L), anyLong());
     }
