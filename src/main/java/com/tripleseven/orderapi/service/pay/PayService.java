@@ -24,4 +24,6 @@ public interface PayService {
     Object getPaymentInfo(String paymentKey) throws IOException;
 
     Long getOrderId(Long orderId);
+
+    Long getPayPrice(Long orderId);
 }

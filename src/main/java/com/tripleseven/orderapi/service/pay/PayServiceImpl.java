@@ -133,6 +133,12 @@ public class PayServiceImpl implements PayService {
         return pay.getOrderGroup().getId();
     }
 
+    @Override
+    public Long getPayPrice(Long orderId) {
+        Pay pay =  payRepository.findByOrderId(orderId);
+        return pay.getPrice();
+    }
+
 
     private void checkValid(Long userId, PayInfoDTO payInfo) {
         List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
