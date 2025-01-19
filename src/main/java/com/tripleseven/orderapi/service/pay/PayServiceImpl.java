@@ -130,7 +130,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public Long getOrderId(Long orderId) {
         Pay pay =  payRepository.findByOrderId(orderId);
-        return pay.getOrderId();
+        return pay.getOrderGroup().getId();
     }
 
 
