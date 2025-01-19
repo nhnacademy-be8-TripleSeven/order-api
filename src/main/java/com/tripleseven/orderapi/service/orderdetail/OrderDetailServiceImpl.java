@@ -98,9 +98,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                         comment,
                         orderDetail.getOrderGroup().getUserId()
                 );
-                pointHistoryRepository.save(pointHistory);
+                PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
 
-                //
+                orderGroupPointHistoryService.createOrderGroupPointHistory(
+                        new OrderGroupPointHistoryRequestDTO(
+                                orderDetail.getOrderGroup().getId(),
+                                savedPointHistory.getId()
+                        ));
+
                 orderDetail.ofZeroPrice();
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
@@ -130,8 +135,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     if (today.isAfter(deliveryInfo.getShippingAt().plusDays(30))) {
                         throw new CustomException(ErrorCode.RETURN_EXPIRED_UNPROCESSABLE_ENTITY);
                     }
-                    orderDetail.ofUpdateStatus(orderStatus);
                 }
+                orderDetail.ofUpdateStatus(orderStatus);
 
                 orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
             }
