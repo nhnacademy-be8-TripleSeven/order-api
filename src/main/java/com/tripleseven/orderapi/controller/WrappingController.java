@@ -58,4 +58,10 @@ public class WrappingController {
         wrappingService.deleteWrapping(id); // 삭제 서비스 호출
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // HTTP 204 No Content 반환
     }
+
+    @GetMapping("/orders/wrappings/{wrappingId}")
+    public ResponseEntity<WrappingResponseDTO> getWrapping(@PathVariable Long wrappingId) {
+        WrappingResponseDTO response = wrappingService.getWrappingById(wrappingId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
