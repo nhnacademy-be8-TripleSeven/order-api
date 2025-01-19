@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.dto.pay;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import org.json.simple.JSONObject;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ErrorDTO {
     private String code;
     private String message;
