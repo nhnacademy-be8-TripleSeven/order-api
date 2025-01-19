@@ -127,6 +127,12 @@ public class PayServiceImpl implements PayService {
         return PaymentDTO.fromJson(response);
     }
 
+    @Override
+    public Long getOrderId(Long orderId) {
+        Pay pay =  payRepository.findByOrderId(orderId);
+        return pay.getOrderId();
+    }
+
 
     private void checkValid(Long userId, PayInfoDTO payInfo) {
         List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();

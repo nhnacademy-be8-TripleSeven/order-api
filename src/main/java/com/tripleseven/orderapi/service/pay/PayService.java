@@ -22,4 +22,6 @@ public interface PayService {
     Object confirmRequest(HttpServletRequest request, String jsonBody) throws IOException;
 
     Object getPaymentInfo(String paymentKey) throws IOException;
+
+    Long getOrderId(Long orderId);
 }
