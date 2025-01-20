@@ -40,7 +40,7 @@ class DeliveryInfoRepositoryTest {
         orderGroup.ofCreate(1L, "Test Ordered", "Test Recipient", "01012345678", "01012345678", 1000, "Test Address", savedWrapping);
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
         deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate(savedOrderGroup);
+        deliveryInfo.ofCreate(savedOrderGroup, LocalDate.now());
         arrivedAt = LocalDate.parse("2024-12-17");
     }
 
@@ -49,7 +49,7 @@ class DeliveryInfoRepositoryTest {
         DeliveryInfo savedDeliveryInfo = deliveryInfoRepository.save(deliveryInfo);
 
         assertNotNull(savedDeliveryInfo.getId());
-        assertNull(savedDeliveryInfo.getArrivedAt());
+        assertNotNull(savedDeliveryInfo.getArrivedAt());
     }
 
     @Test
@@ -61,7 +61,7 @@ class DeliveryInfoRepositoryTest {
         assertTrue(foundDeliveryInfo.isPresent());
 
         DeliveryInfo getDeliveryInfo = foundDeliveryInfo.get();
-        assertNull(getDeliveryInfo.getArrivedAt());
+        assertNotNull(getDeliveryInfo.getArrivedAt());
     }
 
     @Test
