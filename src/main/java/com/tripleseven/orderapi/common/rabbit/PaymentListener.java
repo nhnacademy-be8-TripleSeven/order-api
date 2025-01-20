@@ -31,9 +31,9 @@ public class PaymentListener {
             List<Long> bookIdsS = (List<Long>) messageDTO.getObject("BookIds");
             String userId = (String) messageDTO.getObject("UserId");
 
+
             // 여러번 호출
-            bookIdsS.stream()
-                    .forEach(bookId -> memberApiClient.deleteCart(Long.valueOf(userId), bookId));
+            bookIdsS.forEach(bookId -> memberApiClient.deleteCart(null, userId, bookId));
 
             log.info("Completed Clearing Cart!!");
 
