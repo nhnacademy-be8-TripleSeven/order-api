@@ -31,6 +31,7 @@ public class RabbitServiceImpl implements RabbitService {
             cartMessageDTO.addObject("BookIds", bookIds);
             cartMessageDTO.addObject("UserId", userId);
             rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
+            log.info("send cart message success");
         } catch (Exception e) {
             log.error("Error sending cart message: {}", e.getMessage());
         }
@@ -45,6 +46,7 @@ public class RabbitServiceImpl implements RabbitService {
             pointMessageDTO.addObject("TotalAmount", totalAmount);
             pointMessageDTO.addObject("OrderId", orderId);
             rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
+            log.info("send point message success");
         } catch (Exception e) {
             log.error("Error sending point message: {}", e.getMessage());
         }

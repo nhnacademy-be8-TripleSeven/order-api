@@ -110,7 +110,7 @@ public class OrderSaveProcessing implements OrderProcessing {
         PayInfoDTO payInfo = payHash.get(memberId.toString(), "PayInfo");
         OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
 
-        Long orderGroupId = null;
+        Long orderGroupId;
 
         try {
             // OrderGroup 생성
@@ -134,14 +134,16 @@ public class OrderSaveProcessing implements OrderProcessing {
                                 orderGroupId
                         );
                 orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+
+                // 쿠폰 사용
+                if (bookInfo.getCouponId() != null) {
+                    bookService.useCoupon(bookInfo.getCouponId());
+                }
+
             }
 
             payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
-            // 쿠폰 사용
-            if (payInfo.getCouponId() != null) {
-                bookService.useCoupon(payInfo.getCouponId());
-            }
 
             // 포인트 사용
             if (payInfo.getPoint() > 0) {
