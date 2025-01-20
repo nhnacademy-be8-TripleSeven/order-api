@@ -47,7 +47,7 @@ class DeliveryInfoControllerTest {
         ReflectionTestUtils.setField(orderGroup, "id", 1L);
 
         deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate(orderGroup);
+        deliveryInfo.ofCreate(orderGroup, LocalDate.now());
         deliveryInfo.ofUpdate("Test DeliveryInfo", 12345678, LocalDate.now());
         deliveryInfo.ofShippingUpdate(LocalDate.now());
         ReflectionTestUtils.setField(deliveryInfo, "id", 1L);

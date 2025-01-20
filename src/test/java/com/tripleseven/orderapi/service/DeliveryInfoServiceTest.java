@@ -65,7 +65,7 @@ class DeliveryInfoServiceTest {
 
         deliveryInfo = new DeliveryInfo();
         ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
-        deliveryInfo.ofCreate(orderGroup);
+        deliveryInfo.ofCreate(orderGroup, arrivedAt);
 
         arrivedAt = LocalDate.parse("2024-12-17");
     }

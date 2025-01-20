@@ -106,7 +106,7 @@ class OrderSaveProcessingTest {
         deliveryInfo = new DeliveryInfo();
         ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
 
-        deliveryInfo.ofCreate(orderGroup);
+        deliveryInfo.ofCreate(orderGroup, LocalDate.now());
         OrderBookInfoDTO orderBookInfoDTO =
                 new OrderBookInfoDTO(
                         1L,
