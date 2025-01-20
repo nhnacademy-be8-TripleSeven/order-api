@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class QueryDslDefaultDeliveryPolicyRepositoryImpl extends QuerydslReposit
 
     // 정책 타입 별 검색 (UNIQUE)
     @Override
+    @Transactional(readOnly = true)
     public List<DefaultDeliveryPolicyDTO> findDefaultDeliveryPolicy() {
         QDeliveryPolicy deliveryPolicy = QDeliveryPolicy.deliveryPolicy;
         QDefaultDeliveryPolicy defaultDeliveryPolicy = QDefaultDeliveryPolicy.defaultDeliveryPolicy;

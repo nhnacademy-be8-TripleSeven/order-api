@@ -137,7 +137,7 @@ public class PointHistoryController {
     }
 
 
-    @GetMapping("/api/user/point-histories")
+    @GetMapping("/api/orders/point-histories")
     @Operation(summary = "사용자 포인트 이력 조회", description = "특정 사용자의 포인트 이력을 기간 조건으로 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),

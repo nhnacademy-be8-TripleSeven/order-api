@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PayController {
     private final PayService payService;
-    @GetMapping("/orders/pay/{orderId}")
-    public ResponseEntity<Long> getPayPrice(@PathVariable("orderId") Long orderId) {
+    @GetMapping("/orders/pay/{order-id}")
+    public ResponseEntity<Long> getPayPrice(@PathVariable("order-id") Long orderId) {
         Long payPrice = payService.getPayPrice(orderId);
         return ResponseEntity.ok(payPrice);
     }

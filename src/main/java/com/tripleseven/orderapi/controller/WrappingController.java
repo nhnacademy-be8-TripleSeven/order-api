@@ -48,19 +48,21 @@ public class WrappingController {
     }
 
     // 3. 포장지 삭제
-    @DeleteMapping("/admin/orders/wrappings/{id}")
+    @DeleteMapping("/admin/orders/wrappings/{wrapping-id}")
     @Operation(summary = "포장지 삭제", description = "포장지를 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
             @ApiResponse(responseCode = "404", description = "해당하는 포장지 없음")
     })
-    public ResponseEntity<Void> deleteWrapping(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteWrapping(
+            @PathVariable("wrapping-id") Long id) {
         wrappingService.deleteWrapping(id); // 삭제 서비스 호출
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // HTTP 204 No Content 반환
     }
 
-    @GetMapping("/orders/wrappings/{wrappingId}")
-    public ResponseEntity<WrappingResponseDTO> getWrapping(@PathVariable Long wrappingId) {
+    @GetMapping("/orders/wrappings/{wrapping-id}")
+    public ResponseEntity<WrappingResponseDTO> getWrapping(
+            @PathVariable("wrapping-id") Long wrappingId) {
         WrappingResponseDTO response = wrappingService.getWrappingById(wrappingId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

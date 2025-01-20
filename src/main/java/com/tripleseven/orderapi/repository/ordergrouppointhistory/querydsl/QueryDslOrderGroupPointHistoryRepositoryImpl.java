@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +33,7 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
     private EntityManager entityManager;
 
     @Override
+    @Transactional(readOnly = true)
     public Long findTotalAmountByOrderGroupId(Long orderGroupId, HistoryTypes historyTypes) {
         QPointHistory pointHistory = QPointHistory.pointHistory;
         QOrderGroupPointHistory orderGroupPointHistory = QOrderGroupPointHistory.orderGroupPointHistory;
@@ -49,6 +51,7 @@ public class QueryDslOrderGroupPointHistoryRepositoryImpl extends QuerydslReposi
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserPointHistoryDTO> findUserPointHistories(Long memberId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         QPointHistory pointHistory = QPointHistory.pointHistory;
         QOrderGroupPointHistory orderGroupPointHistory = QOrderGroupPointHistory.orderGroupPointHistory;
