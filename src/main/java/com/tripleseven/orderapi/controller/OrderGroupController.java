@@ -30,7 +30,7 @@ public class OrderGroupController {
     private final PayService payService;
 
     // 1. 주문 그룹 단건 조회
-    @GetMapping("/order-groups/{id}")
+    @GetMapping("/orders/order-groups/{id}")
     @Operation(summary = "주문 그룹 단건 조회", description = "특정 ID의 주문 그룹 정보를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -43,7 +43,7 @@ public class OrderGroupController {
     }
 
     // 5. 주문 그룹 삭제
-    @DeleteMapping("/order-groups/{id}")
+    @DeleteMapping("/orders/order-groups/{id}")
     @Operation(summary = "주문 그룹 삭제", description = "특정 주문 그룹을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),

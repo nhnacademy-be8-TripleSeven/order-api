@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class QueryDslDefaultPointPolicyRepositoryImpl extends QuerydslRepository
     private EntityManager entityManager;
 
     @Override
+    @Transactional(readOnly = true)
     public DefaultPointPolicyDTO findDefaultPointPolicyByType(PointPolicyType pointPolicyType) {
         QPointPolicy pointPolicy = QPointPolicy.pointPolicy;
         QDefaultPointPolicy defaultPointPolicy = QDefaultPointPolicy.defaultPointPolicy;
@@ -45,6 +47,7 @@ public class QueryDslDefaultPointPolicyRepositoryImpl extends QuerydslRepository
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DefaultPointPolicyDTO> findDefaultPointPolicies() {
         QPointPolicy pointPolicy = QPointPolicy.pointPolicy;
         QDefaultPointPolicy defaultPointPolicy = QDefaultPointPolicy.defaultPointPolicy;

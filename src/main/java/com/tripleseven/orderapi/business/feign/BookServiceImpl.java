@@ -19,7 +19,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Retryable(value = FeignException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public void useCoupon(Long couponId) {
-        bookCouponApiClient.updateUseCoupon(couponId);
+        bookCouponApiClient.useCoupon(couponId);
     }
 
     @Recover

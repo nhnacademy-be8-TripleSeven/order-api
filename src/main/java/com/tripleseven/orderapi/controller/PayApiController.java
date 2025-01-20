@@ -74,8 +74,8 @@ public class PayApiController {
             @ApiResponse(responseCode = "200", description = "결제 취소 성공"),
             @ApiResponse(responseCode = "400", description = "결제 취소 실패")
     })
-    @PostMapping("/payments/{paymentKey}/cancel")
-    public ResponseEntity<Object> cancelPayment(@PathVariable("paymentKey") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
+    @PostMapping("/payments/{payment-key}/cancel")
+    public ResponseEntity<Object> cancelPayment(@PathVariable("payment-key") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
         Object response = payService.cancelRequest(paymentKey,request);
 
         if(response.getClass().isAssignableFrom(ErrorDTO.class))
@@ -89,8 +89,8 @@ public class PayApiController {
             @ApiResponse(responseCode = "200", description = "결제 조회 성공"),
             @ApiResponse(responseCode = "400", description = "결제 조회 실패")
     })
-    @GetMapping("/payments/{paymentKey}")
-    public ResponseEntity<Object> getPayment(@PathVariable("paymentKey") String paymentKey) throws Exception {
+    @GetMapping("/payments/{payment-key}")
+    public ResponseEntity<Object> getPayment(@PathVariable("payment-key") String paymentKey) throws Exception {
         Object response = payService.getPaymentInfo(paymentKey);
 
         if(response.getClass().isAssignableFrom(ErrorDTO.class))
