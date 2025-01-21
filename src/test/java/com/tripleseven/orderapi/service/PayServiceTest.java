@@ -221,4 +221,62 @@ class PayServiceTest {
         assertTrue(response.containsKey("error"));
         assertEquals("Error reading response", response.get("error"));
     }
+
+    @Test
+    void sendRequest_ShouldReturnValidResponse_WhenApiCallSucceeds() throws IOException {
+        // Given
+        JSONObject requestData = new JSONObject();
+        requestData.put("key", "value");
+
+        String secretKey = "test-secret-key";
+        String url = "https://api.example.com/test";
+
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("status", "SUCCESS");
+        jsonResponse.put("data", "Sample response");
+
+        // ✅ sendRequest가 호출될 때 정상 응답을 반환하도록 설정
+        doReturn(jsonResponse).when(payService).sendRequest(any(), anyString(), anyString());
+
+        // When
+        JSONObject response = payService.sendRequest(requestData, secretKey, url);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("SUCCESS", response.get("status"));
+        assertEquals("Sample response", response.get("data"));
+    }
+
+    @Test
+    void sendRequest_ShouldThrowIOException_WhenResponseParsingFails() throws IOException {
+        // Given
+        JSONObject requestData = new JSONObject();
+        String secretKey = "test-secret-key";
+        String url = "https://api.example.com/test";
+
+        // ✅ JSON 파싱 오류가 발생하도록 예외 설정
+        doThrow(new IOException("응답 데이터를 파싱하는 도중 오류 발생"))
+                .when(payService).sendRequest(any(), anyString(), anyString());
+
+        // When & Then
+        IOException exception = assertThrows(IOException.class, () -> payService.sendRequest(requestData, secretKey, url));
+        assertTrue(exception.getMessage().contains("응답 데이터를 파싱하는 도중 오류 발생"));
+    }
+
+    @Test
+    void sendRequest_ShouldThrowIOException_WhenApiCallFails() throws IOException {
+        // Given
+        JSONObject requestData = new JSONObject();
+        String secretKey = "test-secret-key";
+        String url = "https://api.example.com/test";
+
+        // ✅ HTTP 요청 중 IOException이 발생하도록 설정
+        doThrow(new IOException("HTTP 요청 중 오류 발생"))
+                .when(payService).sendRequest(any(), anyString(), anyString());
+
+        // When & Then
+        IOException exception = assertThrows(IOException.class, () -> payService.sendRequest(requestData, secretKey, url));
+        assertTrue(exception.getMessage().contains("HTTP 요청 중 오류 발생"));
+    }
+
 }
