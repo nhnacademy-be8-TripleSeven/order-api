@@ -110,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
 
         long totalPrice;
         Long wrappingId = orderGroupResponseDTO.getWrappingId();
-        if(Objects.isNull(wrappingId)) {
+        if (Objects.isNull(wrappingId)) {
             totalPrice = primeTotalPrice - discountPrice + orderGroupResponseDTO.getDeliveryPrice();
             return new OrderGroupInfoDTO(
                     primeTotalPrice,

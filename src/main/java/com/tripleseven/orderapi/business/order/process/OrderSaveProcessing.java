@@ -86,7 +86,7 @@ public class OrderSaveProcessing implements OrderProcessing {
 
             payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
-            rabbitService.sendCartMessage(guestId, bookInfos);
+            rabbitService.sendCartMessage(null, guestId, bookInfos);
 
             log.info("Successfully processed non-member order");
         } catch (Exception e) {
@@ -153,7 +153,7 @@ public class OrderSaveProcessing implements OrderProcessing {
             log.info("Successfully processed member order");
 
             // RabbitMQ 처리
-            rabbitService.sendCartMessage(memberId.toString(), bookInfos);
+            rabbitService.sendCartMessage(memberId, null, bookInfos);
             rabbitService.sendPointMessage(memberId, orderGroupId, payInfo.getTotalAmount());
 
         } catch (Exception e) {

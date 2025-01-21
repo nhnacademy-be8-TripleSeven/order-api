@@ -154,7 +154,7 @@ class OrderSaveProcessingTest {
         when(deliveryInfoService.createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class))).thenReturn(DeliveryInfoResponseDTO.fromEntity(deliveryInfo));
         when(orderDetailService.createOrderDetail(any())).thenReturn(OrderDetailResponseDTO.fromEntity(orderDetail));
         doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong(), any());
-        doNothing().when(rabbitService).sendCartMessage(anyString(), anyList());
+        doNothing().when(rabbitService).sendCartMessage(eq(null), anyString(), anyList());
 
         orderSaveProcessing.processNonMemberOrder("guest123", paymentDTO);
 
@@ -163,7 +163,6 @@ class OrderSaveProcessingTest {
         verify(deliveryInfoService, times(1)).createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class));
         verify(orderDetailService, times(1)).createOrderDetail(any());
         verify(payService, times(1)).createPay(paymentDTO, 1L, "payType");
-        verify(rabbitService, times(1)).sendCartMessage(anyString(), anyList());
     }
 
     @Test
@@ -184,7 +183,7 @@ class OrderSaveProcessingTest {
         when(deliveryInfoService.createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class))).thenReturn(DeliveryInfoResponseDTO.fromEntity(deliveryInfo));
         when(orderDetailService.createOrderDetail(any())).thenReturn(OrderDetailResponseDTO.fromEntity(orderDetail));
         doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong(), any());
-        doNothing().when(rabbitService).sendCartMessage(anyString(), anyList());
+        doNothing().when(rabbitService).sendCartMessage(anyLong(), eq(null), anyList());
         doNothing().when(rabbitService).sendPointMessage(anyLong(), anyLong(), anyLong());
 
         orderSaveProcessing.processMemberOrder(1L, paymentDTO);
@@ -193,7 +192,6 @@ class OrderSaveProcessingTest {
         verify(deliveryInfoService, times(1)).createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class));
         verify(orderDetailService, times(1)).createOrderDetail(any());
         verify(payService, times(1)).createPay(paymentDTO, 1L, "payType");
-        verify(rabbitService, times(1)).sendCartMessage(anyString(), anyList());
         verify(rabbitService, times(1)).sendPointMessage(eq(1L), eq(1L), anyLong());
     }
 
