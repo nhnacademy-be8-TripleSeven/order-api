@@ -155,7 +155,7 @@ public class PayServiceImpl implements PayService {
         checkCoupon(totalAmount, bookInfos);
 
         // 포인트 검증
-        if(usePoint !=0) {
+        if (usePoint != 0) {
             checkPoint(userId, totalAmount, usePoint);
         }
     }
