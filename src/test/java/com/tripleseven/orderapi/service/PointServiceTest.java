@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.service;
 
+import com.tripleseven.orderapi.business.feign.MemberService;
 import com.tripleseven.orderapi.business.point.PointServiceImpl;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
@@ -52,7 +53,7 @@ class PointServiceTest {
     private DefaultPointPolicyRepository defaultPointPolicyRepository;
 
     @Mock
-    private MemberApiClient memberApiClient;
+    private MemberService memberService;
 
     @InjectMocks
     private PointServiceImpl pointService;
@@ -76,32 +77,32 @@ class PointServiceTest {
         verify(pointHistoryRepository, times(1)).save(any(PointHistory.class));
     }
 
-//    @Test
-//    void testCreatePointHistoryForPaymentEarn_Success() {
-//        Long memberId = 1L;
-//        Long orderGroupId = 10L;
-//        int usedMoney = 5000;
-//
-//        PointPolicy pointPolicy = new PointPolicy();
-//        pointPolicy.ofCreate("Default Policy", 0, new BigDecimal("0.02"));
-//        ReflectionTestUtils.setField(pointPolicy, "id", 1L);
-//
-//        DefaultPointPolicyDTO policyDTO = new DefaultPointPolicyDTO(1L, PointPolicyType.DEFAULT_BUY, pointPolicy);
-//        when(queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.DEFAULT_BUY)).thenReturn(policyDTO);
-//
-//        PointHistory pointHistory = new PointHistory(HistoryTypes.EARN, 100, LocalDateTime.now(), "Default Policy", memberId);
-//        ReflectionTestUtils.setField(pointHistory, "id", 100L);
-//
-//        when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
-//        when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(new OrderGroup()));
-//        when(memberApiClient.getGradePoint(anyLong(), anyLong())).thenReturn(100L);   //사용하지 않는  when().thenReturn()문이라고 뜸
-//        PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentEarn(memberId, usedMoney, orderGroupId);
-//
-//        Assertions.assertNotNull(result);
-//        Assertions.assertEquals(100, result.getAmount());
-//        verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
-//        verify(orderGroupRepository, times(1)).findById(orderGroupId);
-//    }
+    @Test
+    void testCreatePointHistoryForPaymentEarn_Success() {
+        Long memberId = 1L;
+        Long orderGroupId = 10L;
+        int usedMoney = 5000;
+
+        PointPolicy pointPolicy = new PointPolicy();
+        pointPolicy.ofCreate("Default Policy", 0, new BigDecimal("0.02"));
+        ReflectionTestUtils.setField(pointPolicy, "id", 1L);
+
+        DefaultPointPolicyDTO policyDTO = new DefaultPointPolicyDTO(1L, PointPolicyType.DEFAULT_BUY, pointPolicy);
+        when(queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.DEFAULT_BUY)).thenReturn(policyDTO);
+
+        PointHistory pointHistory = new PointHistory(HistoryTypes.EARN, 100, LocalDateTime.now(), "Default Policy", memberId);
+        ReflectionTestUtils.setField(pointHistory, "id", 100L);
+
+        when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
+        when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(new OrderGroup()));
+        when(memberService.getGradePoint(anyLong(), anyLong())).thenReturn(100L);   //사용하지 않는  when().thenReturn()문이라고 뜸
+        PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentEarn(memberId, usedMoney, orderGroupId);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(100, result.getAmount());
+        verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
+        verify(orderGroupRepository, times(1)).findById(orderGroupId);
+    }
 
     @Test
     void testCreateRegisterPointHistory_Success() {
