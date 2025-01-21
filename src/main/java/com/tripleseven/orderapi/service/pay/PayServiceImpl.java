@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -46,17 +48,18 @@ public class PayServiceImpl implements PayService {
     private final PayTypesRepository payTypesRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // ✅ static final로 선언
+    private static final String ERROR = "error";
 
 
     @Override
     public void createPay(PaymentDTO paymentDTO, Long orderGroupId, String payType) {
         Pay pay = new Pay();
         Optional<OrderGroup> orderGroup = orderGroupRepository.findById(orderGroupId);
-        PayType PayType = payTypesRepository.findByName(payType);
+        PayType type = payTypesRepository.findByName(payType);
         if (orderGroup.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        pay.ofCreate(paymentDTO, orderGroup.get(), PayType);
+        pay.ofCreate(paymentDTO, orderGroup.get(), type);
         payRepository.save(pay);
     }
 
@@ -65,7 +68,7 @@ public class PayServiceImpl implements PayService {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
         JSONObject response = sendRequest(convertToJSONObject(request), apiProperties.getSecretApiKey(), url);
 
-        if (response.containsKey("error")) {
+        if (response.containsKey(ERROR)) {
             // Error 객체 반환
             return ErrorDTO.fromJson(response);
         }
@@ -106,7 +109,7 @@ public class PayServiceImpl implements PayService {
 
         JSONObject response = sendRequest(parseRequestData(jsonBody), secretKey, "https://api.tosspayments.com/v1/payments/confirm");
 
-        if (response.containsKey("error")) {
+        if (response.containsKey(ERROR)) {
             // Error 객체 반환
             return ErrorDTO.fromJson(response);
         }
@@ -121,7 +124,7 @@ public class PayServiceImpl implements PayService {
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
         JSONObject response = sendRequest(new JSONObject(), secretKey, url);
 
-        if (response.containsKey("error")) {
+        if (response.containsKey(ERROR)) {
             return ErrorDTO.fromJson(response);
         }
 
@@ -231,13 +234,35 @@ public class PayServiceImpl implements PayService {
     }
 
     private HttpURLConnection createConnection(String secretKey, String urlString, String requestMethod) throws IOException {
-        URL url = new URL(urlString);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8)));
-        connection.setRequestProperty("Content-Type", "application/json");
+        HttpURLConnection connection = openHttpConnection(urlString);
+
+        setRequestHeaders(connection, secretKey);
         connection.setRequestMethod(requestMethod);
         connection.setDoOutput(true);
+
         return connection;
+    }
+
+    /**
+     * URL을 검증하고 안전하게 HttpURLConnection을 반환하는 메서드
+     */
+    private HttpURLConnection openHttpConnection(String urlString) throws IOException {
+        try {
+            URI uri = URI.create(urlString); // URL 형식 검증
+            URL url = uri.toURL();
+            return (HttpURLConnection) url.openConnection();
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            throw new IOException("잘못된 URL 형식: " + urlString, e);
+        }
+    }
+
+    /**
+     * 공통 헤더 설정을 위한 메서드
+     */
+    private void setRequestHeaders(HttpURLConnection connection, String secretKey) {
+        String encodedAuth = Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+        connection.setRequestProperty("Authorization", "Basic " + encodedAuth);
+        connection.setRequestProperty("Content-Type", "application/json");
     }
 
     private JSONObject parseRequestData(String jsonBody) {
