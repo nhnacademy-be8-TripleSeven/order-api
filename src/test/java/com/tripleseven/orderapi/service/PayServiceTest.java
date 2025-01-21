@@ -5,10 +5,8 @@ import com.tripleseven.orderapi.dto.pay.*;
 import com.tripleseven.orderapi.entity.pay.PaymentStatus;
 import com.tripleseven.orderapi.service.pay.PayService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
