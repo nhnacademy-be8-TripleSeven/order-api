@@ -1,126 +1,105 @@
 package com.tripleseven.orderapi.repository;
 
+import com.tripleseven.orderapi.dto.pay.PaymentDTO;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pay.Pay;
-import com.tripleseven.orderapi.repository.pay.PayRepository;
-import org.json.simple.JSONObject;
+import com.tripleseven.orderapi.entity.pay.PaymentStatus;
+import com.tripleseven.orderapi.entity.paytype.PayType;
+import com.tripleseven.orderapi.entity.wrapping.Wrapping;
+import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.Rollback;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@DataJpaTest
+@DataJpaTest
+@Rollback
 class PayRepositoryTest {
 
-//    @Autowired
-//    private PayRepository payRepository;
-//
-//    @Test
-//    void testSavePay() {
-//        // given
-//        JSONObject response = new JSONObject();
-//        response.put("orderId", "ORDER123");
-//        response.put("approvedAt", OffsetDateTime.now().toString());
-//        response.put("balanceAmount", "5000");
-//        response.put("status", "APPROVED");
-//        response.put("paymentKey", "PAYMENT_KEY_123");
-//
-//        Pay pay = new Pay();
-//        pay.ofCreate(response);
-//
-//        // when
-//        Pay savedPay = payRepository.save(pay);
-//
-//        // then
-//        assertThat(savedPay).isNotNull();
-//        assertThat(savedPay.getId()).isNotNull();
-//        assertThat(savedPay.getOrderId()).isEqualTo("ORDER123");
-//        assertThat(savedPay.getPrice()).isEqualTo(5000);
-//        assertThat(savedPay.getStatus()).isEqualTo("APPROVED");
-//        assertThat(savedPay.getPaymentKey()).isEqualTo("PAYMENT_KEY_123");
-//        assertThat(savedPay.getRequestedAt()).isNotNull();
-//    }
-//
-//    @Test
-//    void testFindPayById() {
-//        // given
-//        JSONObject response = new JSONObject();
-//        response.put("orderId", "ORDER456");
-//        response.put("approvedAt", OffsetDateTime.now().toString());
-//        response.put("balanceAmount", "10000");
-//        response.put("status", "PENDING");
-//        response.put("paymentKey", "PAYMENT_KEY_456");
-//
-//        Pay pay = new Pay();
-//        pay.ofCreate(response);
-//        Pay savedPay = payRepository.save(pay);
-//
-//        // when
-//        Optional<Pay> retrievedPay = payRepository.findById(savedPay.getId());
-//
-//        // then
-//        assertThat(retrievedPay).isPresent();
-//        Pay foundPay = retrievedPay.get();
-//        assertThat(foundPay.getOrderId()).isEqualTo("ORDER456");
-//        assertThat(foundPay.getPrice()).isEqualTo(10000);
-//        assertThat(foundPay.getStatus()).isEqualTo("PENDING");
-//        assertThat(foundPay.getPaymentKey()).isEqualTo("PAYMENT_KEY_456");
-//    }
-//
-//    @Test
-//    void testUpdatePay() {
-//        // given
-//        JSONObject createResponse = new JSONObject();
-//        createResponse.put("orderId", "ORDER789");
-//        createResponse.put("approvedAt", OffsetDateTime.now().toString());
-//        createResponse.put("balanceAmount", "20000");
-//        createResponse.put("status", "PENDING");
-//        createResponse.put("paymentKey", "PAYMENT_KEY_789");
-//
-//        Pay pay = new Pay();
-//        pay.ofCreate(createResponse);
-//        Pay savedPay = payRepository.save(pay);
-//
-//        JSONObject updateResponse = new JSONObject();
-//        updateResponse.put("orderId", "ORDER789_UPDATED");
-//        updateResponse.put("approvedAt", OffsetDateTime.now().toString());
-//        updateResponse.put("balanceAmount", "15000");
-//        updateResponse.put("status", "APPROVED");
-//        updateResponse.put("paymentKey", "PAYMENT_KEY_789_UPDATED");
-//
-//        // when
-//        savedPay.ofUpdate(updateResponse);
-//        Pay updatedPay = payRepository.save(savedPay);
-//
-//        // then
-//        assertThat(updatedPay.getOrderId()).isEqualTo("ORDER789_UPDATED");
-//        assertThat(updatedPay.getPrice()).isEqualTo(15000);
-//        assertThat(updatedPay.getStatus()).isEqualTo("APPROVED");
-//        assertThat(updatedPay.getPaymentKey()).isEqualTo("PAYMENT_KEY_789_UPDATED");
-//    }
-//
-//    @Test
-//    void testDeletePay() {
-//        // given
-//        JSONObject response = new JSONObject();
-//        response.put("orderId", "ORDER_TO_DELETE");
-//        response.put("approvedAt", OffsetDateTime.now().toString());
-//        response.put("balanceAmount", "3000");
-//        response.put("status", "CANCELED");
-//        response.put("paymentKey", "PAYMENT_KEY_TO_DELETE");
-//
-//        Pay pay = new Pay();
-//        pay.ofCreate(response);
-//        Pay savedPay = payRepository.save(pay);
-//
-//        // when
-//        payRepository.deleteById(savedPay.getId());
-//
-//        // then
-//        Optional<Pay> deletedPay = payRepository.findById(savedPay.getId());
-//        assertThat(deletedPay).isNotPresent();
-//    }
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    @DisplayName("1. Pay 엔터티 저장 및 조회 테스트")
+    void saveAndFindPay() {
+        // Given: Wrapping 객체 저장
+        Wrapping wrapping = new Wrapping();
+        wrapping.ofCreate("기본 포장", 3000);
+        entityManager.persist(wrapping);
+
+        // Given: OrderGroup 객체 저장
+        OrderGroup orderGroup = new OrderGroup();
+        orderGroup.ofCreate(1L, "김철수", "박영희", "010-1234-5678", "02-1234-5678", 3000, "서울 강남구", wrapping);
+        entityManager.persist(orderGroup);
+
+        // ✅ Given: PayType 객체 생성 및 저장 (`name` 필수 값 검증)
+        PayType payType = PayType.ofCreate("신용카드"); // ✅ `name` 값 설정
+        entityManager.persist(payType);
+
+        // Given: Pay 객체 생성 (`ofCreate()` 사용)
+        Pay pay = new Pay();
+        PaymentDTO paymentDTO = new PaymentDTO(1L, LocalDate.now(), 50000, PaymentStatus.READY, "test-key");
+        pay.ofCreate(paymentDTO, orderGroup, payType);
+        entityManager.persist(pay);
+        entityManager.flush();
+        entityManager.clear();
+
+        // When: Pay 객체 조회
+        Pay foundPay = entityManager.find(Pay.class, pay.getId());
+
+        // Then: Pay 객체 검증
+        assertThat(foundPay).isNotNull();
+        assertThat(foundPay.getOrderId()).isEqualTo(1L);
+        assertThat(foundPay.getPrice()).isEqualTo(50000);
+        assertThat(foundPay.getStatus()).isEqualTo(PaymentStatus.READY);
+        assertThat(foundPay.getPaymentKey()).isEqualTo("test-key");
+        assertThat(foundPay.getOrderGroup()).isNotNull();
+        assertThat(foundPay.getOrderGroup().getOrderedName()).isEqualTo("김철수");
+        assertThat(foundPay.getPayType()).isNotNull();
+        assertThat(foundPay.getPayType().getName()).isEqualTo("신용카드"); // ✅ PayType 검증
+    }
+
+    @Test
+    @DisplayName("2. Pay 엔터티의 결제 정보 갱신 테스트")
+    void updatePayInfo() {
+        // Given: Wrapping, OrderGroup, PayType 저장
+        Wrapping wrapping = new Wrapping();
+        wrapping.ofCreate("기본 포장", 3000);
+        entityManager.persist(wrapping);
+
+        OrderGroup orderGroup = new OrderGroup();
+        orderGroup.ofCreate(1L, "김철수", "박영희", "010-1234-5678", "02-1234-5678", 3000, "서울 강남구", wrapping);
+        entityManager.persist(orderGroup);
+
+        // ✅ Given: PayType 객체 생성 및 저장 (`name` 필수 값 설정)
+        PayType payType = PayType.ofCreate("신용카드"); // ✅ `name` 값 설정
+        entityManager.persist(payType);
+
+        // Given: Pay 객체 생성 및 저장 (`ofCreate()` 사용)
+        Pay pay = new Pay();
+        PaymentDTO initialDTO = new PaymentDTO(1L, LocalDate.now(), 50000, PaymentStatus.IN_PROGRESS, "test-key");
+        pay.ofCreate(initialDTO, orderGroup, payType);
+        entityManager.persist(pay);
+        entityManager.flush();
+        entityManager.clear();
+
+        // When: 결제 상태 및 정보 업데이트 (`ofUpdate()` 사용)
+        Pay foundPay = entityManager.find(Pay.class, pay.getId());
+        PaymentDTO updatedDTO = new PaymentDTO(2L, LocalDate.now(), 70000, PaymentStatus.CANCELED, "updated-key");
+        foundPay.ofUpdate(updatedDTO);
+        entityManager.flush();
+        entityManager.clear();
+
+        // Then: Pay 객체 갱신 정보 검증
+        Pay updatedPay = entityManager.find(Pay.class, pay.getId());
+        assertThat(updatedPay.getOrderId()).isEqualTo(2L);
+        assertThat(updatedPay.getPrice()).isEqualTo(70000);
+        assertThat(updatedPay.getStatus()).isEqualTo(PaymentStatus.CANCELED); // ✅ PaymentStatus 변경 확인
+        assertThat(updatedPay.getPaymentKey()).isEqualTo("updated-key");
+    }
 }
