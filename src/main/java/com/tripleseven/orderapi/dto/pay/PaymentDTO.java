@@ -30,7 +30,7 @@ public class PaymentDTO {
     public static PaymentDTO fromJson(JSONObject response) {
         return PaymentDTO.builder()
                 .orderId(Long.valueOf(response.get("orderId").toString()))
-                .requestedAt(LocalDate.parse(response.get("requestedAt").toString())) // ✅ 변경
+                .requestedAt(OffsetDateTime.parse(response.get("requestedAt").toString()).toLocalDate())
                 .balanceAmount(Long.parseLong(response.get("balanceAmount").toString()))
                 .status(PaymentStatus.fromString(response.get("status").toString())) // ✅ Enum 변환 적용
                 .paymentKey(response.get("paymentKey").toString())
