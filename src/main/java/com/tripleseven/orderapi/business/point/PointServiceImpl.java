@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.business.point;
 
+import com.tripleseven.orderapi.business.feign.MemberService;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
 import com.tripleseven.orderapi.dto.pointhistory.PointHistoryResponseDTO;
@@ -38,7 +39,7 @@ public class PointServiceImpl implements PointService {
     private final PointPolicyRepository pointPolicyRepository;
     private final DefaultPointPolicyRepository defaultPointPolicyRepository;
 
-    private final MemberApiClient memberApiClient;
+    private final MemberService memberService;
 
     // 결제 시 포인트 사용 내역 생성
     @Override
@@ -96,8 +97,7 @@ public class PointServiceImpl implements PointService {
                 dto.getName()
         );
 
-        long gradePoint = 0;
-                //memberApiClient.getGradePoint(memberId, usedMoney);
+        long gradePoint = memberService.getGradePoint(memberId, usedMoney);
 
         PointHistory graderPointHistory = createPointHistory(
                 HistoryTypes.EARN,

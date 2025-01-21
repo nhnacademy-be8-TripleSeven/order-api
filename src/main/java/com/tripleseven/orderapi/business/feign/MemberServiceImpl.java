@@ -15,6 +15,10 @@ public class MemberServiceImpl implements MemberService {
     public void clearCart(Long userId, String guestId, List<Long> bookIds) {
         bookIds.stream()
                 .forEach(bookId -> memberApiClient.deleteCart(userId, guestId, bookId));
+    }
 
+    @Override
+    public Long getGradePoint(Long userId, long totalAmount){
+        return memberApiClient.getGradePoint(userId, totalAmount);
     }
 }

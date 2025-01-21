@@ -45,6 +45,8 @@ public class PayServiceImpl implements PayService {
     private final OrderGroupRepository orderGroupRepository;
     private final PayTypesRepository payTypesRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // ✅ static final로 선언
+
 
     @Override
     public void createPay(PaymentDTO paymentDTO, Long orderGroupId, String payType) {
@@ -206,13 +208,9 @@ public class PayServiceImpl implements PayService {
     }
 
     public JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
-        // GET 요청의 경우 requestData를 보내지 않음
-        HttpURLConnection connection;
-        if (requestData.isEmpty()) {
-            connection = createConnection(secretKey, urlString, "GET");
-        } else {
-            connection = createConnection(secretKey, urlString, "POST");
-            // POST 요청 시에는 requestData를 본문에 포함
+        HttpURLConnection connection = createConnection(secretKey, urlString, requestData.isEmpty() ? "GET" : "POST");
+
+        if (!requestData.isEmpty()) {
             try (OutputStream os = connection.getOutputStream()) {
                 os.write(requestData.toString().getBytes(StandardCharsets.UTF_8));
             }
@@ -221,10 +219,12 @@ public class PayServiceImpl implements PayService {
         try (InputStream responseStream = connection.getResponseCode() == 200 ? connection.getInputStream() : connection.getErrorStream();
              Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
             return (JSONObject) new JSONParser().parse(reader);
-        } catch (Exception e) {
-            JSONObject errorResponse = new JSONObject();
-            errorResponse.put("error", "Error reading response");
-            return errorResponse;
+        } catch (ParseException e) {
+            log.error("Response parsing error: {}", e.getMessage());
+            throw new IOException("응답 데이터를 파싱하는 도중 오류 발생", e);
+        } catch (IOException e) {
+            log.error("HTTP 요청 중 오류 발생: {}", e.getMessage());
+            throw e;
         }
     }
 
@@ -238,7 +238,6 @@ public class PayServiceImpl implements PayService {
         return connection;
     }
 
-
     private JSONObject parseRequestData(String jsonBody) {
         try {
             return (JSONObject) new JSONParser().parse(jsonBody);
@@ -249,12 +248,11 @@ public class PayServiceImpl implements PayService {
 
     private JSONObject convertToJSONObject(PayCancelRequestDTO request) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonString = objectMapper.writeValueAsString(request);
+            String jsonString = OBJECT_MAPPER.writeValueAsString(request);
             return parseRequestData(jsonString);
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return new JSONObject();
+            log.error("JSON 변환 오류: {}", e.getMessage());
+            throw new CustomException(ErrorCode.JSON_PARSING_ERROR);
         }
     }
 }
