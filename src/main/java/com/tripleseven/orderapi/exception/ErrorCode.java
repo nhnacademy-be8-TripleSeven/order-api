@@ -12,6 +12,7 @@ public enum ErrorCode {
     API_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 API 요청입니다."),
     CANCEL_BAD_REQUEST(HttpStatus.BAD_REQUEST, "취소 요청을 실패하였습니다."),
     REFUND_BAD_REQUEST(HttpStatus.BAD_REQUEST, "반품 요청을 실패하였습니다."),
+    JSON_PARSING_ERROR(HttpStatus.BAD_REQUEST, "JSON 데이터를 처리하는 도중 오류가 발생했습니다."),
 
     /* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
