@@ -19,6 +19,7 @@ import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
 import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
 import com.tripleseven.orderapi.service.pay.PayService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
@@ -45,6 +46,8 @@ public class OrderSaveProcessing implements OrderProcessing {
     private final RabbitService rabbitService;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
@@ -111,6 +114,7 @@ public class OrderSaveProcessing implements OrderProcessing {
         OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
 
         Long orderGroupId;
+        List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
 
         try {
             // OrderGroup 생성
@@ -123,7 +127,6 @@ public class OrderSaveProcessing implements OrderProcessing {
             );
 
             // OrderDetail 저장
-            List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
             for (OrderBookInfoDTO bookInfo : bookInfos) {
                 OrderDetailCreateRequestDTO orderDetailCreateRequestDTO =
                         new OrderDetailCreateRequestDTO(
@@ -151,15 +154,15 @@ public class OrderSaveProcessing implements OrderProcessing {
             }
 
             log.info("Successfully processed member order");
-
-            // RabbitMQ 처리
-            rabbitService.sendCartMessage(memberId, null, bookInfos);
-            rabbitService.sendPointMessage(memberId, orderGroupId, payInfo.getTotalAmount());
-
         } catch (Exception e) {
             handlePaymentCancellation(paymentDTO, "주문 오류");
             throw e; // 예외를 다시 던져 롤백 트리거
         }
+        // RabbitMQ 처리
+
+        rabbitService.sendCartMessage(memberId, null, bookInfos);
+        rabbitService.sendPointMessage(memberId, orderGroupId, payInfo.getTotalAmount());
+
     }
 
     // 결제 취소 처리
@@ -178,10 +181,14 @@ public class OrderSaveProcessing implements OrderProcessing {
         AddressInfoDTO addressInfo = payInfo.getAddressInfo();
         RecipientInfoDTO recipientInfo = payInfo.getRecipientInfo();
 
-        String address = String.format("%s %s (%s)",
-                addressInfo.getRoadAddress().trim(),
-                addressInfo.getDetailAddress().trim(),
-                addressInfo.getZoneAddress()).trim();
+        String address = addressInfo.getZoneAddress() != null ?
+                String.format("%s %s (%s)",
+                        addressInfo.getRoadAddress().trim(),
+                        addressInfo.getDetailAddress().trim(),
+                        addressInfo.getZoneAddress().trim()) :
+                String.format("%s %s",
+                        addressInfo.getRoadAddress().trim(),
+                        addressInfo.getDetailAddress().trim());
 
         return new OrderGroupCreateRequestDTO(
                 payInfo.getWrapperId(),

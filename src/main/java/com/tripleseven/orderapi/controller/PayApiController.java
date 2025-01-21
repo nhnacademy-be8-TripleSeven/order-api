@@ -61,6 +61,7 @@ public class PayApiController {
 
         if (userId != null) {
             orderProcessing.processMemberOrder(userId, (PaymentDTO) response);
+
         } else {
             orderProcessing.processNonMemberOrder(guestId, (PaymentDTO) response);
         }

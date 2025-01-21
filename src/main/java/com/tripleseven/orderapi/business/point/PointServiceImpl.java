@@ -21,6 +21,7 @@ import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -68,6 +69,7 @@ public class PointServiceImpl implements PointService {
 
     // 결제 시 포인트 적립 내역 생성 (기본 구매 적립 + 등급별 적립)
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PointHistoryResponseDTO createPointHistoryForPaymentEarn(Long memberId, long usedMoney, Long orderGroupId) {
         DefaultPointPolicyDTO dto = queryDslDefaultPointPolicyRepository.findDefaultPointPolicyByType(PointPolicyType.DEFAULT_BUY);
 
@@ -97,7 +99,8 @@ public class PointServiceImpl implements PointService {
                 dto.getName()
         );
 
-        long gradePoint = memberService.getGradePoint(memberId, usedMoney);
+        long gradePoint = 0;
+//        memberService.getGradePoint(memberId, usedMoney);
 
         PointHistory graderPointHistory = createPointHistory(
                 HistoryTypes.EARN,
