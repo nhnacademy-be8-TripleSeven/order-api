@@ -48,49 +48,49 @@ public class OrderSaveProcessing implements OrderProcessing {
 
     @Override
     @Transactional
-    public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
-        log.info("processNonMemberOrder guestId={}", guestId);
+            public void processNonMemberOrder(String guestId, PaymentDTO paymentDTO) {
+                log.info("processNonMemberOrder guestId={}", guestId);
 
-        HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
+                HashOperations<String, String, PayInfoDTO> payHash = redisTemplate.opsForHash();
 
-        if (Objects.isNull(payHash)) {
-            throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
-        }
+                if (Objects.isNull(payHash)) {
+                    throw new CustomException(ErrorCode.REDIS_NOT_FOUND);
+                }
 
-        PayInfoDTO payInfo = payHash.get(guestId, "PayInfo");
+                PayInfoDTO payInfo = payHash.get(guestId, "PayInfo");
 
-        OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
-        try {
-            // OrderGroup 생성
-            OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(GUEST_USER_ID, request);
-            Long orderGroupId = orderGroupResponseDTO.getId();
+                OrderGroupCreateRequestDTO request = getOrderGroupCreateRequestDTO(payInfo);
+                try {
+                    // OrderGroup 생성
+                    OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.createOrderGroup(GUEST_USER_ID, request);
+                    Long orderGroupId = orderGroupResponseDTO.getId();
 
-            // DeliveryInfo 생성
-            deliveryInfoService.createDeliveryInfo(
-                    new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
-            );
+                    // DeliveryInfo 생성
+                    deliveryInfoService.createDeliveryInfo(
+                            new DeliveryInfoCreateRequestDTO(orderGroupId, payInfo.getDeliveryDate())
+                    );
 
-            // OrderDetail 저장
-            List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
-            for (OrderBookInfoDTO bookInfo : bookInfos) {
-                OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
-                        = new OrderDetailCreateRequestDTO(
-                        bookInfo.getBookId(),
-                        bookInfo.getQuantity(),
-                        bookInfo.getPrice(),
-                        bookInfo.getCouponSalePrice(),
-                        orderGroupId
-                );
-                orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
-            }
+                    // OrderDetail 저장
+                    List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
+                    for (OrderBookInfoDTO bookInfo : bookInfos) {
+                        OrderDetailCreateRequestDTO orderDetailCreateRequestDTO
+                                = new OrderDetailCreateRequestDTO(
+                                bookInfo.getBookId(),
+                                bookInfo.getQuantity(),
+                                bookInfo.getPrice(),
+                                bookInfo.getCouponSalePrice(),
+                                orderGroupId
+                        );
+                        orderDetailService.createOrderDetail(orderDetailCreateRequestDTO);
+                    }
 
-            payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
+                    payService.createPay(paymentDTO, orderGroupId, payInfo.getPayType());
 
-            rabbitService.sendCartMessage(guestId, bookInfos);
+                    rabbitService.sendCartMessage(null, guestId, bookInfos);
 
-            log.info("Successfully processed non-member order");
-        } catch (Exception e) {
-            handlePaymentCancellation(paymentDTO, "주문 오류");
+                    log.info("Successfully processed non-member order");
+                } catch (Exception e) {
+                    handlePaymentCancellation(paymentDTO, "주문 오류");
             throw e;
         }
 
@@ -151,7 +151,7 @@ public class OrderSaveProcessing implements OrderProcessing {
             log.info("Successfully processed member order");
 
             // RabbitMQ 처리
-            rabbitService.sendCartMessage(memberId.toString(), bookInfos);
+            rabbitService.sendCartMessage(memberId, null, bookInfos);
             rabbitService.sendPointMessage(memberId, orderGroupId, payInfo.getTotalAmount());
 
         } catch (Exception e) {

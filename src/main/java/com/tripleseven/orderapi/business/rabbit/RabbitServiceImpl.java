@@ -1,13 +1,14 @@
 package com.tripleseven.orderapi.business.rabbit;
 
-import com.tripleseven.orderapi.dto.CombinedMessageDTO;
+import com.tripleseven.orderapi.business.feign.MemberService;
+import com.tripleseven.orderapi.business.point.PointService;
 import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,32 +22,20 @@ public class RabbitServiceImpl implements RabbitService {
     private static final String POINT_ROUTING_KEY = "point.routing.key";
 
     private final RabbitTemplate rabbitTemplate;
+    private final PointService pointService;
+    private final MemberService memberService;
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void sendCartMessage(String userId, List<OrderBookInfoDTO> bookInfos) {
-        try {
+    public void sendCartMessage(Long userId, String guestId, List<OrderBookInfoDTO> bookInfos) {
             List<Long> bookIds = bookInfos.stream().map(OrderBookInfoDTO::getBookId).toList();
-            CombinedMessageDTO cartMessageDTO = new CombinedMessageDTO();
-            cartMessageDTO.addObject("BookIds", bookIds);
-            cartMessageDTO.addObject("UserId", userId);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, CART_ROUTING_KEY, cartMessageDTO);
-        } catch (Exception e) {
-            log.error("Error sending cart message: {}", e.getMessage());
-        }
+            memberService.clearCart(userId, guestId, bookIds);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void sendPointMessage(Long userId, Long orderId, long totalAmount) {
-        try {
-            CombinedMessageDTO pointMessageDTO = new CombinedMessageDTO();
-            pointMessageDTO.addObject("UserId", userId);
-            pointMessageDTO.addObject("TotalAmount", totalAmount);
-            pointMessageDTO.addObject("OrderId", orderId);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, POINT_ROUTING_KEY, pointMessageDTO);
-        } catch (Exception e) {
-            log.error("Error sending point message: {}", e.getMessage());
-        }
+        pointService.createPointHistoryForPaymentEarn(userId, totalAmount, orderId);
+
     }
 }
