@@ -205,7 +205,7 @@ public class PayServiceImpl implements PayService {
 
     }
 
-    private JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
+    public JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
         // GET 요청의 경우 requestData를 보내지 않음
         HttpURLConnection connection;
         if (requestData.isEmpty()) {

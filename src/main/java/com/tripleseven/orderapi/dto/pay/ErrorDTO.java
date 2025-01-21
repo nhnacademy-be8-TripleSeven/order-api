@@ -15,9 +15,13 @@ public class ErrorDTO {
     private String message;
 
     public static ErrorDTO fromJson(JSONObject response) {
-        ErrorDTO dto = new ErrorDTO();
-        dto.setCode(response.get("code").toString());
-        dto.setMessage(response.get("message").toString());
-        return dto;
+        if (response == null) {
+            return new ErrorDTO("UNKNOWN_ERROR", "Unknown error occurred");
+        }
+
+        String code = response.get("code") != null ? response.get("code").toString() : "UNKNOWN_ERROR";
+        String message = response.get("message") != null ? response.get("message").toString() : "Unknown error occurred";
+
+        return new ErrorDTO(code, message);
     }
 }
