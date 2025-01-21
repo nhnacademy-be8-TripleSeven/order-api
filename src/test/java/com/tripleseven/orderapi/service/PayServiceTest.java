@@ -23,6 +23,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,25 +106,25 @@ class PayServiceTest {
         assertThrows(IllegalArgumentException.class, () -> payService.createPay(paymentDTO, orderGroupId, payType));
     }
 
-//    @Test
-//    void createPayInfo_ShouldSavePayInfoToRedis() {
-//        // Given
-//        String guestId = "guest-123";
-//        Long userId = null;
-//        PayInfoRequestDTO requestDTO = mock(PayInfoRequestDTO.class); // ✅ Mock 객체 생성
-//        PayInfoResponseDTO mockResponse = new PayInfoResponseDTO(100L, 50000L); // ✅ 예상 반환 값 생성
-//
-//        when(requestDTO.getTotalAmount()).thenReturn(50000L); // ✅ 필드 값 설정
-//        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
-//        when(payService.createPayInfo(userId, guestId, requestDTO)).thenReturn(mockResponse); // ✅ Mocking 처리
-//
-//        // When
-//        PayInfoResponseDTO responseDTO = payService.createPayInfo(userId, guestId, requestDTO);
-//
-//        // Then
-//        assertNotNull(responseDTO);
-//        verify(hashOperations, times(1)).put(eq(guestId), eq("PayInfo"), any(PayInfoDTO.class));
-//    }
+    @Test
+    void createPayInfo_ShouldSavePayInfoToRedis() {
+        // Given
+        String guestId = "guest-123";
+        Long userId = null;
+        PayInfoRequestDTO requestDTO = mock(PayInfoRequestDTO.class); // ✅ Mock 객체 생성
+        PayInfoResponseDTO mockResponse = new PayInfoResponseDTO(100L, 50000L); // ✅ 예상 반환 값 생성
+
+        when(requestDTO.getTotalAmount()).thenReturn(50000L); // ✅ 필드 값 설정
+        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+        when(payService.createPayInfo(userId, guestId, requestDTO)).thenReturn(mockResponse); // ✅ Mocking 처리
+
+        // When
+        PayInfoResponseDTO responseDTO = payService.createPayInfo(userId, guestId, requestDTO);
+
+        // Then
+        assertNotNull(responseDTO);
+        verify(hashOperations, times(1)).put(eq(guestId), eq("PayInfo"), any(PayInfoDTO.class));
+    }
 
     @Test
     void confirmRequest_ShouldReturnErrorDTO_WhenApiCallFails() throws IOException {
@@ -147,27 +148,27 @@ class PayServiceTest {
         assertTrue(response instanceof ErrorDTO);
     }
 
-//    @Test
-//    void getPaymentInfo_ShouldReturnPaymentDTO_WhenApiCallSucceeds() throws IOException {
-//        // Given
-//        when(apiProperties.getSecretApiKey()).thenReturn("secret-key");
-//
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("orderId", 100L);
-//        jsonResponse.put("paymentKey", paymentKey);
-//        jsonResponse.put("balanceAmount", 50000L);
-//        jsonResponse.put("status", "DONE");
-//        jsonResponse.put("requestedAt", LocalDate.now());
-//
-//        doReturn(jsonResponse).when(payService).sendRequest(any(), anyString(), anyString());
-//
-//        // When
-//        Object response = payService.getPaymentInfo(paymentKey);
-//
-//        // Then
-//        assertNotNull(response);
-//        assertTrue(response instanceof PaymentDTO);
-//    }
+    @Test
+    void getPaymentInfo_ShouldReturnPaymentDTO_WhenApiCallSucceeds() throws IOException {
+        // Given
+        when(apiProperties.getSecretApiKey()).thenReturn("secret-key");
+
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("orderId", 100L);
+        jsonResponse.put("paymentKey", paymentKey);
+        jsonResponse.put("balanceAmount", 50000L);
+        jsonResponse.put("status", "DONE");
+        jsonResponse.put("requestedAt", OffsetDateTime.now());
+
+        doReturn(jsonResponse).when(payService).sendRequest(any(), anyString(), anyString());
+
+        // When
+        Object response = payService.getPaymentInfo(paymentKey);
+
+        // Then
+        assertNotNull(response);
+        assertTrue(response instanceof PaymentDTO);
+    }
 
     @Test
     void getOrderId_ShouldReturnOrderGroupId() {
