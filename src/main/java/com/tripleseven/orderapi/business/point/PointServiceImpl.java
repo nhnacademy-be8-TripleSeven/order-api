@@ -96,7 +96,8 @@ public class PointServiceImpl implements PointService {
                 dto.getName()
         );
 
-        long gradePoint = memberApiClient.getGradePoint(memberId, usedMoney);
+        long gradePoint = 0;
+                //memberApiClient.getGradePoint(memberId, usedMoney);
 
         PointHistory graderPointHistory = createPointHistory(
                 HistoryTypes.EARN,

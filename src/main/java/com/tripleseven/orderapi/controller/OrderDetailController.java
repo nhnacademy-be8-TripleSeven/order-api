@@ -28,7 +28,7 @@ public class OrderDetailController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 상세가 존재하지 않음")
     })
-    public ResponseEntity<List<OrderDetailResponseDTO>> getOrderDetailsByOrderGroupId(@PathVariable Long orderGroupId) {
+    public ResponseEntity<List<OrderDetailResponseDTO>> getOrderDetailsByOrderGroupId(@PathVariable("order-group-id") Long orderGroupId) {
         List<OrderDetailResponseDTO> responses = orderDetailService.getOrderDetailsToList(orderGroupId);
         return ResponseEntity.ok(responses); // 반환: 주문 상세 목록 (List<OrderDetailResponse>)
     }

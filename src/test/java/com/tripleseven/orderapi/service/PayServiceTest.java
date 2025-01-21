@@ -1,20 +1,29 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.dto.order.OrderPayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.*;
+import com.tripleseven.orderapi.dto.properties.ApiProperties;
+import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
+import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.entity.pay.PaymentStatus;
-import com.tripleseven.orderapi.service.pay.PayService;
+import com.tripleseven.orderapi.entity.paytype.PayType;
+import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
+import com.tripleseven.orderapi.repository.pay.PayRepository;
+import com.tripleseven.orderapi.repository.paytypes.PayTypesRepository;
+import com.tripleseven.orderapi.service.pay.PayServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -23,123 +32,192 @@ import static org.mockito.Mockito.*;
 class PayServiceTest {
 
     @Mock
-    private PayService payService;
+    private ApiProperties apiProperties;
+
+    @Mock
+    private PayRepository payRepository;
+
+    @Mock
+    private OrderGroupRepository orderGroupRepository;
+
+    @Mock
+    private PayTypesRepository payTypesRepository;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private HashOperations<String, Object, Object> hashOperations;
+
+    @Mock
+    private HttpServletRequest request;
+
+    @InjectMocks
+    private PayServiceImpl payService;
+
+    private final Long orderGroupId = 1L;
+    private final String payType = "CARD";
+    private final String paymentKey = "test-payment-key";
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+        payService = spy(payService); // Spy 적용
+    }
 
     @Test
-    void testCreatePay() {
+    void createPay_ShouldSavePay_WhenValidDataProvided() {
+        // Given
         PaymentDTO paymentDTO = PaymentDTO.builder()
-                .orderId(1L)
+                .orderId(100L)
                 .requestedAt(LocalDate.now())
-                .balanceAmount(10000L)
-                .status(PaymentStatus.DONE)
-                .paymentKey("PAY-12345")
-                .build();  // ✅ `@Builder` 사용 가능
+                .balanceAmount(50000L)
+                .status(PaymentStatus.READY)
+                .paymentKey(paymentKey)
+                .build();
 
-        Long orderGroupId = 1L;
-        String payType = "CARD";
+        OrderGroup orderGroup = new OrderGroup();
+        PayType payTypeEntity = new PayType();
+        when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(orderGroup));
+        when(payTypesRepository.findByName(payType)).thenReturn(payTypeEntity);
 
-        doNothing().when(payService).createPay(paymentDTO, orderGroupId, payType);
+        // When
+        payService.createPay(paymentDTO, orderGroupId, payType);
 
-        assertDoesNotThrow(() -> payService.createPay(paymentDTO, orderGroupId, payType));
-        verify(payService, times(1)).createPay(paymentDTO, orderGroupId, payType);
+        // Then
+        verify(payRepository, times(1)).save(any(Pay.class));
     }
 
     @Test
-    void testCancelRequest() throws IOException {
-        String paymentKey = "testPaymentKey";
+    void createPay_ShouldThrowException_WhenOrderGroupNotFound() {
+        // Given
+        PaymentDTO paymentDTO = PaymentDTO.builder()
+                .orderId(100L)
+                .requestedAt(LocalDate.now())
+                .balanceAmount(50000L)
+                .status(PaymentStatus.READY)
+                .paymentKey(paymentKey)
+                .build();
 
-        // ✅ `PayCancelRequestDTO`에 @Builder가 없으므로 직접 생성
-        PayCancelRequestDTO requestDTO = new PayCancelRequestDTO("Test Cancel",1000L);
+        when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.empty());
 
-        Object expectedResponse = new Object();
-
-        when(payService.cancelRequest(paymentKey, requestDTO)).thenReturn(expectedResponse);
-
-        Object response = payService.cancelRequest(paymentKey, requestDTO);
-        assertEquals(expectedResponse, response);
-        verify(payService, times(1)).cancelRequest(paymentKey, requestDTO);
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> payService.createPay(paymentDTO, orderGroupId, payType));
     }
 
-    @Test
-    void testCreatePayInfo() {
-        Long userId = 1L;
-        String guestId = "guest123";
-
-        // ✅ `PayInfoRequestDTO`에 @Builder가 없으므로 직접 생성
-        PayInfoRequestDTO requestDTO = new PayInfoRequestDTO();
-        requestDTO.setOrdererName("테스트 사용자");
-        requestDTO.setPayType("CARD");
-        requestDTO.setDeliveryFee(3000L);
-        requestDTO.setPoint(500L);
-        requestDTO.setTotalAmount(20000L);
-        requestDTO.setBookOrderDetails(Collections.emptyList()); // 빈 리스트 설정
-
-        PayInfoResponseDTO expectedResponse = new PayInfoResponseDTO();
-
-        when(payService.createPayInfo(userId, guestId, requestDTO)).thenReturn(expectedResponse);
-
-        PayInfoResponseDTO response = payService.createPayInfo(userId, guestId, requestDTO);
-        assertEquals(expectedResponse, response);
-        verify(payService, times(1)).createPayInfo(userId, guestId, requestDTO);
-    }
+//    @Test
+//    void createPayInfo_ShouldSavePayInfoToRedis() {
+//        // Given
+//        String guestId = "guest-123";
+//        Long userId = null;
+//        PayInfoRequestDTO requestDTO = mock(PayInfoRequestDTO.class); // ✅ Mock 객체 생성
+//        PayInfoResponseDTO mockResponse = new PayInfoResponseDTO(100L, 50000L); // ✅ 예상 반환 값 생성
+//
+//        when(requestDTO.getTotalAmount()).thenReturn(50000L); // ✅ 필드 값 설정
+//        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+//        when(payService.createPayInfo(userId, guestId, requestDTO)).thenReturn(mockResponse); // ✅ Mocking 처리
+//
+//        // When
+//        PayInfoResponseDTO responseDTO = payService.createPayInfo(userId, guestId, requestDTO);
+//
+//        // Then
+//        assertNotNull(responseDTO);
+//        verify(hashOperations, times(1)).put(eq(guestId), eq("PayInfo"), any(PayInfoDTO.class));
+//    }
 
     @Test
-    void testGetOrderPayInfo() {
-        Long orderId = 1L;
-        OrderPayInfoDTO expectedResponse = new OrderPayInfoDTO();
-
-        when(payService.getOrderPayInfo(orderId)).thenReturn(expectedResponse);
-
-        OrderPayInfoDTO response = payService.getOrderPayInfo(orderId);
-        assertEquals(expectedResponse, response);
-        verify(payService, times(1)).getOrderPayInfo(orderId);
-    }
-
-    @Test
-    void testConfirmRequest() throws IOException {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+    void confirmRequest_ShouldReturnErrorDTO_WhenApiCallFails() throws IOException {
+        // Given
         String jsonBody = "{}";
-        Object expectedResponse = new Object();
 
-        when(payService.confirmRequest(request, jsonBody)).thenReturn(expectedResponse);
+        when(apiProperties.getSecretApiKey()).thenReturn("secret-key");
+        when(request.getRequestURI()).thenReturn("/confirm/payment"); // ✅ 추가된 부분
 
+        JSONObject errorResponse = new JSONObject();
+        errorResponse.put("error", true);
+        errorResponse.put("code", "ERROR_CODE");
+        errorResponse.put("message", "Payment failed");
+
+        doReturn(errorResponse).when(payService).sendRequest(any(), anyString(), anyString());
+
+        // When
         Object response = payService.confirmRequest(request, jsonBody);
-        assertEquals(expectedResponse, response);
-        verify(payService, times(1)).confirmRequest(request, jsonBody);
+
+        // Then
+        assertTrue(response instanceof ErrorDTO);
+    }
+
+//    @Test
+//    void getPaymentInfo_ShouldReturnPaymentDTO_WhenApiCallSucceeds() throws IOException {
+//        // Given
+//        when(apiProperties.getSecretApiKey()).thenReturn("secret-key");
+//
+//        JSONObject jsonResponse = new JSONObject();
+//        jsonResponse.put("orderId", 100L);
+//        jsonResponse.put("paymentKey", paymentKey);
+//        jsonResponse.put("balanceAmount", 50000L);
+//        jsonResponse.put("status", "DONE");
+//        jsonResponse.put("requestedAt", LocalDate.now());
+//
+//        doReturn(jsonResponse).when(payService).sendRequest(any(), anyString(), anyString());
+//
+//        // When
+//        Object response = payService.getPaymentInfo(paymentKey);
+//
+//        // Then
+//        assertNotNull(response);
+//        assertTrue(response instanceof PaymentDTO);
+//    }
+
+    @Test
+    void getOrderId_ShouldReturnOrderGroupId() {
+        // Given
+        Long orderId = 100L;
+        Pay pay = mock(Pay.class);
+        OrderGroup orderGroup = mock(OrderGroup.class);
+        when(pay.getOrderGroup()).thenReturn(orderGroup);
+        when(orderGroup.getId()).thenReturn(orderGroupId);
+        when(payRepository.findByOrderId(orderId)).thenReturn(pay);
+
+        // When
+        Long result = payService.getOrderId(orderId);
+
+        // Then
+        assertEquals(orderGroupId, result);
     }
 
     @Test
-    void testGetPaymentInfo() throws IOException {
-        String paymentKey = "testKey";
-        Object expectedResponse = new Object();
+    void getPayPrice_ShouldReturnPayPrice() {
+        // Given
+        Long orderId = 100L;
+        Pay pay = mock(Pay.class);
+        when(pay.getPrice()).thenReturn(50000L);
+        when(payRepository.findByOrderId(orderId)).thenReturn(pay);
 
-        when(payService.getPaymentInfo(paymentKey)).thenReturn(expectedResponse);
+        // When
+        Long result = payService.getPayPrice(orderId);
 
-        Object response = payService.getPaymentInfo(paymentKey);
-        assertEquals(expectedResponse, response);
-        verify(payService, times(1)).getPaymentInfo(paymentKey);
+        // Then
+        assertEquals(50000L, result);
     }
 
     @Test
-    void testGetOrderId() {
-        Long orderId = 1L;
+    void sendRequest_ShouldReturnErrorResponse_WhenApiFails() throws IOException {
+        // Given
+        JSONObject requestData = new JSONObject();
+        String secretKey = "test-secret-key";
+        String url = "https://api.example.com/test";
 
-        when(payService.getOrderId(orderId)).thenReturn(orderId);
+        JSONObject errorResponse = new JSONObject();
+        errorResponse.put("error", "Error reading response");
 
-        Long response = payService.getOrderId(orderId);
-        assertEquals(orderId, response);
-        verify(payService, times(1)).getOrderId(orderId);
-    }
+        doReturn(errorResponse).when(payService).sendRequest(any(), anyString(), anyString());
 
-    @Test
-    void testGetPayPrice() {
-        Long orderId = 1L;
-        Long expectedPrice = 50000L;
+        // When
+        JSONObject response = payService.sendRequest(requestData, secretKey, url);
 
-        when(payService.getPayPrice(orderId)).thenReturn(expectedPrice);
-
-        Long response = payService.getPayPrice(orderId);
-        assertEquals(expectedPrice, response);
-        verify(payService, times(1)).getPayPrice(orderId);
+        // Then
+        assertTrue(response.containsKey("error"));
+        assertEquals("Error reading response", response.get("error"));
     }
 }

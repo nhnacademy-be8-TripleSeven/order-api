@@ -17,7 +17,7 @@ public interface BookCouponApiClient {
     @GetMapping("/books/{book-id}/name")
     String getBookName(@PathVariable("book-id") Long bookId);
 
-    @PutMapping("/coupons/apply")
+    @GetMapping("/api/coupons/apply")
     Long applyCoupon(
             @RequestParam Long couponId,
             @RequestParam Long paymentAmount);

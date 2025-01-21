@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "member-api")
 public interface MemberApiClient {
-    @PostMapping("/cart/book")
+    @DeleteMapping("/cart/book")
     void deleteCart(
-            @RequestHeader(value = "X-USER") Long userId,
-            @CookieValue("X-GUEST") String guestId,
+            @RequestHeader(value = "X-USER", required = false) Long userId,
+            @CookieValue("GUEST-ID") String guestId,
             @RequestParam Long bookId);
 
     @GetMapping("/members/grade/point")

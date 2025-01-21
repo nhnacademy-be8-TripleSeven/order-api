@@ -46,16 +46,15 @@ public class PayServiceImpl implements PayService {
     private final PayTypesRepository payTypesRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // TODO save 해서 반환해야될 경우가 있는지 확인(void 타입)
     @Override
     public void createPay(PaymentDTO paymentDTO, Long orderGroupId, String payType) {
         Pay pay = new Pay();
         Optional<OrderGroup> orderGroup = orderGroupRepository.findById(orderGroupId);
         PayType PayType = payTypesRepository.findByName(payType);
-        if(orderGroup.isEmpty()) {
+        if (orderGroup.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        pay.ofCreate(paymentDTO,orderGroup.get(), PayType);
+        pay.ofCreate(paymentDTO, orderGroup.get(), PayType);
         payRepository.save(pay);
     }
 
@@ -83,7 +82,7 @@ public class PayServiceImpl implements PayService {
         PayInfoDTO payInfoDTO = new PayInfoDTO();
         payInfoDTO.ofCreate(orderId, request);
 
-//        checkValid(userId, payInfoDTO);
+        checkValid(userId, payInfoDTO);
 
         if (Objects.nonNull(userId)) {
             redisTemplate.opsForHash().put(userId.toString(), "PayInfo", payInfoDTO);
@@ -118,9 +117,9 @@ public class PayServiceImpl implements PayService {
     public Object getPaymentInfo(String paymentKey) throws IOException {
         String secretKey = apiProperties.getSecretApiKey();
         String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
-        JSONObject response = sendRequest(new JSONObject(),secretKey,url);
+        JSONObject response = sendRequest(new JSONObject(), secretKey, url);
 
-        if(response.containsKey("error")) {
+        if (response.containsKey("error")) {
             return ErrorDTO.fromJson(response);
         }
 
@@ -129,73 +128,69 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public Long getOrderId(Long orderId) {
-        Pay pay =  payRepository.findByOrderId(orderId);
+        Pay pay = payRepository.findByOrderId(orderId);
         return pay.getOrderGroup().getId();
     }
 
     @Override
     public Long getPayPrice(Long orderId) {
-        Pay pay =  payRepository.findByOrderId(orderId);
+        Pay pay = payRepository.findByOrderId(orderId);
         return pay.getPrice();
     }
 
 
     private void checkValid(Long userId, PayInfoDTO payInfo) {
         List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
-        Long couponId = payInfo.getCouponId();
+
         Long usePoint = payInfo.getPoint();
         Long totalAmount = payInfo.getTotalAmount();
 
 
-        Map<Long, Integer> bookAmounts = new HashMap<>();
-        List<Long> bookIds = new ArrayList<>();
-
-        for (OrderBookInfoDTO bookInfo : bookInfos) {
-            bookIds.add(bookInfo.getBookId());
-            bookAmounts.put(bookInfo.getBookId(), bookInfo.getQuantity());
-        }
-
         // 쿠폰 검증
-        checkCoupon(couponId, bookInfos);
+        checkCoupon(totalAmount, bookInfos);
 
         // 포인트 검증
         checkPoint(userId, totalAmount, usePoint);
     }
 
     private void checkCoupon(Long totalAmount, List<OrderBookInfoDTO> bookInfos) {
-        CouponDTO coupon = bookCouponApiClient.getCoupon(1L);
-
-        // 쿠폰 존재 검증
-        if (Objects.isNull(coupon)) {
-            throw new CustomException(ErrorCode.COUPON_NOT_FOUND);
-        }
-
-        // 사용 가능한 쿠폰 확인
-        if (!coupon.getCouponStatus().equals(CouponStatus.NOTUSED)) {
-            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
-        }
-
-        // 최소 사용 금액보다 적음
-        if (totalAmount < coupon.getCouponMinAmount()) {
-            throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
-        }
-
         for (OrderBookInfoDTO bookInfo : bookInfos) {
-            if (bookInfo.getCouponId() != null) {
-                // 계산 재확인
-                Long realDiscount = bookCouponApiClient.applyCoupon(bookInfo.getCouponId(), bookInfo.getPrice());
-
-                // 계산된 할인 금액과 맞지 않음
-                if (bookInfo.getCouponSalePrice() != realDiscount) {
-                    throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
-
-                }
+            Long couponId = bookInfo.getCouponId();
+            if (couponId == null) {
+                continue;
             }
+            // 계산 재확인
+            Long realDiscount = bookCouponApiClient.applyCoupon(bookInfo.getCouponId(), bookInfo.getPrice());
+
+            // 계산된 할인 금액과 맞지 않음
+            if (bookInfo.getCouponSalePrice() != realDiscount) {
+                throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+
+            }
+
+            CouponDTO coupon = bookCouponApiClient.getCoupon(couponId);
+
+            // 쿠폰 존재 검증
+            if (Objects.isNull(coupon)) {
+                throw new CustomException(ErrorCode.COUPON_NOT_FOUND);
+            }
+
+            // 사용 가능한 쿠폰 확인
+            if (!coupon.getCouponStatus().equals(CouponStatus.NOTUSED)) {
+                throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+            }
+
+            // 최소 사용 금액보다 적음
+            if (totalAmount < coupon.getCouponMinAmount()) {
+                throw new CustomException(ErrorCode.COUPON_USED_UNPROCESSABLE_ENTITY);
+            }
+
         }
+
 
     }
 
-    private Long checkPoint(Long userId, Long totalPrice, Long point) {
+    private void checkPoint(Long userId, Long totalPrice, Long point) {
         int userPoint = pointHistoryService.getTotalPointByMemberId(userId);
 
         // 보유 포인트보다 포인트 사용량이 더 큰 경우
@@ -205,13 +200,12 @@ public class PayServiceImpl implements PayService {
 
         // 최종 가격보다 사용량이 더 큰 경우
         if (point > totalPrice) {
-            point = point - totalPrice;
+            throw new CustomException(ErrorCode.POINT_UNPROCESSABLE_ENTITY);
         }
 
-        return point;
     }
 
-    private JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
+    public JSONObject sendRequest(JSONObject requestData, String secretKey, String urlString) throws IOException {
         // GET 요청의 경우 requestData를 보내지 않음
         HttpURLConnection connection;
         if (requestData.isEmpty()) {
@@ -259,7 +253,7 @@ public class PayServiceImpl implements PayService {
             String jsonString = objectMapper.writeValueAsString(request);
             return parseRequestData(jsonString);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return new JSONObject();
         }
     }

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -95,8 +96,6 @@ public class OrderServiceImpl implements OrderService {
         OrderGroupResponseDTO orderGroupResponseDTO = orderGroupService.getOrderGroupById(orderGroupId);
         List<OrderDetailResponseDTO> orderDetailResponseList = orderDetailService.getOrderDetailsToList(orderGroupId);
 
-        WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupResponseDTO.getWrappingId());
-
         long usedPoint = orderGroupPointHistoryService.getUsedPoint(orderGroupId);
         long earnedPoint = orderGroupPointHistoryService.getEarnedPoint(orderGroupId);
         // 판매가 총합
@@ -109,8 +108,23 @@ public class OrderServiceImpl implements OrderService {
             discountPrice += orderDetailResponseDTO.getDiscountPrice();
         }
 
+        long totalPrice;
+        Long wrappingId = orderGroupResponseDTO.getWrappingId();
+        if (Objects.isNull(wrappingId)) {
+            totalPrice = primeTotalPrice - discountPrice + orderGroupResponseDTO.getDeliveryPrice();
+            return new OrderGroupInfoDTO(
+                    primeTotalPrice,
+                    discountPrice,
+                    orderGroupResponseDTO.getDeliveryPrice(),
+                    "포장안함",
+                    0,
+                    totalPrice,
+                    usedPoint,
+                    earnedPoint);
+        }
+        WrappingResponseDTO wrappingResponseDTO = wrappingService.getWrappingById(orderGroupResponseDTO.getWrappingId());
         // 총 계산된 금액
-        long totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
+        totalPrice = primeTotalPrice - discountPrice + wrappingResponseDTO.getPrice() + orderGroupResponseDTO.getDeliveryPrice();
 
         return new OrderGroupInfoDTO(
                 primeTotalPrice,
