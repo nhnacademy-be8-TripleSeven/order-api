@@ -8,11 +8,13 @@ import com.tripleseven.orderapi.entity.pay.Pay;
 import com.tripleseven.orderapi.entity.pay.PaymentStatus;
 import com.tripleseven.orderapi.entity.paytype.PayType;
 import com.tripleseven.orderapi.exception.CustomException;
+import com.tripleseven.orderapi.exception.ErrorCode;
 import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pay.PayRepository;
 import com.tripleseven.orderapi.repository.paytypes.PayTypesRepository;
 import com.tripleseven.orderapi.service.pay.PayServiceImpl;
 import com.tripleseven.orderapi.client.BookCouponApiClient;
+import com.tripleseven.orderapi.service.pointhistory.PointHistoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PayServiceTest {
+
+    @Mock
+    private PointHistoryService pointHistoryService; // ✅ 포인트 서비스 Mock
 
     @Mock
     private ApiProperties apiProperties;
@@ -62,6 +67,8 @@ class PayServiceTest {
     @InjectMocks
     private PayServiceImpl payService;
 
+
+
     private final Long orderGroupId = 1L;
     private final String payType = "CARD";
     private final String paymentKey = "test-payment-key";
@@ -70,6 +77,7 @@ class PayServiceTest {
     void setUp() {
         lenient().when(redisTemplate.opsForHash()).thenReturn(hashOperations);
         payService = spy(payService);
+
     }
 
     @Test
@@ -238,5 +246,58 @@ class PayServiceTest {
         NullPointerException exception = assertThrows(NullPointerException.class,
                 () -> payService.cancelRequest(paymentKey, requestDTO));
         assertTrue(exception.getMessage().contains("Cannot invoke"));
+    }
+
+    @Test
+    void createPayInfo_ShouldThrowException_WhenUserPointIsLessThanUsedPoint() {
+        // Given
+        Long userId = 1L;
+        String guestId = "guest-123";
+
+        PayInfoRequestDTO requestDTO = mock(PayInfoRequestDTO.class);
+        when(requestDTO.getTotalAmount()).thenReturn(50000L);
+        when(requestDTO.getPoint()).thenReturn(20000L);
+        when(pointHistoryService.getTotalPointByMemberId(userId)).thenReturn(10000); // ✅ 보유 포인트: 10,000
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                payService.createPayInfo(userId, guestId, requestDTO)
+        );
+
+        assertEquals(ErrorCode.POINT_UNPROCESSABLE_ENTITY, exception.getErrorCode());
+    }
+
+    @Test
+    void createPayInfo_ShouldThrowException_WhenUsedPointIsMoreThanTotalPrice() {
+        // Given
+        Long userId = 1L;
+        String guestId = "guest-123";
+
+        PayInfoRequestDTO requestDTO = mock(PayInfoRequestDTO.class);
+        when(requestDTO.getTotalAmount()).thenReturn(50000L);
+        when(requestDTO.getPoint()).thenReturn(60000L);
+        when(pointHistoryService.getTotalPointByMemberId(userId)).thenReturn(70000); // ✅ 보유 포인트: 70,000
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                payService.createPayInfo(userId, guestId, requestDTO)
+        );
+
+        assertEquals(ErrorCode.POINT_UNPROCESSABLE_ENTITY, exception.getErrorCode());
+    }
+
+    @Test
+    void createPayInfo_ShouldPass_WhenUserPointIsSufficientAndWithinTotalPrice() {
+        // Given
+        Long userId = 1L;
+        String guestId = "guest-123";
+
+        PayInfoRequestDTO requestDTO = mock(PayInfoRequestDTO.class);
+        when(requestDTO.getTotalAmount()).thenReturn(50000L);
+        when(requestDTO.getPoint()).thenReturn(30000L);
+        when(pointHistoryService.getTotalPointByMemberId(userId)).thenReturn(50000); // ✅ 보유 포인트: 50,000
+
+        // When & Then (예외가 발생하지 않으면 성공)
+        assertDoesNotThrow(() -> payService.createPayInfo(userId, guestId, requestDTO));
     }
 }
