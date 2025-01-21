@@ -112,8 +112,9 @@ public class SecureKeyManagerService {
                     KeyResponseDTO.class
             );
 
-            if (response.getBody() != null && response.getBody() != null) {
-                return response.getBody().getBody().getSecret();
+            KeyResponseDTO keyResponse = response.getBody();
+            if (keyResponse != null ) {
+                return keyResponse.getBody().getSecret();
             } else {
                 throw new KeyManagerException("Invalid response from Key Manager");
             }

@@ -191,4 +191,52 @@ class PayServiceTest {
         IOException exception = assertThrows(IOException.class, () -> payService.sendRequest(requestData, secretKey, url));
         assertTrue(exception.getMessage().contains("HTTP 요청 중 오류 발생"));
     }
+
+
+
+    @Test
+    void cancelRequest_ShouldReturnErrorDTO_WhenApiCallFails() throws IOException {
+        // Given
+        String paymentKey = "test-payment-key";
+        PayCancelRequestDTO requestDTO = new PayCancelRequestDTO("customer-request", 50000L);
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
+
+        JSONObject errorResponse = new JSONObject();
+        errorResponse.put("error", true);
+        errorResponse.put("code", "ERROR_CODE");
+        errorResponse.put("message", "Payment cancellation failed");
+
+        when(apiProperties.getSecretApiKey()).thenReturn("secret-key");
+        doReturn(errorResponse).when(payService).sendRequest(any(), anyString(), eq(url));
+
+        // When
+        Object response = payService.cancelRequest(paymentKey, requestDTO);
+
+        // Then
+        assertNotNull(response);
+        assertTrue(response instanceof ErrorDTO);
+    }
+
+    @Test
+    void cancelRequest_ShouldThrowException_WhenPayNotFound() throws IOException {
+        // Given
+        String paymentKey = "test-payment-key";
+        PayCancelRequestDTO requestDTO = new PayCancelRequestDTO("customer-request", 50000L);
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
+
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put("orderId", 100L);
+        jsonResponse.put("paymentKey", paymentKey);
+        jsonResponse.put("balanceAmount", 50000L);
+        jsonResponse.put("status", "CANCELED");
+
+        when(apiProperties.getSecretApiKey()).thenReturn("secret-key");
+        when(payRepository.findByPaymentKey(paymentKey)).thenReturn(null);
+        doReturn(jsonResponse).when(payService).sendRequest(any(), anyString(), eq(url));
+
+        // When & Then
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> payService.cancelRequest(paymentKey, requestDTO));
+        assertTrue(exception.getMessage().contains("Cannot invoke"));
+    }
 }
