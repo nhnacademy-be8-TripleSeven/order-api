@@ -99,8 +99,7 @@ public class PointServiceImpl implements PointService {
                 dto.getName()
         );
 
-        long gradePoint = 0;
-//        memberService.getGradePoint(memberId, usedMoney);
+        long gradePoint = memberService.getGradePoint(memberId, usedMoney);
 
         PointHistory graderPointHistory = createPointHistory(
                 HistoryTypes.EARN,
