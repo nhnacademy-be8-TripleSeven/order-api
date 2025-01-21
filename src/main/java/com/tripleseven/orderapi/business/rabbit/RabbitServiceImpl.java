@@ -19,15 +19,21 @@ public class RabbitServiceImpl implements RabbitService {
     private final MemberService memberService;
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void sendCartMessage(Long userId, String guestId, List<OrderBookInfoDTO> bookInfos) {
-        List<Long> bookIds = bookInfos.stream().map(OrderBookInfoDTO::getBookId).toList();
-        memberService.clearCart(userId, guestId, bookIds);
+        try {
+            List<Long> bookIds = bookInfos.stream().map(OrderBookInfoDTO::getBookId).toList();
+            memberService.clearCart(userId, guestId, bookIds);
+        } catch (Exception e) {
+            log.error("can not clear cart: {}", e.getMessage());
+        }
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void sendPointMessage(Long userId, Long orderId, long totalAmount) {
-        pointService.createPointHistoryForPaymentEarn(userId, totalAmount, orderId);
+        try {
+            pointService.createPointHistoryForPaymentEarn(userId, totalAmount, orderId);
+        } catch (Exception e) {
+            log.error("can not earn point: {}", e.getMessage());
+        }
     }
 }
