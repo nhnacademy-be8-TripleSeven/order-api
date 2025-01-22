@@ -19,14 +19,17 @@ import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.service.ordergrouppointhistory.OrderGroupPointHistoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderDetailServiceImpl implements OrderDetailService {
@@ -76,74 +79,94 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         List<OrderDetailResponseDTO> orderDetailResponses = new ArrayList<>();
 
         if (orderStatus.equals(OrderStatus.ORDER_CANCELED)) {
-
-            for (Long id : ids) {
-                OrderDetail orderDetail = orderDetailRepository.findById(id)
-                        .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
-
-                // 결제 대기 중이나 결제 완료 일때만 취소 가능
-                if (!orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) && !orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
-                    throw new CustomException(ErrorCode.CANCEL_BAD_REQUEST);
-                }
-                orderDetail.ofUpdateStatus(orderStatus);
-
-                String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
-
-                String comment = String.format("%s %s", bookName, orderStatus.getKorean());
-
-                long refund = orderDetail.getPrimePrice() * orderDetail.getAmount() - orderDetail.getDiscountPrice();
-                PointHistory pointHistory = PointHistory.ofCreate(
-                        HistoryTypes.EARN,
-                        refund,
-                        comment,
-                        orderDetail.getOrderGroup().getUserId()
-                );
-                PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
-
-                orderGroupPointHistoryService.createOrderGroupPointHistory(
-                        new OrderGroupPointHistoryRequestDTO(
-                                orderDetail.getOrderGroup().getId(),
-                                savedPointHistory.getId()
-                        ));
-
-                orderDetail.ofZeroPrice();
-                orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
-            }
-        } else if (orderStatus.equals(OrderStatus.RETURNED_PENDING)) { // 반품 요청
-            for (Long id : ids) {
-                OrderDetail orderDetail = orderDetailRepository.findById(id)
-                        .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
-
-                if (!orderDetail.getOrderStatus().equals(OrderStatus.SHIPPING) && !orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                    throw new CustomException(ErrorCode.REFUND_BAD_REQUEST);
-                }
-
-                // 배송 완료 될 시에만 로직 실행
-                if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
-                    Long orderGroupId = orderDetail.getOrderGroup().getId();
-
-                    if (!orderGroupRepository.existsById(orderGroupId)) {
-                        throw new CustomException(ErrorCode.ID_NOT_FOUND);
-                    }
-
-                    DeliveryInfo deliveryInfo = deliveryInfoRepository.findById(orderGroupId)
-                            .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
-
-                    LocalDate today = LocalDate.now();
-
-                    // 출고일 기준
-                    if (today.isAfter(deliveryInfo.getShippingAt().plusDays(30))) {
-                        throw new CustomException(ErrorCode.RETURN_EXPIRED_UNPROCESSABLE_ENTITY);
-                    }
-                }
-                orderDetail.ofUpdateStatus(orderStatus);
-
-                orderDetailResponses.add(OrderDetailResponseDTO.fromEntity(orderDetail));
-            }
+            ids.forEach(id -> orderDetailResponses.add(processOrderCancellation(id, orderStatus)));
+        } else if (orderStatus.equals(OrderStatus.RETURNED_PENDING)) {
+            ids.forEach(id -> orderDetailResponses.add(processOrderReturn(id, orderStatus)));
         } else {
             throw new CustomException(ErrorCode.BAD_REQUEST);
         }
+
         return orderDetailResponses;
+    }
+
+    private OrderDetailResponseDTO processOrderCancellation(Long id, OrderStatus orderStatus) {
+        OrderDetail orderDetail = getOrderDetailById(id);
+
+        validateOrderDetailStatusForCancellation(orderDetail);
+
+        orderDetail.ofUpdateStatus(orderStatus);
+
+        String bookName = bookCouponApiClient.getBookName(orderDetail.getBookId());
+        String comment = String.format("%s %s", bookName, orderStatus.getKorean());
+
+        long refund = calculateRefund(orderDetail);
+        PointHistory savedPointHistory = createPointHistory(refund, comment, orderDetail);
+
+        orderGroupPointHistoryService.createOrderGroupPointHistory(
+                new OrderGroupPointHistoryRequestDTO(orderDetail.getOrderGroup().getId(), savedPointHistory.getId())
+        );
+
+        orderDetail.ofZeroPrice();
+
+        return OrderDetailResponseDTO.fromEntity(orderDetail);
+    }
+
+    private OrderDetailResponseDTO processOrderReturn(Long id, OrderStatus orderStatus) {
+        OrderDetail orderDetail = getOrderDetailById(id);
+
+        validateOrderDetailStatusForReturn(orderDetail);
+
+        orderDetail.ofUpdateStatus(orderStatus);
+
+        return OrderDetailResponseDTO.fromEntity(orderDetail);
+    }
+
+    private void validateOrderDetailStatusForCancellation(OrderDetail orderDetail) {
+        if (!orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_PENDING) &&
+                !orderDetail.getOrderStatus().equals(OrderStatus.PAYMENT_COMPLETED)) {
+            throw new CustomException(ErrorCode.CANCEL_BAD_REQUEST);
+        }
+    }
+
+    private void validateOrderDetailStatusForReturn(OrderDetail orderDetail) {
+        if (!orderDetail.getOrderStatus().equals(OrderStatus.SHIPPING) &&
+                !orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+            throw new CustomException(ErrorCode.REFUND_BAD_REQUEST);
+        }
+
+        if (orderDetail.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+            Long orderGroupId = orderDetail.getOrderGroup().getId();
+
+            if (!orderGroupRepository.existsById(orderGroupId)) {
+                throw new CustomException(ErrorCode.ID_NOT_FOUND);
+            }
+
+            DeliveryInfo deliveryInfo = deliveryInfoRepository.findById(orderGroupId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+
+            if (LocalDate.now().isAfter(deliveryInfo.getShippingAt().plusDays(30))) {
+                throw new CustomException(ErrorCode.RETURN_EXPIRED_UNPROCESSABLE_ENTITY);
+            }
+        }
+    }
+
+    private OrderDetail getOrderDetailById(Long id) {
+        return orderDetailRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.ID_NOT_FOUND));
+    }
+
+    private long calculateRefund(OrderDetail orderDetail) {
+        return orderDetail.getPrimePrice() * orderDetail.getAmount() - orderDetail.getDiscountPrice();
+    }
+
+    private PointHistory createPointHistory(long amount, String comment, OrderDetail orderDetail) {
+        PointHistory pointHistory = PointHistory.ofCreate(
+                HistoryTypes.EARN,
+                amount,
+                comment,
+                orderDetail.getOrderGroup().getUserId()
+        );
+        return pointHistoryRepository.save(pointHistory);
     }
 
     // 주문 상태 변경 (환불 처리 등)
@@ -242,5 +265,20 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Transactional(readOnly = true)
     public Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate) {
         return queryDslOrderDetailRepository.computeNetTotal(userId, startDate, endDate);
+    }
+
+    @Override
+    @Transactional
+    public void completeOverdueShipments(Duration duration) {
+        // 기준 시간이 현재 시간보다 오래된 경우 조회
+        LocalDate cutoffTime = LocalDate.now().minusDays(duration.toDays());
+
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderStatusAndUpdateDateBefore(OrderStatus.SHIPPING, cutoffTime);
+
+        for (OrderDetail orderDetail : orderDetails) {
+            orderDetail.ofUpdateStatus(OrderStatus.DELIVERED);
+        }
+
+        log.info("Completed overdue shipments: {}", orderDetails.size());
     }
 }

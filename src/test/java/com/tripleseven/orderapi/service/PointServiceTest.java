@@ -1,5 +1,6 @@
 package com.tripleseven.orderapi.service;
 
+import com.tripleseven.orderapi.business.feign.MemberService;
 import com.tripleseven.orderapi.business.point.PointServiceImpl;
 import com.tripleseven.orderapi.client.MemberApiClient;
 import com.tripleseven.orderapi.dto.defaultpointpolicy.DefaultPointPolicyDTO;
@@ -15,6 +16,7 @@ import com.tripleseven.orderapi.repository.ordergroup.OrderGroupRepository;
 import com.tripleseven.orderapi.repository.ordergrouppointhistory.OrderGroupPointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointhistory.PointHistoryRepository;
 import com.tripleseven.orderapi.repository.pointpolicy.PointPolicyRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,7 +53,7 @@ class PointServiceTest {
     private DefaultPointPolicyRepository defaultPointPolicyRepository;
 
     @Mock
-    private MemberApiClient memberApiClient;
+    private MemberService memberService;
 
     @InjectMocks
     private PointServiceImpl pointService;
@@ -93,11 +95,11 @@ class PointServiceTest {
 
         when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(pointHistory);
         when(orderGroupRepository.findById(orderGroupId)).thenReturn(Optional.of(new OrderGroup()));
-        when(memberApiClient.getGradePoint(anyLong())).thenReturn(100);
+        when(memberService.getGradePoint(anyLong(), anyLong())).thenReturn(100L);   //사용하지 않는  when().thenReturn()문이라고 뜸
         PointHistoryResponseDTO result = pointService.createPointHistoryForPaymentEarn(memberId, usedMoney, orderGroupId);
 
-        assertNotNull(result);
-        assertEquals(100, result.getAmount());
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(100, result.getAmount());
         verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
         verify(orderGroupRepository, times(1)).findById(orderGroupId);
     }

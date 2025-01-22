@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
+
 @Getter
 public class PaymentDTO {
     private final Long orderId;
@@ -31,7 +32,7 @@ public class PaymentDTO {
                 .orderId(Long.valueOf(response.get("orderId").toString()))
                 .requestedAt(OffsetDateTime.parse(response.get("requestedAt").toString()).toLocalDate())
                 .balanceAmount(Long.parseLong(response.get("balanceAmount").toString()))
-                .status(PaymentStatus.valueOf(response.get("status").toString())) // 문자열을 enum으로 변환
+                .status(PaymentStatus.fromString(response.get("status").toString())) // ✅ Enum 변환 적용
                 .paymentKey(response.get("paymentKey").toString())
                 .build();
     }

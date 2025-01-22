@@ -42,7 +42,7 @@ class QueryDslDeliveryInfoTest {
         OrderGroup savedOrderGroup = orderGroupRepository.save(orderGroup);
 
         DeliveryInfo deliveryInfo = new DeliveryInfo();
-        deliveryInfo.ofCreate(savedOrderGroup);
+        deliveryInfo.ofCreate(savedOrderGroup, LocalDate.now());
         deliveryInfo.ofUpdate("Test Delivery Name", 1234567890, LocalDate.now());
         deliveryInfoRepository.save(deliveryInfo);
 

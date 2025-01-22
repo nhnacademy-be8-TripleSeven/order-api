@@ -6,10 +6,8 @@ import com.tripleseven.orderapi.entity.paytype.PayType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.json.simple.JSONObject;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 @Entity
 @Getter
@@ -41,13 +39,14 @@ public class Pay {
 
 
     // 결제 정보 생성 메서드
-    public void ofCreate(PaymentDTO response, OrderGroup orderGroup) {
+    public void ofCreate(PaymentDTO response, OrderGroup orderGroup, PayType payType) {
         this.orderId = response.getOrderId();
         this.requestedAt = response.getRequestedAt();
         this.price = response.getBalanceAmount();
         this.status = PaymentStatus.valueOf(response.getStatus().name());
         this.paymentKey = response.getPaymentKey();
         this.orderGroup = orderGroup;
+        this.payType = payType;
     }
 
     // 결제 정보 갱신 메서드

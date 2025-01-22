@@ -17,9 +17,9 @@ public class BookServiceImpl implements BookService {
 
     // 2초 마다 FeignException 시 2번 더 재시도
     @Override
-    @Retryable(value = FeignException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
+    @Retryable(retryFor = FeignException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public void useCoupon(Long couponId) {
-        bookCouponApiClient.updateUseCoupon(couponId);
+        bookCouponApiClient.useCoupon(couponId);
     }
 
     @Recover

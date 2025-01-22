@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class QueryDslDeliveryInfoRepositoryImpl extends QuerydslRepositorySupport implements QueryDslDeliveryInfoRepository {
@@ -21,6 +22,7 @@ public class QueryDslDeliveryInfoRepositoryImpl extends QuerydslRepositorySuppor
     private EntityManager entityManager;
 
     @Override
+    @Transactional(readOnly = true)
     public DeliveryInfoDTO getDeliveryInfo(Long orderGroupId) {
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
         QDeliveryInfo deliveryInfo = QDeliveryInfo.deliveryInfo;

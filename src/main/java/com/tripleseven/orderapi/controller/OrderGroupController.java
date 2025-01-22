@@ -6,6 +6,7 @@ import com.tripleseven.orderapi.dto.order.OrderPayDetailDTO;
 import com.tripleseven.orderapi.dto.order.OrderViewsResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
 import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
+import com.tripleseven.orderapi.service.pay.PayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,21 +27,23 @@ public class OrderGroupController {
 
     private final OrderGroupService orderGroupService;
     private final OrderService orderService;
+    private final PayService payService;
 
     // 1. 주문 그룹 단건 조회
-    @GetMapping("/order-groups/{id}")
+    @GetMapping("/orders/order-groups/{id}")
     @Operation(summary = "주문 그룹 단건 조회", description = "특정 ID의 주문 그룹 정보를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "주문 그룹이 존재하지 않음")
     })
     public ResponseEntity<OrderGroupResponseDTO> getOrderGroupById(@PathVariable Long id) {
-        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(id);
+        Long orderGroupId = payService.getOrderId(id);
+        OrderGroupResponseDTO response = orderGroupService.getOrderGroupById(orderGroupId);
         return ResponseEntity.ok(response); // 반환: 주문 그룹 정보 (OrderGroupResponse)
     }
 
     // 5. 주문 그룹 삭제
-    @DeleteMapping("/order-groups/{id}")
+    @DeleteMapping("/orders/order-groups/{id}")
     @Operation(summary = "주문 그룹 삭제", description = "특정 주문 그룹을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),

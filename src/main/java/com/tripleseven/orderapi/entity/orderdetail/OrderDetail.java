@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 public class OrderDetail {
@@ -13,21 +15,25 @@ public class OrderDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(nullable = false)
     private Long bookId;
 
     @Min(1)
-    @NotNull
+    @Column(nullable = false)
     private int amount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrderStatus orderStatus;
 
-    @NotNull
+    @Column(nullable = false)
     private long primePrice;
 
-    @NotNull
+    @Column(nullable = false)
     private long discountPrice;
+
+    @Column(nullable = false)
+    private LocalDate updateDate;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,10 +47,12 @@ public class OrderDetail {
         this.discountPrice = discountPrice;
         this.orderGroup = orderGroup;
         this.orderStatus = OrderStatus.PAYMENT_PENDING;
+        this.updateDate = LocalDate.now();
     }
 
     public void ofUpdateStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
+        this.updateDate = LocalDate.now();
     }
 
     public void ofZeroPrice() {

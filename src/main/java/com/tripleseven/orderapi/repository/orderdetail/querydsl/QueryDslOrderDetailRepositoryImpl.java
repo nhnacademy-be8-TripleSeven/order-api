@@ -13,6 +13,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +29,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
     private EntityManager entityManager;
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderViewDTO> findAllByPeriodAndUserId(Long userId, LocalDate startTime, LocalDate endTime, OrderStatus orderStatus) {
 
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
@@ -63,6 +65,7 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderViewDTO> findAllByPeriod(LocalDate startTime, LocalDate endTime, OrderStatus orderStatus) {
 
         QOrderGroup orderGroup = QOrderGroup.orderGroup;
@@ -97,19 +100,21 @@ public class QueryDslOrderDetailRepositoryImpl extends QuerydslRepositorySupport
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long computeNetTotal(Long userId, LocalDate startDate, LocalDate endDate) {
         QOrderDetail orderDetail = QOrderDetail.orderDetail;
 
-        // null 값 방지용 coalesce
-        return new JPAQuery<>(entityManager).select(
-                        orderDetail.primePrice.coalesce(0L).
-                                multiply(orderDetail.amount).coalesce(1L).
-                                subtract(orderDetail.discountPrice).coalesce(0L).
-                                sum())
+        Long result = new JPAQuery<>(entityManager).select(
+                        orderDetail.primePrice.coalesce(0L)
+                                .multiply(orderDetail.amount).coalesce(1L)
+                                .subtract(orderDetail.discountPrice).coalesce(0L)
+                                .sum())
                 .from(orderDetail)
                 .where(orderDetail.orderGroup.userId.eq(userId)
                         .and(betweenDates(orderDetail.orderGroup.orderedAt, startDate, endDate)))
                 .fetchOne();
+
+        return result != null ? result : 0L;
     }
 
 

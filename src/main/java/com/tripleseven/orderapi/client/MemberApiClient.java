@@ -1,18 +1,18 @@
 package com.tripleseven.orderapi.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "member-api")
 public interface MemberApiClient {
-    @PostMapping("/cart/book")
+    @DeleteMapping("/cart/book")
     void deleteCart(
-            @RequestHeader(value = "X-USER") Long userId,
+            @RequestHeader(value = "X-USER", required = false) Long userId,
+            @CookieValue("GUEST-ID") String guestId,
             @RequestParam Long bookId);
 
     @GetMapping("/members/grade/point")
-    Integer getGradePoint(@RequestHeader(value = "X-USER") Long userId);
+    Long getGradePoint(
+            @RequestHeader(value = "X-USER") Long userId,
+            @RequestParam Long amount);
 }

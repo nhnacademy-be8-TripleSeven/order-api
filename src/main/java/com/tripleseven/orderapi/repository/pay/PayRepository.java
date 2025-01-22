@@ -15,4 +15,7 @@ public interface PayRepository extends JpaRepository<Pay, Long> {
             "JOIN p.orderGroup og " +
             "WHERE p.orderGroup.id = :orderId")
     OrderPayInfoDTO getDTOByOrderGroupId(Long orderId);
+
+    @Query("SELECT p from Pay p where p.orderId = ?1")
+    Pay findByOrderId(Long orderId);
 }

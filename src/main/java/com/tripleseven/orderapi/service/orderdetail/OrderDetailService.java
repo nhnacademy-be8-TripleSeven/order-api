@@ -5,6 +5,7 @@ import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.entity.orderdetail.OrderStatus;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -24,4 +25,7 @@ public interface OrderDetailService {
     boolean hasUserPurchasedBook(Long userId, Long bookId);
 
     Long getNetTotalByPeriod(Long userId, LocalDate startDate, LocalDate endDate);
+
+    @Transactional
+    void completeOverdueShipments(Duration duration);
 }

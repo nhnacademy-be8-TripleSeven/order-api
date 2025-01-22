@@ -28,15 +28,7 @@ public class PaymentListener {
         try {
             log.info("Clearing Cart...");
 
-            List<Long> bookIdsS = (List<Long>) messageDTO.getObject("BookIds");
-            String userId = (String) messageDTO.getObject("UserId");
-
-            // 여러번 호출
-            bookIdsS.stream()
-                    .forEach(bookId -> memberApiClient.deleteCart(Long.valueOf(userId), bookId));
-
             log.info("Completed Clearing Cart!!");
-
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             retryQueue(e, channel, message);
@@ -48,13 +40,9 @@ public class PaymentListener {
         try {
             log.info("Used Point save...");
 
-            Long userId = (Long) messageDTO.getObject("UserId");
-            Long totalAmount = (Long) messageDTO.getObject("TotalAmount");
-            Long orderId = (Long) messageDTO.getObject("OrderId");
-
-            pointService.createPointHistoryForPaymentEarn(userId, totalAmount, orderId);
 
             log.info("Completed Point save!!");
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             retryQueue(e, channel, message);
         }

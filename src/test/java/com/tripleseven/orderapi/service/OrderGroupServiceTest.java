@@ -177,7 +177,6 @@ class OrderGroupServiceTest {
 
     @Test
     void testGetOrderGroupPeriodByUserId_Success() {
-
         List<OrderViewDTO> orderViewList = List.of(
                 new OrderViewDTO(1L, LocalDate.now(), 101L, 15000, 2, OrderStatus.PAYMENT_COMPLETED, "John Doe", "Jane Doe"),
                 new OrderViewDTO(1L, LocalDate.now(), 102L, 20000, 1, OrderStatus.SHIPPING, "Alice", "Bob")
@@ -230,10 +229,8 @@ class OrderGroupServiceTest {
                 dto.getOrderStatus()
         )).thenReturn(orderViewList);
 
-        // 메서드 호출
         Page<OrderViewsResponseDTO> result = orderGroupService.getOrderGroupPeriod(dto, PageRequest.of(0, 10));
 
-        // 결과 검증
         assertNotNull(result);
         assertEquals(2, result.getTotalElements());
 
@@ -254,14 +251,11 @@ class OrderGroupServiceTest {
                 orderGroup2
         );
 
-        // Mock 설정
         when(orderGroupRepository.findAllByRecipientPhone("01012345678"))
                 .thenReturn(orderGroups);
 
-        // 메서드 호출
         List<OrderGroupResponseDTO> result = orderGroupService.getGuestOrderGroups("01012345678");
 
-        // 결과 검증
         assertNotNull(result);
         assertEquals(2, result.size());
 

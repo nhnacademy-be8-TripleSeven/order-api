@@ -34,7 +34,6 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     private final PointPolicyRepository pointPolicyRepository;
     private final QueryDslOrderGroupPointHistoryRepository queryDslOrderGroupPointHistoryRepository;
 
-
     @Override
     public Page<PointHistoryResponseDTO> getPointHistoriesByMemberId(Long memberId, Pageable pageable) {
         Page<PointHistory> histories = pointHistoryRepository.findAllByMemberId(memberId, pageable);
