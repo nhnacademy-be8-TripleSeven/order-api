@@ -48,7 +48,6 @@ public class OrderGroupServiceImpl implements OrderGroupService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public OrderGroupResponseDTO createOrderGroup(Long userId, OrderGroupCreateRequestDTO orderGroupCreateRequestDTO) {
         OrderGroup orderGroup = new OrderGroup();
         Wrapping wrapping = null;

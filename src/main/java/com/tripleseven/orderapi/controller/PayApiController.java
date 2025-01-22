@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,19 +50,15 @@ public class PayApiController {
     })
     @PostMapping(value = {"/confirm/widget", "/confirm/payment"})
     public ResponseEntity<Object> confirmPayment(HttpServletRequest request,
-                                                     @RequestHeader(value = "X-USER", required = false) Long userId,
-                                                     @CookieValue(value = "GUEST-ID") String guestId,
-                                                     @RequestBody String jsonBody) throws Exception {
-        Object response = payService.confirmRequest(request,jsonBody);
+                                                 @RequestHeader(value = "X-USER", required = false) Long userId,
+                                                 @CookieValue(value = "GUEST-ID") String guestId,
+                                                 @RequestBody String jsonBody) throws Exception {
+        Object response = payService.confirmRequest(request, jsonBody);
 
-        if(response.getClass().isAssignableFrom(ErrorDTO.class))
+        if (response.getClass().isAssignableFrom(ErrorDTO.class))
             return ResponseEntity.badRequest().body(response);
-
-        if (userId != null) {
-            orderProcessing.processMemberOrder(userId, (PaymentDTO) response);
-
-        } else {
-            orderProcessing.processNonMemberOrder(guestId, (PaymentDTO) response);
+        else {
+            orderProcessing.processOrder(userId, guestId, (PaymentDTO) response);
         }
 
         return ResponseEntity.ok(response);
@@ -77,9 +72,9 @@ public class PayApiController {
     })
     @PostMapping("/payments/{payment-key}/cancel")
     public ResponseEntity<Object> cancelPayment(@PathVariable("payment-key") String paymentKey, @RequestBody PayCancelRequestDTO request) throws Exception {
-        Object response = payService.cancelRequest(paymentKey,request);
+        Object response = payService.cancelRequest(paymentKey, request);
 
-        if(response.getClass().isAssignableFrom(ErrorDTO.class))
+        if (response.getClass().isAssignableFrom(ErrorDTO.class))
             return ResponseEntity.badRequest().body(response);
 
         return ResponseEntity.ok(response);
@@ -94,13 +89,11 @@ public class PayApiController {
     public ResponseEntity<Object> getPayment(@PathVariable("payment-key") String paymentKey) throws Exception {
         Object response = payService.getPaymentInfo(paymentKey);
 
-        if(response.getClass().isAssignableFrom(ErrorDTO.class))
+        if (response.getClass().isAssignableFrom(ErrorDTO.class))
             return ResponseEntity.badRequest().body(response);
 
         return ResponseEntity.ok(response);
     }
-
-
 
 
 }

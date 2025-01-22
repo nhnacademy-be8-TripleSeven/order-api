@@ -1,32 +1,18 @@
 package com.tripleseven.orderapi.service;
 
-import com.tripleseven.orderapi.business.feign.BookService;
+import com.tripleseven.orderapi.business.order.OrderService;
 import com.tripleseven.orderapi.business.order.process.OrderSaveProcessing;
-import com.tripleseven.orderapi.business.point.PointService;
 import com.tripleseven.orderapi.business.rabbit.RabbitService;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoCreateRequestDTO;
-import com.tripleseven.orderapi.dto.deliveryinfo.DeliveryInfoResponseDTO;
 import com.tripleseven.orderapi.dto.order.AddressInfoDTO;
 import com.tripleseven.orderapi.dto.order.OrderBookInfoDTO;
 import com.tripleseven.orderapi.dto.order.RecipientInfoDTO;
-import com.tripleseven.orderapi.dto.orderdetail.OrderDetailResponseDTO;
 import com.tripleseven.orderapi.dto.ordergroup.OrderGroupCreateRequestDTO;
-import com.tripleseven.orderapi.dto.ordergroup.OrderGroupResponseDTO;
-import com.tripleseven.orderapi.dto.pay.PayCancelRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoDTO;
 import com.tripleseven.orderapi.dto.pay.PayInfoRequestDTO;
 import com.tripleseven.orderapi.dto.pay.PaymentDTO;
-import com.tripleseven.orderapi.entity.deliveryinfo.DeliveryInfo;
-import com.tripleseven.orderapi.entity.orderdetail.OrderDetail;
-import com.tripleseven.orderapi.entity.ordergroup.OrderGroup;
 import com.tripleseven.orderapi.entity.pay.PaymentStatus;
-import com.tripleseven.orderapi.entity.wrapping.Wrapping;
 import com.tripleseven.orderapi.exception.CustomException;
 import com.tripleseven.orderapi.exception.ErrorCode;
-import com.tripleseven.orderapi.service.deliveryinfo.DeliveryInfoService;
-import com.tripleseven.orderapi.service.orderdetail.OrderDetailService;
-import com.tripleseven.orderapi.service.ordergroup.OrderGroupService;
-import com.tripleseven.orderapi.service.pay.PayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,37 +21,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderSaveProcessingTest {
-
-    @Mock
-    private OrderGroupService orderGroupService;
-
-    @Mock
-    private OrderDetailService orderDetailService;
-
-    @Mock
-    private DeliveryInfoService deliveryInfoService;
-
-    @Mock
-    private PointService pointService;
-
-    @Mock
-    private PayService payService;
-
-    @Mock
-    private BookService bookService;
 
     @Mock
     private RabbitService rabbitService;
@@ -76,37 +41,17 @@ class OrderSaveProcessingTest {
     @Mock
     private RedisTemplate<String, PayInfoDTO> redisTemplate;
 
+    @Mock
+    private OrderService orderService;
 
     @InjectMocks
     private OrderSaveProcessing orderSaveProcessing;
 
     private PayInfoDTO payInfo;
     private PaymentDTO paymentDTO;
-    private OrderGroup orderGroup;
-    private DeliveryInfo deliveryInfo;
-    private OrderDetail orderDetail;
 
     @BeforeEach
     void setUp() {
-        Wrapping wrapping = new Wrapping();
-        ReflectionTestUtils.setField(wrapping, "id", 1L);
-        wrapping.ofCreate("Test Wrapping", 100);
-
-        orderGroup = new OrderGroup();
-        ReflectionTestUtils.setField(orderGroup, "id", 1L);
-        orderGroup.ofCreate(1L,
-                "Test Ordered",
-                "Test Recipient",
-                "01012345678",
-                "01012345678",
-                1000,
-                "Test Address",
-                wrapping);
-
-        deliveryInfo = new DeliveryInfo();
-        ReflectionTestUtils.setField(deliveryInfo, "id", 1L);
-
-        deliveryInfo.ofCreate(orderGroup, LocalDate.now());
         OrderBookInfoDTO orderBookInfoDTO =
                 new OrderBookInfoDTO(
                         1L,
@@ -117,12 +62,8 @@ class OrderSaveProcessingTest {
                         1000
                 );
 
-        orderDetail = new OrderDetail();
-        ReflectionTestUtils.setField(orderDetail, "id", 1L);
-        orderDetail.ofCreate(1L, 3, 10000, 9000, orderGroup);
-
-        RecipientInfoDTO recipientInfoDTO = new RecipientInfoDTO("name","01012345678","01012345678");
-        AddressInfoDTO addressInfoDTO = new AddressInfoDTO("road","zone","detail");
+        RecipientInfoDTO recipientInfoDTO = new RecipientInfoDTO("name", "01012345678", "01012345678");
+        AddressInfoDTO addressInfoDTO = new AddressInfoDTO("road", "zone", "detail");
         payInfo = new PayInfoDTO();
         payInfo.ofCreate(
                 1L,
@@ -143,74 +84,64 @@ class OrderSaveProcessingTest {
         paymentDTO = new PaymentDTO(1L, LocalDate.now(), 1000, PaymentStatus.DONE, "PAY1234");
 
         when(redisTemplate.opsForHash()).thenAnswer(invocation -> hashOperations);
+    }
+
+    @Test
+    void testProcessOrder_Member_Success() {
+        Long memberId = 1L;
+        String guestId = null;
+
         when(hashOperations.get(anyString(), anyString())).thenReturn(payInfo);
+
+        // Mock OrderService and RabbitService
+        when(orderService.saveOrderInfo(eq(memberId), any(PayInfoDTO.class), any(PaymentDTO.class), any(OrderGroupCreateRequestDTO.class)))
+                .thenReturn(123L);
+
+        assertDoesNotThrow(() -> orderSaveProcessing.processOrder(memberId, guestId, paymentDTO));
+
+        // Verify interactions
+        verify(orderService, times(1)).saveOrderInfo(eq(memberId), eq(payInfo), eq(paymentDTO), any(OrderGroupCreateRequestDTO.class));
+        verify(rabbitService, times(1)).sendCartMessage(eq(memberId), eq(null), eq(payInfo.getBookOrderDetails()));
+        verify(rabbitService, times(1)).sendPointMessage(eq(memberId), eq(123L), eq(payInfo.getTotalAmount()));
     }
 
     @Test
-    void testProcessNonMemberOrder_Success() {
-        when(orderGroupService.createOrderGroup(any(), any(OrderGroupCreateRequestDTO.class)))
-                .thenReturn(OrderGroupResponseDTO.fromEntity(orderGroup));
+    void testProcessOrder_Guest_Success() {
+        Long memberId = null;
+        String guestId = "guest123";
 
-        when(deliveryInfoService.createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class))).thenReturn(DeliveryInfoResponseDTO.fromEntity(deliveryInfo));
-        when(orderDetailService.createOrderDetail(any())).thenReturn(OrderDetailResponseDTO.fromEntity(orderDetail));
-        doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong(), any());
-        doNothing().when(rabbitService).sendCartMessage(eq(null), anyString(), anyList());
+        when(hashOperations.get(anyString(), anyString())).thenReturn(payInfo);
 
-        orderSaveProcessing.processNonMemberOrder("guest123", paymentDTO);
+        assertDoesNotThrow(() -> orderSaveProcessing.processOrder(memberId, guestId, paymentDTO));
 
-
-        verify(orderGroupService, times(1)).createOrderGroup(eq(OrderSaveProcessing.GUEST_USER_ID), any(OrderGroupCreateRequestDTO.class));
-        verify(deliveryInfoService, times(1)).createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class));
-        verify(orderDetailService, times(1)).createOrderDetail(any());
-        verify(payService, times(1)).createPay(paymentDTO, 1L, "payType");
+        // Verify interactions
+        verify(orderService, times(1)).saveOrderInfo(eq(OrderSaveProcessing.GUEST_USER_ID), eq(payInfo), eq(paymentDTO), any(OrderGroupCreateRequestDTO.class));
+        verify(rabbitService, times(1)).sendCartMessage(eq(null), eq(guestId), eq(payInfo.getBookOrderDetails()));
     }
 
     @Test
-    void testProcessNonMemberOrder_Fail_PaymentCancellation() throws IOException {
-        when(orderGroupService.createOrderGroup(any(), any(OrderGroupCreateRequestDTO.class)))
-                .thenThrow(new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+    void testProcessOrder_RedisNotFound() {
+        Long memberId = 1L;
+        String guestId = null;
 
-        assertThrows(CustomException.class, () -> orderSaveProcessing.processNonMemberOrder("guest123", paymentDTO));
+        when(redisTemplate.opsForHash()).thenReturn(null);
 
-        verify(payService, times(1)).cancelRequest(eq("PAY1234"), any(PayCancelRequestDTO.class));
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderSaveProcessing.processOrder(memberId, guestId, paymentDTO));
+
+        assertEquals(ErrorCode.REDIS_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
-    void testProcessMemberOrder_Success() {
-        when(orderGroupService.createOrderGroup(anyLong(), any(OrderGroupCreateRequestDTO.class)))
-                .thenReturn(OrderGroupResponseDTO.fromEntity(orderGroup));
+    void testProcessOrder_PayInfoNotFound() {
+        Long memberId = 1L;
+        String guestId = "guest123";
 
-        when(deliveryInfoService.createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class))).thenReturn(DeliveryInfoResponseDTO.fromEntity(deliveryInfo));
-        when(orderDetailService.createOrderDetail(any())).thenReturn(OrderDetailResponseDTO.fromEntity(orderDetail));
-        doNothing().when(payService).createPay(any(PaymentDTO.class), anyLong(), any());
-        doNothing().when(rabbitService).sendCartMessage(anyLong(), eq(null), anyList());
-        doNothing().when(rabbitService).sendPointMessage(anyLong(), anyLong(), anyLong());
+        when(hashOperations.get(any(), any())).thenReturn(null);
 
-        orderSaveProcessing.processMemberOrder(1L, paymentDTO);
+        CustomException exception = assertThrows(CustomException.class,
+                () -> orderSaveProcessing.processOrder(memberId, guestId, paymentDTO));
 
-        verify(orderGroupService, times(1)).createOrderGroup(eq(1L), any(OrderGroupCreateRequestDTO.class));
-        verify(deliveryInfoService, times(1)).createDeliveryInfo(any(DeliveryInfoCreateRequestDTO.class));
-        verify(orderDetailService, times(1)).createOrderDetail(any());
-        verify(payService, times(1)).createPay(paymentDTO, 1L, "payType");
-        verify(rabbitService, times(1)).sendPointMessage(eq(1L), eq(1L), anyLong());
-    }
-
-    @Test
-    void testProcessMemberOrder_Fail_PaymentCancellation() throws IOException {
-        when(orderGroupService.createOrderGroup(anyLong(), any(OrderGroupCreateRequestDTO.class)))
-                .thenThrow(new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-        assertThrows(CustomException.class, () -> orderSaveProcessing.processMemberOrder(1L, paymentDTO));
-
-        verify(payService, times(1)).cancelRequest(eq("PAY1234"), any(PayCancelRequestDTO.class));
-    }
-
-    @Test
-    void testHandlePaymentCancellation_Success() throws IOException {
-        when(payService.cancelRequest(anyString(), any(PayCancelRequestDTO.class))).thenReturn(OrderGroupResponseDTO.fromEntity(orderGroup));
-
-        assertThrows(Exception.class, () -> orderSaveProcessing.processNonMemberOrder("guest123", paymentDTO));
-
-        verify(payService, times(1)).cancelRequest(anyString(), any(PayCancelRequestDTO.class));
+        assertEquals(ErrorCode.REDIS_NOT_FOUND, exception.getErrorCode());
     }
 }

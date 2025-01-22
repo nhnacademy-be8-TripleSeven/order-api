@@ -20,8 +20,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDate;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class PayApiControllerTest {
@@ -94,7 +96,7 @@ class PayApiControllerTest {
                 .andExpect(status().isOk());
 
         verify(payService, times(1)).confirmRequest(any(), any());
-        verify(orderProcessing, times(1)).processMemberOrder(userId, paymentDTO);
+        verify(orderProcessing, times(1)).processOrder(userId, guestId, paymentDTO);
     }
 
     @Test
