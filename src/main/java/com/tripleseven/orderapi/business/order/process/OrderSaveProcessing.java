@@ -55,7 +55,7 @@ public class OrderSaveProcessing implements OrderProcessing {
             List<OrderBookInfoDTO> bookInfos = payInfo.getBookOrderDetails();
 
             orderGroupId = orderService.saveOrderInfo(memberId, payInfo, paymentDTO, request);
-            rabbitService.sendCartMessage(memberId, null, bookInfos);
+            rabbitService.sendCartMessage(memberId, guestId, bookInfos);
             rabbitService.sendPointMessage(memberId, orderGroupId, payInfo.getTotalAmount());
 
         } else {
