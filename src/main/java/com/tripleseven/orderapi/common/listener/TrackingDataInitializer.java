@@ -24,10 +24,10 @@ public class TrackingDataInitializer implements ApplicationListener<ApplicationR
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        if (initializeData) {
-            String apiUrl = "https://info.sweettracker.co.kr/api/v1/companylist?t_key=" + apiKey;
-            deliveryCodeService.saveDeliveryCode(apiUrl);
-            log.info("Tracking Data fetched and saved during server startup.");
-        }
+//        if (initializeData) {
+//            String apiUrl = "https://info.sweettracker.co.kr/api/v1/companylist?t_key=" + apiKey;
+//            deliveryCodeService.saveDeliveryCode(apiUrl);
+//            log.info("Tracking Data fetched and saved during server startup.");
+//        }
     }
 }

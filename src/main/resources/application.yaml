@@ -11,7 +11,7 @@ spring:
   rabbitmq:
     username: admin
     password: nhnacademy123!
-    host: 133.186.241.167
+    host: s4.java21.net
     port: 5672
 
 logging:
@@ -50,5 +50,4 @@ management:
       enabled: true
 
 url: https://api-keymanager.nhncloudservice.com
-appKey: qTQNj7LyHhdAazH3
-keyId: 22611337ca804b778ddf7b036c824807
+
